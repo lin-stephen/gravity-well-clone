@@ -15,12 +15,14 @@ public partial class Application
     private static Vector2 shipPosition = new(430, 270);
     private static Vector2 shipVelocity = new(105, 0);
     private static float shipRotation = 90f;
+    private static Font hudFont;
 
     public static void Main()
     {
         Raylib.SetConfigFlags(ConfigFlags.ResizableWindow | ConfigFlags.VSyncHint);
         Raylib.InitWindow(ScreenWidth, ScreenHeight, "Gravity Well");
         Raylib.SetTargetFPS(60);
+        hudFont = Raylib.LoadFontEx("fonts/Orbitron-Medium.ttf", 32, null, 0);
     }
 
     [JSExport]
@@ -110,9 +112,13 @@ public partial class Application
     {
         Raylib.DrawRectangle(16, 16, 260, 104, new Color(6, 18, 31, 220));
         Raylib.DrawRectangleLines(16, 16, 260, 104, new Color(55, 121, 170, 255));
-        Raylib.DrawText("GRAVITY WELL", 30, 28, 24, new Color(106, 191, 255, 255));
-        Raylib.DrawText("LEFT / RIGHT  rotate", 30, 62, 16, Color.LightGray);
-        Raylib.DrawText("UP  thrust     HOME  reset", 30, 84, 16, Color.LightGray);
-        Raylib.DrawFPS(ScreenWidth - 92, 20);
+        Raylib.DrawTextEx(hudFont, "GRAVITY WELL", new Vector2(30, 26), 24, 1,
+            new Color(106, 191, 255, 255));
+        Raylib.DrawTextEx(hudFont, "LEFT / RIGHT  ROTATE", new Vector2(30, 61), 15, 0.5f,
+            Color.LightGray);
+        Raylib.DrawTextEx(hudFont, "UP  THRUST     HOME  RESET", new Vector2(30, 84), 15, 0.5f,
+            Color.LightGray);
+        Raylib.DrawTextEx(hudFont, $"{Raylib.GetFPS()} FPS", new Vector2(ScreenWidth - 92, 20),
+            15, 0.5f, Color.Lime);
     }
 }
