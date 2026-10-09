@@ -77,28 +77,42 @@ public partial class Application
     {
         var scale = framebufferHeight / (float)ScreenHeight;
         viewportWidth = framebufferWidth / scale;
-        var camera = new Camera2D
+        var screenCamera = new Camera2D
         {
             Offset = Vector2.Zero,
             Target = Vector2.Zero,
             Rotation = 0,
             Zoom = scale
         };
+        var worldCamera = new Camera2D
+        {
+            Offset = new Vector2(framebufferWidth / 2f, framebufferHeight / 2f),
+            Target = shipPosition,
+            Rotation = 0,
+            Zoom = scale
+        };
 
         Raylib.BeginDrawing();
         Raylib.ClearBackground(Color.Black);
-        Raylib.BeginMode2D(camera);
+        Raylib.BeginMode2D(screenCamera);
 
         Raylib.DrawRectangle(0, 0, (int)MathF.Ceiling(viewportWidth), ScreenHeight,
             new Color(3, 7, 14, 255));
-
         DrawStars();
+
+        Raylib.EndMode2D();
+        Raylib.BeginMode2D(worldCamera);
+
         Raylib.DrawCircleLines((int)Star.X, (int)Star.Y, 330, new Color(24, 66, 91, 255));
         Raylib.DrawCircleV(Star, 34, new Color(255, 218, 91, 255));
         Raylib.DrawCircleV(Planet, 22, new Color(92, 183, 126, 255));
         Raylib.DrawCircleLines((int)Planet.X, (int)Planet.Y, 26, new Color(88, 162, 255, 255));
 
         DrawShip();
+
+        Raylib.EndMode2D();
+        Raylib.BeginMode2D(screenCamera);
+
         DrawHud();
 
         Raylib.EndMode2D();
