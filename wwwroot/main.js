@@ -11,8 +11,11 @@ const canvas = document.getElementById('canvas');
 dotnet.instance.Module.canvas = canvas;
 
 function resizeCanvas() {
-    canvas.width = Math.max(640, window.innerWidth);
-    canvas.height = Math.max(360, window.innerHeight);
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+    const width = Math.max(1, Math.round(window.innerWidth * pixelRatio));
+    const height = Math.max(1, Math.round(window.innerHeight * pixelRatio));
+
+    exports.Application.ResizeCanvas(width, height);
 }
 
 function mainLoop() {
@@ -20,7 +23,7 @@ function mainLoop() {
     window.requestAnimationFrame(mainLoop);
 }
 
+await runMain();
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
-await runMain();
 window.requestAnimationFrame(mainLoop);

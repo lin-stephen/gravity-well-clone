@@ -6,6 +6,7 @@ public partial class Application
 {
     private const int ScreenWidth = 1280;
     private const int ScreenHeight = 720;
+    private const int FontAtlasSize = 64;
     private const float Gravity = 1_350_000f;
     private const float Thrust = 230f;
     private const float TurnSpeed = 2.8f;
@@ -16,13 +17,23 @@ public partial class Application
     private static Vector2 shipVelocity = new(105, 0);
     private static float shipRotation = 90f;
     private static Font hudFont;
+    private static int framebufferWidth = ScreenWidth;
+    private static int framebufferHeight = ScreenHeight;
 
     public static void Main()
     {
         Raylib.SetConfigFlags(ConfigFlags.ResizableWindow | ConfigFlags.VSyncHint);
         Raylib.InitWindow(ScreenWidth, ScreenHeight, "Gravity Well");
         Raylib.SetTargetFPS(60);
-        hudFont = Raylib.LoadFontEx("fonts/Orbitron-Medium.ttf", 32, null, 0);
+        hudFont = Raylib.LoadFontEx("fonts/Orbitron-Medium.ttf", FontAtlasSize, null, 0);
+    }
+
+    [JSExport]
+    public static void ResizeCanvas(int width, int height)
+    {
+        framebufferWidth = Math.Max(width, 1);
+        framebufferHeight = Math.Max(height, 1);
+        Raylib.SetWindowSize(framebufferWidth, framebufferHeight);
     }
 
     [JSExport]
@@ -63,8 +74,26 @@ public partial class Application
 
     private static void Draw()
     {
+        var scale = MathF.Min(
+            framebufferWidth / (float)ScreenWidth,
+            framebufferHeight / (float)ScreenHeight);
+        var viewportWidth = ScreenWidth * scale;
+        var viewportHeight = ScreenHeight * scale;
+        var camera = new Camera2D
+        {
+            Offset = new Vector2(
+                (framebufferWidth - viewportWidth) / 2f,
+                (framebufferHeight - viewportHeight) / 2f),
+            Target = Vector2.Zero,
+            Rotation = 0,
+            Zoom = scale
+        };
+
         Raylib.BeginDrawing();
-        Raylib.ClearBackground(new Color(3, 7, 14, 255));
+        Raylib.ClearBackground(Color.Black);
+        Raylib.BeginMode2D(camera);
+
+        Raylib.DrawRectangle(0, 0, ScreenWidth, ScreenHeight, new Color(3, 7, 14, 255));
 
         DrawStars();
         Raylib.DrawCircleLines((int)Star.X, (int)Star.Y, 330, new Color(24, 66, 91, 255));
@@ -75,6 +104,7 @@ public partial class Application
         DrawShip();
         DrawHud();
 
+        Raylib.EndMode2D();
         Raylib.EndDrawing();
     }
 
