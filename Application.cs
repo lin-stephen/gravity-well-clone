@@ -19,6 +19,7 @@ public partial class Application
     private static Font hudFont;
     private static int framebufferWidth = ScreenWidth;
     private static int framebufferHeight = ScreenHeight;
+    private static float viewportWidth = ScreenWidth;
 
     public static void Main()
     {
@@ -74,16 +75,11 @@ public partial class Application
 
     private static void Draw()
     {
-        var scale = MathF.Min(
-            framebufferWidth / (float)ScreenWidth,
-            framebufferHeight / (float)ScreenHeight);
-        var viewportWidth = ScreenWidth * scale;
-        var viewportHeight = ScreenHeight * scale;
+        var scale = framebufferHeight / (float)ScreenHeight;
+        viewportWidth = framebufferWidth / scale;
         var camera = new Camera2D
         {
-            Offset = new Vector2(
-                (framebufferWidth - viewportWidth) / 2f,
-                (framebufferHeight - viewportHeight) / 2f),
+            Offset = Vector2.Zero,
             Target = Vector2.Zero,
             Rotation = 0,
             Zoom = scale
@@ -93,7 +89,8 @@ public partial class Application
         Raylib.ClearBackground(Color.Black);
         Raylib.BeginMode2D(camera);
 
-        Raylib.DrawRectangle(0, 0, ScreenWidth, ScreenHeight, new Color(3, 7, 14, 255));
+        Raylib.DrawRectangle(0, 0, (int)MathF.Ceiling(viewportWidth), ScreenHeight,
+            new Color(3, 7, 14, 255));
 
         DrawStars();
         Raylib.DrawCircleLines((int)Star.X, (int)Star.Y, 330, new Color(24, 66, 91, 255));
@@ -110,9 +107,12 @@ public partial class Application
 
     private static void DrawStars()
     {
-        for (var i = 0; i < 80; i++)
+        var starCount = Math.Max(1, (int)MathF.Ceiling(80 * viewportWidth / ScreenWidth));
+        var width = Math.Max(1, (int)MathF.Ceiling(viewportWidth));
+
+        for (var i = 0; i < starCount; i++)
         {
-            var x = (i * 197 + 31) % ScreenWidth;
+            var x = (i * 197 + 31) % width;
             var y = (i * 89 + 17) % ScreenHeight;
             Raylib.DrawPixel(x, y, i % 5 == 0 ? Color.LightGray : Color.DarkGray);
         }
@@ -148,7 +148,7 @@ public partial class Application
             Color.LightGray);
         Raylib.DrawTextEx(hudFont, "UP  THRUST     HOME  RESET", new Vector2(30, 84), 15, 0.5f,
             Color.LightGray);
-        Raylib.DrawTextEx(hudFont, $"{Raylib.GetFPS()} FPS", new Vector2(ScreenWidth - 92, 20),
+        Raylib.DrawTextEx(hudFont, $"{Raylib.GetFPS()} FPS", new Vector2(viewportWidth - 92, 20),
             15, 0.5f, Color.Lime);
     }
 }
