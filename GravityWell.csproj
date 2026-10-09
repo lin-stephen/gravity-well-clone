@@ -15,7 +15,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <StaticWebAssetFingerprintPattern Include="JS" Pattern="*.js" Expression="#[.{fingerprint}]!" />
     <PackageReference Include="Raylib-cs" Version="8.1.0" />
   </ItemGroup>
 </Project>
