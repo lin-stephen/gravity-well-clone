@@ -11,8 +11,13 @@ public sealed class GameRenderer
     private readonly StarfieldRenderer starfield = new();
     private readonly ShipRenderer ships = new();
     private readonly HudRenderer hud = new();
+    private readonly RadarRenderer radar = new();
 
-    public void Initialize() => hud.Initialize();
+    public void Initialize()
+    {
+        hud.Initialize();
+        radar.Initialize();
+    }
     public void Resize(int width, int height) => viewport.Resize(width, height);
 
     public void Draw(GameWorld world, PlayerControls controls, bool showHelp)
@@ -31,12 +36,11 @@ public sealed class GameRenderer
         DrawWorld(world, controls);
         Raylib.EndMode2D();
 
+        Raylib.BeginMode2D(screenCamera);
         if (showHelp)
-        {
-            Raylib.BeginMode2D(screenCamera);
             hud.Draw(viewport.LogicalWidth);
-            Raylib.EndMode2D();
-        }
+        radar.Draw(world, viewport.LogicalWidth);
+        Raylib.EndMode2D();
 
         Raylib.EndDrawing();
     }
