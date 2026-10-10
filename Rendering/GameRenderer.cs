@@ -15,7 +15,7 @@ public sealed class GameRenderer
     public void Initialize() => hud.Initialize();
     public void Resize(int width, int height) => viewport.Resize(width, height);
 
-    public void Draw(GameWorld world, PlayerControls controls)
+    public void Draw(GameWorld world, PlayerControls controls, bool showHelp)
     {
         var screenCamera = viewport.CreateScreenCamera();
         var worldCamera = viewport.CreateWorldCamera(world.Player.Position);
@@ -31,9 +31,12 @@ public sealed class GameRenderer
         DrawWorld(world, controls);
         Raylib.EndMode2D();
 
-        Raylib.BeginMode2D(screenCamera);
-        hud.Draw(viewport.LogicalWidth);
-        Raylib.EndMode2D();
+        if (showHelp)
+        {
+            Raylib.BeginMode2D(screenCamera);
+            hud.Draw(viewport.LogicalWidth);
+            Raylib.EndMode2D();
+        }
 
         Raylib.EndDrawing();
     }

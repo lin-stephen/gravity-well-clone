@@ -8,5 +8,7 @@ public sealed class InputSystem
         Raylib.IsKeyDown(KeyboardKey.Left),
         Raylib.IsKeyDown(KeyboardKey.Right),
         Raylib.IsKeyDown(KeyboardKey.Up),
-        Raylib.IsKeyPressed(KeyboardKey.Home));
+        Raylib.IsKeyPressed(KeyboardKey.Home),
+        Raylib.IsKeyPressed(KeyboardKey.Slash) &&
+        (Raylib.IsKeyDown(KeyboardKey.LeftShift) || Raylib.IsKeyDown(KeyboardKey.RightShift)));
 }
