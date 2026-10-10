@@ -6,6 +6,10 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <NuGetAudit>false</NuGetAudit>
+    <!-- The game has no localized formatting or timezone behavior. Excluding
+         ICU and timezone data keeps the initial browser download smaller. -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <InvariantTimezone>true</InvariantTimezone>
   </PropertyGroup>
 
   <!-- Work around a .NET 10.0.12 macOS workload mismatch where Release's
