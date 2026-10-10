@@ -7,6 +7,7 @@ const { getAssemblyExports, getConfig, runMain } = await dotnet
 const config = getConfig();
 const exports = await getAssemblyExports(config.mainAssemblyName);
 const canvas = document.getElementById('canvas');
+const loadingScreen = document.getElementById('loading');
 
 dotnet.instance.Module.canvas = canvas;
 
@@ -20,6 +21,7 @@ function resizeCanvas() {
 
 function mainLoop() {
     exports.Application.UpdateFrame();
+    loadingScreen?.remove();
     window.requestAnimationFrame(mainLoop);
 }
 
