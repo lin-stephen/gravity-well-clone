@@ -10,7 +10,11 @@ public sealed class RadarRenderer
 {
     private const int FontAtlasSize = 64;
     private const float Radius = 72f;
+    private const double CoordinateUpdateIntervalSeconds = 0.2d;
     private Font font;
+    private Vector2 displayedPosition;
+    private double nextCoordinateUpdateTime;
+    private bool hasDisplayedPosition;
 
     public void Initialize() =>
         font = Raylib.LoadFontEx("fonts/Orbitron-Medium.ttf", FontAtlasSize, null, 0);
@@ -19,6 +23,14 @@ public sealed class RadarRenderer
     {
         var fighter = world.Player;
         var center = new Vector2(viewportWidth - 100f, GameConstants.DesignHeight - 100f);
+
+        var currentTime = Raylib.GetTime();
+        if (!hasDisplayedPosition || currentTime >= nextCoordinateUpdateTime)
+        {
+            displayedPosition = fighter.Position;
+            nextCoordinateUpdateTime = currentTime + CoordinateUpdateIntervalSeconds;
+            hasDisplayedPosition = true;
+        }
 
         Raylib.DrawCircleV(center, Radius + 10f, new Color(6, 18, 31, 220));
         Raylib.DrawCircleLinesV(center, Radius, new Color(55, 121, 170, 255));
@@ -30,7 +42,7 @@ public sealed class RadarRenderer
             new Color(92, 183, 126, 255));
         DrawFighter(center, fighter);
 
-        var coordinates = $"X {fighter.Position.X:0}  Y {fighter.Position.Y:0}";
+        var coordinates = $"X {displayedPosition.X:0}  Y {displayedPosition.Y:0}";
         var textSize = Raylib.MeasureTextEx(font, coordinates, 14, 0.5f);
         Raylib.DrawTextEx(font, coordinates,
             new Vector2(center.X - textSize.X / 2f, center.Y + Radius + 14f),
