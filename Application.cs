@@ -121,16 +121,39 @@ public partial class Application
 
     private static void DrawStars()
     {
-        var starCount = Math.Max(1, (int)MathF.Ceiling(80 * viewportWidth / ScreenWidth));
-        var width = Math.Max(1, (int)MathF.Ceiling(viewportWidth));
+        DrawStarLayer(48, 0.025f, 197, 89, 31, 17, 0.55f,
+            new Color(58, 72, 86, 255));
+        DrawStarLayer(26, 0.06f, 263, 137, 73, 41, 0.8f,
+            new Color(107, 125, 141, 255));
+        DrawStarLayer(12, 0.12f, 359, 211, 127, 83, 1.15f,
+            new Color(184, 203, 216, 255));
+    }
 
-        for (var i = 0; i < starCount; i++)
+    private static void DrawStarLayer(
+        int baseCount,
+        float parallax,
+        int xStep,
+        int yStep,
+        int xSeed,
+        int ySeed,
+        float radius,
+        Color color)
+    {
+        var count = Math.Max(1, (int)MathF.Ceiling(baseCount * viewportWidth / ScreenWidth));
+
+        for (var i = 0; i < count; i++)
         {
-            var x = (i * 197 + 31) % width;
-            var y = (i * 89 + 17) % ScreenHeight;
-            Raylib.DrawPixel(x, y, i % 5 == 0 ? Color.LightGray : Color.DarkGray);
+            var baseX = (i * xStep + xSeed) % viewportWidth;
+            var baseY = (i * yStep + ySeed) % ScreenHeight;
+            var x = Wrap(baseX - shipPosition.X * parallax, viewportWidth);
+            var y = Wrap(baseY - shipPosition.Y * parallax, ScreenHeight);
+
+            Raylib.DrawCircleV(new Vector2(x, y), radius, color);
         }
     }
+
+    private static float Wrap(float value, float length) =>
+        (value % length + length) % length;
 
     private static void DrawShip()
     {
