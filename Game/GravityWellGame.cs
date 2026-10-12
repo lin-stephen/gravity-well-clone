@@ -1,3 +1,4 @@
+using GravityWell.Colonization;
 using GravityWell.Input;
 using GravityWell.Physics;
 using GravityWell.Rendering;
@@ -10,6 +11,7 @@ public sealed class GravityWellGame
     private readonly GameWorld world = new();
     private readonly InputSystem input = new();
     private readonly PhysicsSystem physics = new();
+    private readonly ColonizationSystem colonization = new();
     private readonly GameRenderer renderer = new();
     private bool showHelp = true;
 
@@ -23,6 +25,7 @@ public sealed class GravityWellGame
             showHelp = !showHelp;
 
         physics.Update(world, controls, deltaTime);
+        colonization.Update(world);
         renderer.Draw(world, controls, showHelp);
     }
 }

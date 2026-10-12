@@ -36,10 +36,11 @@ public sealed class RadarRenderer
         Raylib.DrawCircleLinesV(center, Radius, new Color(55, 121, 170, 255));
         Raylib.DrawCircleLinesV(center, Radius + 10f, new Color(24, 66, 91, 255));
 
-        DrawObjectMarker(center, fighter.Position, GameWorld.StarPosition, 6f,
-            new Color(255, 218, 91, 255));
-        DrawObjectMarker(center, fighter.Position, GameWorld.PlanetPosition, 4f,
-            new Color(92, 183, 126, 255));
+        foreach (var planet in world.Planets)
+        {
+            var color = planet.IsColonized ? Palette.PlayerShip : Palette.UncolonizedPlanet;
+            DrawObjectMarker(center, fighter.Position, planet.Position, 4f, color);
+        }
         DrawFighter(center, fighter);
 
         var coordinates = $"X {displayedPosition.X:0}  Y {displayedPosition.Y:0}";

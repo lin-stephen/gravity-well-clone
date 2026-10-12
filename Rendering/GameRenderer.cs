@@ -1,3 +1,4 @@
+using GravityWell.Entities;
 using GravityWell.Game;
 using GravityWell.Input;
 using GravityWell.World;
@@ -54,12 +55,12 @@ public sealed class GameRenderer
 
     private void DrawWorld(GameWorld world, PlayerControls controls)
     {
-        Raylib.DrawCircleLines((int)GameWorld.StarPosition.X, (int)GameWorld.StarPosition.Y, 330,
-            new Color(24, 66, 91, 255));
-        Raylib.DrawCircleV(GameWorld.StarPosition, 34, new Color(255, 218, 91, 255));
-        Raylib.DrawCircleV(GameWorld.PlanetPosition, 22, new Color(92, 183, 126, 255));
-        Raylib.DrawCircleLines((int)GameWorld.PlanetPosition.X, (int)GameWorld.PlanetPosition.Y, 26,
-            new Color(88, 162, 255, 255));
+        foreach (var planet in world.Planets)
+        {
+            var color = planet.IsColonized ? Palette.PlayerShip : Palette.UncolonizedPlanet;
+            Raylib.DrawCircleV(planet.Position, Planet.Radius, color);
+            Raylib.DrawCircleLinesV(planet.Position, Planet.Radius + 4f, color);
+        }
         ships.Draw(world.Player, controls.Thrust);
     }
 }

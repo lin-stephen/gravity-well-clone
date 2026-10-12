@@ -16,7 +16,7 @@ public sealed class ShipRenderer
         var nose = fighter.Position + Rotate(new Vector2(0, -13));
         var left = fighter.Position + Rotate(new Vector2(-9, 10));
         var right = fighter.Position + Rotate(new Vector2(9, 10));
-        Raylib.DrawTriangleLines(nose, left, right, new Color(92, 170, 255, 255));
+        Raylib.DrawTriangleLines(nose, left, right, Palette.PlayerShip);
 
         if (!isThrusting) return;
 
