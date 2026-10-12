@@ -5,8 +5,13 @@ namespace GravityWell.World;
 
 public sealed class GameWorld
 {
-    public static readonly Vector2 StarPosition = new(760, 360);
-    public static readonly Vector2 PlanetPosition = new(430, 360);
-
     public Fighter Player { get; } = new();
+
+    public IReadOnlyList<Planet> Planets { get; } =
+    [
+        new Planet(new Vector2(430, 360), isColonized: true),
+        new Planet(new Vector2(800, 170)),
+        new Planet(new Vector2(1040, 480)),
+        new Planet(new Vector2(330, 640)),
+    ];
 }

@@ -7,7 +7,7 @@ namespace GravityWell.Physics;
 
 public sealed class PhysicsSystem
 {
-    private const float GravityStrength = 1_350_000f;
+    private const float PlanetGravityStrength = 1_350_000f * 0.08f;
     private const float ThrustStrength = 230f;
     private const float TurnSpeed = 2.8f;
 
@@ -19,8 +19,8 @@ public sealed class PhysicsSystem
         if (controls.TurnRight) fighter.Rotation += TurnSpeed * deltaTime * 60f;
         if (controls.Thrust) fighter.Velocity += fighter.Forward * ThrustStrength * deltaTime;
 
-        ApplyGravity(fighter, GameWorld.StarPosition, GravityStrength, deltaTime);
-        ApplyGravity(fighter, GameWorld.PlanetPosition, GravityStrength * 0.08f, deltaTime);
+        foreach (var planet in world.Planets)
+            ApplyGravity(fighter, planet.Position, PlanetGravityStrength, deltaTime);
         fighter.Position += fighter.Velocity * deltaTime;
 
         if (controls.Reset) fighter.Reset();
