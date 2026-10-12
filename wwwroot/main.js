@@ -1,7 +1,14 @@
 import { dotnet } from './_framework/dotnet.js';
 
+// raylib loads fonts from the Emscripten virtual filesystem, so the font must be
+// registered as a VFS asset. Without this entry, LoadFontEx falls back to the default font.
 const { getAssemblyExports, getConfig, runMain } = await dotnet
     .withDiagnosticTracing(false)
+    .withConfig({
+        resources: {
+            vfs: [{ name: '../fonts/Orbitron-Medium.ttf', virtualPath: 'fonts/Orbitron-Medium.ttf' }],
+        },
+    })
     .create();
 
 const config = getConfig();
