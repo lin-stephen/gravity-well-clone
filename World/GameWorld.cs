@@ -17,9 +17,9 @@ public sealed class GameWorld
         Planets =
         [
             homeworld,
-            new Planet(new Vector2(800, 170)),
-            new Planet(new Vector2(1040, 480), PlanetType.Barren),
-            new Planet(new Vector2(330, 640)),
+            new Planet(new Vector2(950, 95)),
+            new Planet(new Vector2(1260, 530), PlanetType.Barren),
+            new Planet(new Vector2(290, 760)),
         ];
     }
 }

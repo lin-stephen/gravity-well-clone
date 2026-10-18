@@ -4,7 +4,9 @@ namespace GravityWell.Entities;
 
 public sealed class Planet
 {
-    public const float Radius = 22f;
+    // In the original game's battle and landing views, a planet is roughly
+    // three fighter lengths across.
+    public const float Radius = 34f;
     private readonly List<PlanetStructure> structures = [];
 
     public Planet(

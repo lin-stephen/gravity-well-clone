@@ -64,7 +64,6 @@ public sealed class GameRenderer
                     ? Palette.UncolonizedPlanet
                     : Palette.BarrenPlanet;
             Raylib.DrawCircleLinesV(planet.Position, Planet.Radius, color);
-            Raylib.DrawCircleLinesV(planet.Position, Planet.Radius + 4f, color);
             structures.Draw(planet);
         }
         ships.Draw(world.Player, controls.Thrust);
