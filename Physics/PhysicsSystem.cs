@@ -21,6 +21,7 @@ public sealed class PhysicsSystem
 
         foreach (var planet in world.Planets)
             ApplyGravity(fighter, planet.Position, PlanetGravityStrength, deltaTime);
+        LimitSpeed(fighter);
         fighter.Position += fighter.Velocity * deltaTime;
 
         if (controls.Reset) fighter.Reset();
@@ -35,5 +36,12 @@ public sealed class PhysicsSystem
         var offset = bodyPosition - fighter.Position;
         var distanceSquared = MathF.Max(offset.LengthSquared(), 2_500f);
         fighter.Velocity += Vector2.Normalize(offset) * (strength / distanceSquared) * deltaTime;
+    }
+
+    private static void LimitSpeed(Fighter fighter)
+    {
+        var maxSpeedSquared = Fighter.MaxSpeed * Fighter.MaxSpeed;
+        if (fighter.Velocity.LengthSquared() > maxSpeedSquared)
+            fighter.Velocity = Vector2.Normalize(fighter.Velocity) * Fighter.MaxSpeed;
     }
 }

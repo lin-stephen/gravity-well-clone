@@ -6,6 +6,7 @@ public sealed class Fighter
 {
     public const int MaxHealth = 6;
     public const float Radius = 10f;
+    public const float MaxSpeed = 260f;
 
     private static readonly Vector2 InitialPosition = new(430, 270);
     private static readonly Vector2 InitialVelocity = new(105, 0);
