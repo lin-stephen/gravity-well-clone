@@ -7,7 +7,7 @@ namespace GravityWell.Physics;
 
 public sealed class PhysicsSystem
 {
-    private const float PlanetGravityStrength = 1_350_000f * 0.08f;
+    private const float PlanetGravityStrength = 1_350_000f * 0.09f;
     private const float ThrustStrength = 230f;
     private const float TurnSpeed = 2.8f;
 

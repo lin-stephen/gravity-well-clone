@@ -38,9 +38,16 @@ public sealed class RadarRenderer
 
         foreach (var planet in world.Planets)
         {
-            var color = planet.IsColonized ? Palette.PlayerShip : Palette.UncolonizedPlanet;
+            var color = planet.IsColonized
+                ? Palette.PlayerShip
+                : planet.Type == PlanetType.Habitable
+                    ? Palette.UncolonizedPlanet
+                    : Palette.BarrenPlanet;
             DrawObjectMarker(center, fighter.Position, planet.Position, 4f, color);
         }
+        foreach (var freighter in world.Freighters.Where(freighter =>
+                     freighter.State != FreighterState.Consumed))
+            DrawObjectMarker(center, fighter.Position, freighter.Position, 2f, Color.LightGray);
         DrawFighter(center, fighter);
 
         var coordinates = $"X {displayedPosition.X:0}  Y {displayedPosition.Y:0}";

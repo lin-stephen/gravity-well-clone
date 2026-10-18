@@ -11,6 +11,8 @@ public sealed class GameRenderer
     private readonly Viewport viewport = new();
     private readonly StarfieldRenderer starfield = new();
     private readonly ShipRenderer ships = new();
+    private readonly FreighterRenderer freighters = new();
+    private readonly StructureRenderer structures = new();
     private readonly HudRenderer hud = new();
     private readonly RadarRenderer radar = new();
 
@@ -57,10 +59,16 @@ public sealed class GameRenderer
     {
         foreach (var planet in world.Planets)
         {
-            var color = planet.IsColonized ? Palette.PlayerShip : Palette.UncolonizedPlanet;
-            Raylib.DrawCircleV(planet.Position, Planet.Radius, color);
-            Raylib.DrawCircleLinesV(planet.Position, Planet.Radius + 4f, color);
+            var color = planet.IsColonized
+                ? Palette.PlayerShip
+                : planet.Type == PlanetType.Habitable
+                    ? Palette.UncolonizedPlanet
+                    : Palette.BarrenPlanet;
+            Raylib.DrawCircleLinesV(planet.Position, Planet.Radius, color);
+            structures.Draw(planet);
         }
+        foreach (var freighter in world.Freighters)
+            freighters.Draw(freighter);
         ships.Draw(world.Player, controls.Thrust);
     }
 }
