@@ -9,17 +9,7 @@ public sealed class PlanetRenderer
 
     public void Draw(Planet planet)
     {
-        Raylib.DrawCircleLinesV(planet.Position, Planet.Radius, GetColor(planet));
+        Raylib.DrawCircleLinesV(planet.Position, Planet.Radius, Palette.ForPlanet(planet));
         structures.Draw(planet);
-    }
-
-    private static Color GetColor(Planet planet)
-    {
-        if (planet.IsColonized)
-            return Palette.PlayerShip;
-
-        return planet.Type == PlanetType.Habitable
-            ? Palette.UncolonizedPlanet
-            : Palette.BarrenPlanet;
     }
 }

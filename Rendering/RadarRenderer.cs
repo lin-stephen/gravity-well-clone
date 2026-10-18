@@ -37,14 +37,7 @@ public sealed class RadarRenderer
         Raylib.DrawCircleLinesV(center, Radius + 10f, new Color(24, 66, 91, 255));
 
         foreach (var planet in world.Planets)
-        {
-            var color = planet.IsColonized
-                ? Palette.PlayerShip
-                : planet.Type == PlanetType.Habitable
-                    ? Palette.UncolonizedPlanet
-                    : Palette.BarrenPlanet;
-            DrawObjectMarker(center, fighter.Position, planet.Position, 4f, color);
-        }
+            DrawObjectMarker(center, fighter.Position, planet.Position, 4f, Palette.ForPlanet(planet));
         foreach (var freighter in world.Freighters.Where(freighter =>
                      freighter.State != FreighterState.Consumed))
             DrawObjectMarker(center, fighter.Position, freighter.Position, 2f, Color.LightGray);

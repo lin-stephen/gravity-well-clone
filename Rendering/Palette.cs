@@ -1,3 +1,4 @@
+using GravityWell.Entities;
 using Raylib_cs;
 
 namespace GravityWell.Rendering;
@@ -10,4 +11,12 @@ public static class Palette
     public static readonly Color StructureBuilding = new(255, 205, 92, 255);
     public static readonly Color StructurePlanned = new(90, 103, 116, 255);
     public static readonly Color StructureDestroyed = new(116, 54, 54, 255);
+
+    public static Color ForPlanet(Planet planet)
+    {
+        if (planet.IsColonized)
+            return PlayerShip;
+
+        return planet.Type == PlanetType.Habitable ? UncolonizedPlanet : BarrenPlanet;
+    }
 }
