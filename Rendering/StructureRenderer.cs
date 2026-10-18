@@ -11,7 +11,7 @@ public sealed class StructureRenderer
         foreach (var structure in planet.Structures)
         {
             var position = GetPosition(planet, structure.Type);
-            var color = GetColor(structure);
+            var color = GetColor(planet, structure);
             DrawGlyph(structure.Type, position, color);
 
             if (structure.State == StructureState.Building)
@@ -35,9 +35,9 @@ public sealed class StructureRenderer
         _ => planet.Position
     };
 
-    private static Color GetColor(PlanetStructure structure) => structure.State switch
+    private static Color GetColor(Planet planet, PlanetStructure structure) => structure.State switch
     {
-        StructureState.Operational => Palette.PlayerShip,
+        StructureState.Operational => Palette.ForPlanet(planet),
         StructureState.Building => Palette.StructureBuilding,
         StructureState.Planned => Palette.StructurePlanned,
         _ => Palette.StructureDestroyed

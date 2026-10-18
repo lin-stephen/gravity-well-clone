@@ -17,7 +17,7 @@ public sealed class ColonizationSystem
             if (planet.IsColonized) continue;
             if (!IsTouching(fighter, planet)) continue;
 
-            planet.Claim(Faction.Blue);
+            planet.Claim(fighter.Faction);
         }
     }
 

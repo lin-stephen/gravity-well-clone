@@ -17,7 +17,7 @@ public sealed class FreighterRenderer
         var tail = freighter.Position - forward * 15f;
         var color = freighter.State == FreighterState.Building
             ? Palette.StructureBuilding
-            : Palette.PlayerShip;
+            : Palette.ForFaction(freighter.Faction);
 
         Raylib.DrawLineV(nose, tail, color);
         Raylib.DrawLineV(nose, freighter.Position + right * 7f, color);

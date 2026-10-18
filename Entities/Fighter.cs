@@ -11,6 +11,7 @@ public sealed class Fighter
     private static readonly Vector2 InitialPosition = new(430, 270);
     private static readonly Vector2 InitialVelocity = new(105, 0);
 
+    public Faction Faction { get; init; } = Faction.Blue;
     public Vector2 Position { get; set; }
     public Vector2 Velocity { get; set; }
     public float Rotation { get; set; }

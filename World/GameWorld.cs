@@ -17,9 +17,13 @@ public sealed class GameWorld
         var homeworld = new Planet(new Vector2(430, 360), owner: Faction.Blue);
         homeworld.BuildHomeworld();
 
+        var rivalHomeworld = new Planet(new Vector2(1900, 900), owner: Faction.Red);
+        rivalHomeworld.BuildHomeworld();
+
         Planets =
         [
             homeworld,
+            rivalHomeworld,
             new Planet(new Vector2(950, 95)),
             new Planet(new Vector2(1260, 530), PlanetType.Barren),
             new Planet(new Vector2(290, 760)),
@@ -30,6 +34,9 @@ public sealed class GameWorld
             new Freighter(homeworld.Position + new Vector2(-44f, 50f), Faction.Blue),
             new Freighter(homeworld.Position + new Vector2(0f, 58f), Faction.Blue),
             new Freighter(homeworld.Position + new Vector2(44f, 50f), Faction.Blue),
+            new Freighter(rivalHomeworld.Position + new Vector2(-44f, 50f), Faction.Red),
+            new Freighter(rivalHomeworld.Position + new Vector2(0f, 58f), Faction.Red),
+            new Freighter(rivalHomeworld.Position + new Vector2(44f, 50f), Faction.Red),
         ];
     }
 
