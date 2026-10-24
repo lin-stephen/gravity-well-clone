@@ -14,6 +14,7 @@ its tradeoffs.
 | [0006](0006-colonize-planets-on-touch.md) | Colonize planets on touch until collision exists | Accepted |
 | [0007](0007-ai-fighters-share-the-planet-approach-logic.md) | AI fighters share the planet approach logic | Accepted |
 | [0008](0008-autopilots-are-strategies-over-a-shared-runner.md) | Autopilots are strategies over a shared runner | Accepted |
+| [0009](0009-a-base-guards-a-planet-from-takeover.md) | A base guards a planet from takeover | Accepted |
 
 New records should copy [the template](template.md), use the next four-digit
 number, and be added to this table. Accepted ADRs aren't edited to disguise a

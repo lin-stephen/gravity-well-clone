@@ -87,7 +87,9 @@ below 60 speed units, within 30 degrees of rear-first alignment. Within 4 units
 of contact, docking gently damps motion, rotates the ship perpendicular to the
 surface with its rear facing inward, and settles it against the target,
 without collision damage or bounce from that target. Planets can be landed on
-regardless of ownership; a completed landing claims an unowned planet. Spacedock
+regardless of ownership; a completed landing claims an unowned planet, or takes one
+owned by another faction that has no base. A base, even one still being built, guards a
+planet from takeover. Spacedock
 bounds follow the dock glyph near the orbital starbase. Thrust releases the ship;
 it must leave the capture zone before docking to that target again. Home resets
 all fighter docking state. Docking does not interpret ship or target health;
