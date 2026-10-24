@@ -72,4 +72,33 @@ public class FighterHoldTests
         surfaceDistance.Should().BeGreaterThanOrEqualTo(ApproachTuning.ForFighter.ApproachClearance - 10f);
         fighter.Velocity.Length().Should().BeLessThan(1f);
     }
+
+    [Test]
+    public void Update_HoldStandoffFollowsTheFightersOwnTuning()
+    {
+        var tuning = ApproachTuning.ForFighter with { ApproachClearance = 200f };
+        var owned = new Planet(Vector2.Zero, owner: Faction.Blue);
+        var fighter = new Fighter
+        {
+            Faction = Faction.Red, Position = new Vector2(0f, 100f), Velocity = Vector2.Zero, Rotation = 0f,
+        };
+        var world = new GameWorld([owned], [], [fighter]);
+        world.Player.Position = new Vector2(10000f, 10000f);
+        var autopilot = new FighterAutopilot(tuning: tuning);
+        var physics = new PhysicsSystem();
+        var docking = new DockingSystem();
+        var collisions = new CollisionSystem();
+
+        for (var step = 0; step < (int)(90f / Dt); step++)
+        {
+            autopilot.Update(world, Dt);
+            physics.Update(world, default, Dt);
+            docking.Update(world, Dt);
+            collisions.Update(world);
+        }
+
+        var surfaceDistance = Vector2.Distance(fighter.Position, owned.Position) - Planet.Radius - Fighter.Radius;
+        surfaceDistance.Should().BeGreaterThanOrEqualTo(tuning.ApproachClearance - 10f);
+        fighter.Velocity.Length().Should().BeLessThan(1f);
+    }
 }

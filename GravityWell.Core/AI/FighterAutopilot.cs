@@ -11,12 +11,16 @@ public sealed class FighterAutopilot
 {
     private const float HoldSpeed = 20f;
 
+    private readonly ApproachTuning tuning;
     private readonly PlanetApproach approach;
     private readonly Dictionary<Fighter, FlightPlan> plans = [];
 
-    public FighterAutopilot(DockingSystem? docking = null, PhysicsSystem? physics = null) =>
-        approach = new PlanetApproach(docking ?? new DockingSystem(), physics ?? new PhysicsSystem(),
-            ApproachTuning.ForFighter);
+    public FighterAutopilot(DockingSystem? docking = null, PhysicsSystem? physics = null,
+        ApproachTuning? tuning = null)
+    {
+        this.tuning = tuning ?? ApproachTuning.ForFighter;
+        approach = new PlanetApproach(docking ?? new DockingSystem(), physics ?? new PhysicsSystem(), this.tuning);
+    }
 
     public Planet? GetTarget(Fighter fighter) => plans.TryGetValue(fighter, out var plan) ? plan.Target : null;
 
@@ -76,12 +80,12 @@ public sealed class FighterAutopilot
     }
 
     /// <summary>The position itself, or the nearest point at the standoff distance if it is closer to a planet than that.</summary>
-    private static Vector2 ClearOfPlanets(GameWorld world, Vector2 position)
+    private Vector2 ClearOfPlanets(GameWorld world, Vector2 position)
     {
         var planet = world.Planets.MinBy(candidate => Vector2.DistanceSquared(candidate.Position, position));
         if (planet is null) return position;
         var offset = position - planet.Position;
-        var minimumDistance = Planet.Radius + Fighter.Radius + ApproachTuning.ForFighter.ApproachClearance;
+        var minimumDistance = Planet.Radius + Fighter.Radius + tuning.ApproachClearance;
         if (offset.Length() >= minimumDistance) return position;
         var outward = offset.LengthSquared() > 0f ? Vector2.Normalize(offset) : Vector2.UnitY;
         return planet.Position + outward * minimumDistance;
