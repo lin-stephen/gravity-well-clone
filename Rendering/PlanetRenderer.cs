@@ -11,7 +11,7 @@ public sealed class PlanetRenderer
     public void Draw(Planet planet, Fighter fighter)
     {
         var color = Palette.ForPlanet(planet);
-        if (DockingSystem.IsApproachSpeedSafe(fighter, planet))
+        if (DockingSystem.ShouldHighlight(fighter, planet))
             Raylib.DrawRing(planet.Position, Planet.Radius - 1.5f, Planet.Radius + 1.5f,
                 0f, 360f, 96, color);
         else

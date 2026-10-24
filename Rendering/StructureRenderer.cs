@@ -15,7 +15,7 @@ public sealed class StructureRenderer
             var color = GetColor(planet, structure);
             var dockThickness = structure.Type == StructureType.SpaceDock &&
                 structure.State == StructureState.Operational &&
-                DockingSystem.IsApproachSpeedSafe(fighter, planet.SpaceDock) ? 3f : 1f;
+                DockingSystem.ShouldHighlight(fighter, planet.SpaceDock) ? 3f : 1f;
             DrawGlyph(structure.Type, position, color, dockThickness);
 
             if (structure.State == StructureState.Building)

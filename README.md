@@ -59,6 +59,6 @@ all fighter docking state. Tune capture and damping in `Physics/DockingSystem.cs
 
 Planet outlines and operational spacedock glyphs use thicker lines while the
 fighter's approach speed toward that particular target is below the docking
-threshold. Sideways motion does not count, and receding motion has zero approach
+threshold and the target lies within 30 degrees of the ship's rear direction. Sideways motion does not count, and receding motion has zero approach
 speed. Docking still requires safe total relative speed, rear-first alignment,
 and proximity.

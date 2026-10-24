@@ -79,6 +79,17 @@ public sealed class DockingSystem
         return MathF.Max(0f, approachSpeed) < SpeedThreshold;
     }
 
+    public static bool IsRearAligned(Fighter fighter, ICollisionBody target)
+    {
+        var outward = fighter.Position - target.Position;
+        return outward.LengthSquared() > 0f &&
+            Vector2.Dot(fighter.Forward, Vector2.Normalize(outward)) >=
+            MathF.Cos(AlignmentDegrees * MathF.PI / 180f);
+    }
+
+    public static bool ShouldHighlight(Fighter fighter, ICollisionBody target) =>
+        IsApproachSpeedSafe(fighter, target) && IsRearAligned(fighter, target);
+
     private bool TryCapture(Fighter fighter, ICollisionBody target)
     {
         if (target == releasedTarget || fighter.Health <= 0 || target.Health <= 0) return false;
@@ -88,8 +99,7 @@ public sealed class DockingSystem
         if (distance < radius - CaptureDistance || distance > radius + CaptureDistance || distance == 0f)
             return false;
         var normal = offset / distance;
-        if (Vector2.Dot(fighter.Forward, normal) < MathF.Cos(AlignmentDegrees * MathF.PI / 180f) ||
-            !IsSpeedSafe(fighter, target))
+        if (!IsRearAligned(fighter, target) || !IsSpeedSafe(fighter, target))
             return false;
         fighter.BeginDocking(target, normal);
         return true;
