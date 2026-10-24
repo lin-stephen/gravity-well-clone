@@ -20,6 +20,9 @@ public sealed class Planet : ICollisionBody
     }
 
     public float CollisionRadius => Radius;
+    public float InverseMass => 0f;
+    public void ApplyCollision(Vector2 displacement, Vector2 velocityChange) { }
+
     public const int MaxHealth = 100;
     public int Health { get; set; } = MaxHealth;
     public Vector2 Velocity => Vector2.Zero;

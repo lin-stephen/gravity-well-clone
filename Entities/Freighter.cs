@@ -4,6 +4,8 @@ namespace GravityWell.Entities;
 
 public sealed class Freighter : ICollisionBody
 {
+    private Vector2 collisionVelocity;
+
     public const float Radius = 12f;
     public const float Speed = 90f;
     public const int CargoCapacity = 1;
@@ -15,6 +17,15 @@ public sealed class Freighter : ICollisionBody
     }
 
     public float CollisionRadius => Radius;
+    public float InverseMass => 1f;
+
+    public void ApplyCollision(Vector2 displacement, Vector2 velocityChange)
+    {
+        Position += displacement;
+        Velocity += velocityChange;
+        collisionVelocity += velocityChange;
+    }
+
     public const int MaxHealth = 6;
     public int Health { get; set; } = MaxHealth;
     public Vector2 Velocity { get; private set; }
@@ -39,8 +50,13 @@ public sealed class Freighter : ICollisionBody
 
     public bool Travel(float deltaTime)
     {
-        Velocity = Vector2.Zero;
-        if (State != FreighterState.Traveling || TargetPlanet is null || deltaTime <= 0f)
+        if (deltaTime <= 0f || State == FreighterState.Consumed)
+            return false;
+
+        Position += collisionVelocity * deltaTime;
+        collisionVelocity *= MathF.Exp(-2f * deltaTime);
+        Velocity = collisionVelocity;
+        if (State != FreighterState.Traveling || TargetPlanet is null)
             return false;
 
         var offset = TargetPlanet.Position - Position;
@@ -50,7 +66,7 @@ public sealed class Freighter : ICollisionBody
         if (distance > arrivalDistance)
         {
             Heading = Vector2.Normalize(offset);
-            Velocity = Heading * Speed;
+            Velocity += Heading * Speed;
         }
         if (distance <= arrivalDistance + travelDistance)
         {

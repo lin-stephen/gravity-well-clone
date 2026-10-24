@@ -36,6 +36,10 @@ velocity difference, with planets stationary. Damage applies once per contact;
 separating and touching again allows another hit. Health is clamped to zero.
 The shared tuning constants live in `Physics/CollisionSystem.cs`.
 
-This currently tracks damage only: destruction and collision bounce are not yet
-implemented. Detection uses positions each frame, so sufficiently fast bodies
-can pass through each other between frames.
+Ships bounce with equal mass and restitution 0.8; planets remain fixed. Contact
+resolution separates overlaps and changes only inward velocity along the contact
+normal, preserving sideways motion. Freighter autopilot continues while collision
+motion decays over time. Damage uses impact velocity before the bounce.
+
+Destruction is not yet implemented. Detection uses positions each frame, so
+sufficiently fast bodies can pass through each other between frames.

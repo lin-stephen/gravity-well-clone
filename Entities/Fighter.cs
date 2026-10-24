@@ -13,6 +13,14 @@ public sealed class Fighter : ICollisionBody
 
     public Faction Faction { get; init; } = Faction.Blue;
     public float CollisionRadius => Radius;
+    public float InverseMass => 1f;
+
+    public void ApplyCollision(Vector2 displacement, Vector2 velocityChange)
+    {
+        Position += displacement;
+        Velocity += velocityChange;
+    }
+
 
     public Vector2 Position { get; set; }
     public Vector2 Velocity { get; set; }

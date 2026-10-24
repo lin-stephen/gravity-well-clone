@@ -8,4 +8,6 @@ public interface ICollisionBody
     Vector2 Velocity { get; }
     float CollisionRadius { get; }
     int Health { get; set; }
+    float InverseMass { get; }
+    void ApplyCollision(Vector2 displacement, Vector2 velocityChange);
 }
