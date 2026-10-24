@@ -21,7 +21,7 @@ public sealed class Freighter : Ship
     public override float ThrustAcceleration => 180f;
     public override float TurnRate => 168f;
     public Vector2 Heading => Forward;
-    public Faction Faction { get; }
+    public override int HealthCapacity => MaxHealth;
     public FreighterState State { get; private set; } = FreighterState.Idle;
     public int RawMaterials { get; private set; } = CargoCapacity;
     public Planet? TargetPlanet { get; private set; }

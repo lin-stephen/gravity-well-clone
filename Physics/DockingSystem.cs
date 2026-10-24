@@ -92,7 +92,7 @@ public sealed class DockingSystem
 
     private static bool TryCapture(Ship ship, ICollisionBody target)
     {
-        if (target == ship.ReleasedDockingTarget || ship.Health <= 0 || target.Health <= 0) return false;
+        if (target == ship.ReleasedDockingTarget) return false;
         var offset = ship.Position - target.Position;
         var distance = offset.Length();
         var radius = ship.CollisionRadius + target.CollisionRadius;

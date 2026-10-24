@@ -7,7 +7,7 @@ public sealed class Fighter : Ship
     public const int MaxHealth = 6;
     public const float Radius = 10f;
     public const float MaxSpeed = 260f;
-    public Faction Faction { get; init; } = Faction.Blue;
+    public override int HealthCapacity => MaxHealth;
     public override float CollisionRadius => Radius;
     public override float SpeedLimit => MaxSpeed;
     public override float ThrustAcceleration => 230f;

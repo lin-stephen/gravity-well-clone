@@ -19,6 +19,27 @@ public sealed class HudRenderer
         var status = fighter.IsDocked ? "DOCKED" : "DOCKING";
         Raylib.DrawTextEx(font, $"{status}: {target}  |  UP TO DEPART",
             new Vector2(30, 166), 15, 0.5f, Color.Lime);
+        if (!fighter.IsDocked) return;
+        var repair = fighter.RepairStatus switch
+        {
+            RepairStatus.Repairing => "REPAIRING",
+            RepairStatus.FullyRepaired => "FULLY REPAIRED",
+            RepairStatus.AwaitingSupplies => "AWAITING SUPPLIES",
+            RepairStatus.Unavailable => "REPAIRS UNAVAILABLE",
+            _ => ""
+        };
+        var inventory = fighter.DockingTarget switch
+        {
+            Planet planet => planet.BaseResources,
+            SpaceDockBody dock => dock.Planet.StarbaseResources,
+            _ => null
+        };
+        var supplies = inventory is null ? "" :
+            $"  |  RAW {inventory.RawMaterials}  FINISHED {inventory.FinishedMaterials}";
+        Raylib.DrawTextEx(font, $"{repair}  {fighter.Health}/{fighter.HealthCapacity} HP{supplies}",
+            new Vector2(30, 189), 15, 0.5f,
+            fighter.RepairStatus == RepairStatus.Repairing || fighter.RepairStatus == RepairStatus.FullyRepaired
+                ? Color.Lime : Color.Yellow);
     }
 
     public void Draw(float viewportWidth)

@@ -5,6 +5,17 @@ namespace GravityWell.Entities;
 
 public abstract class Ship : ICollisionBody
 {
+    public Faction Faction { get; init; } = Faction.Blue;
+    public abstract int HealthCapacity { get; }
+    public RepairStatus RepairStatus { get; internal set; }
+    internal double RepairProgress { get; set; }
+
+    public void ResetRepair(RepairStatus status = RepairStatus.Inactive)
+    {
+        RepairProgress = 0;
+        RepairStatus = status;
+    }
+
     public abstract float CollisionRadius { get; }
     public abstract float SpeedLimit { get; }
     public abstract float ThrustAcceleration { get; }
@@ -25,6 +36,7 @@ public abstract class Ship : ICollisionBody
 
     public void BeginDocking(ICollisionBody target, Vector2 normal)
     {
+        ResetRepair();
         DockingTarget = target;
         DockingNormal = normal;
         IsDocked = false;
@@ -34,6 +46,7 @@ public abstract class Ship : ICollisionBody
 
     public void Undock()
     {
+        ResetRepair();
         ReleasedDockingTarget = DockingTarget;
         DockingTarget = null;
         IsDocked = false;

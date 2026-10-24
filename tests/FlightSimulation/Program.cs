@@ -136,3 +136,27 @@ for (var i = 0; i < 8; i++)
     var start = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * 350;
     Flight($"landing direction {i}", start, Vector2.Zero, dt: 1f / 30);
 }
+
+RepairChecks.Run();
+
+// Destruction belongs to the lifecycle system; docking evaluates the approach
+// of bodies supplied to it without interpreting their health as lifecycle state.
+foreach (var orbital in new[] { false, true })
+foreach (var health in new[] { 0, 1, 6 })
+{
+    var planet = new Planet(Vector2.Zero, owner: Faction.Blue);
+    planet.BuildHomeworld();
+    planet.Health = 0;
+    var world = new GameWorld([planet], []);
+    ICollisionBody target = orbital ? planet.SpaceDock : planet;
+    var ship = world.Player;
+    ship.Health = health;
+    ship.Position = target.Position - Vector2.UnitY * (ship.CollisionRadius + target.CollisionRadius);
+    ship.Velocity = Vector2.Zero;
+    ship.Rotation = 0;
+    var docking = new DockingSystem();
+    for (var frame = 0; frame < 180; frame++) docking.Update(world, 1f / 60);
+    Check(ship.IsDocked && ship.DockingTarget == target, "docking is independent of body health");
+    Check(ship.Health == health && planet.Health == 0, "docking does not modify health");
+}
+Console.WriteLine("PASS docking does not interpret ship or target health");

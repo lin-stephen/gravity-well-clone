@@ -28,6 +28,8 @@ public sealed class Planet : ICollisionBody
     public int Health { get; set; } = MaxHealth;
     public Vector2 Velocity => Vector2.Zero;
 
+    public ResourceInventory BaseResources { get; } = new();
+    public ResourceInventory StarbaseResources { get; } = new();
     public SpaceDockBody SpaceDock { get; }
     public Vector2 Position { get; }
     public PlanetType Type { get; }
@@ -74,5 +76,9 @@ public sealed class Planet : ICollisionBody
     {
         foreach (var type in Enum.GetValues<StructureType>())
             AddStructure(type, StructureState.Operational);
+        BaseResources.AddRawMaterials(10);
+        BaseResources.AddFinishedMaterials(10);
+        StarbaseResources.AddRawMaterials(10);
+        StarbaseResources.AddFinishedMaterials(10);
     }
 }

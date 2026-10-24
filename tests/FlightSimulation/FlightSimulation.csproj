@@ -10,6 +10,7 @@
     <Compile Include="../../World/*.cs" />
     <Compile Include="../../Physics/*.cs" />
     <Compile Include="../../AI/*.cs" />
+    <Compile Include="../../Economy/*.cs" />
     <Compile Include="../../Colonization/*.cs" />
     <Compile Include="../../Input/ShipControls.cs" />
     <Compile Include="../../Input/PlayerControls.cs" />

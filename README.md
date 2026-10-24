@@ -55,7 +55,9 @@ without collision damage or bounce from that target. Planets can be landed on
 regardless of ownership; a completed landing claims an unowned planet. Spacedock
 bounds follow the dock glyph near the orbital starbase. Thrust releases the ship;
 it must leave the capture zone before docking to that target again. Home resets
-all fighter docking state. Tune capture and damping in `Physics/DockingSystem.cs`.
+all fighter docking state. Docking does not interpret ship or target health;
+destruction and respawning belong to a separate lifecycle system. Tune capture
+and damping in `Physics/DockingSystem.cs`.
 
 Planet outlines and operational spacedock glyphs use thicker lines while the
 fighter's approach speed toward that particular target is below the docking
@@ -92,3 +94,34 @@ dotnet run --project tests/FlightSimulation/FlightSimulation.csproj
 They cover blocked routes, crossing traffic, drift and impact recovery, orbital
 docks, multiple approach directions and frame rates, player docking, and fleet
 construction with replacement production.
+
+## Materials and docked repairs
+
+Each planet has independent base and starbase stores, each capped at 20 raw and
+20 finished materials. Homeworlds begin with 10 of each material in both stores;
+new settlements begin empty. An operational colony on a habitable world supplies
+one raw material every two seconds to each operational base/starbase. Each of
+these facilities refines one raw material into one finished material every two
+seconds. Production and refining pause when their required facilities are not
+operational, inputs run out, or storage fills. Barren worlds cannot produce raw
+materials locally.
+
+Friendly fighters and freighters repair only after docking finishes. Surface
+repairs require an operational base and restore one HP every two seconds from
+its finished stores. Spacedock repairs require an operational starbase and dock,
+restore one HP each second, and use the starbase's finished stores. Each restored
+HP costs one finished material, charged only when that HP is restored. Repairs
+stop at maximum health or when supplies run out; waiting for supplies does not
+accumulate repair time. Undocking resets partial repair progress. Zero-health
+ships cannot be revived by repairs.
+
+The docking HUD shows repair status, health, and the relevant facility's raw and
+finished materials. Rates live in `Economy/EconomySystem.cs` and
+`Economy/RepairSystem.cs`; capacities live in `Entities/ResourceInventory.cs`.
+These rates and capacities are tuning choices: the reference manual specifies
+the material flow and faster orbital repairs but does not give numeric rates.
+
+Ship construction costs and freighter cargo/resupply are not yet connected to
+these stores. Barren outposts therefore need future resupply support for a
+renewable repair service. The simulation checks also cover repair eligibility,
+costs, depletion, separate inventories, production, and landing-to-repair flow.

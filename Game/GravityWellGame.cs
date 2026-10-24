@@ -1,4 +1,5 @@
 using GravityWell.Colonization;
+using GravityWell.Economy;
 using GravityWell.AI;
 using GravityWell.Input;
 using GravityWell.Physics;
@@ -17,6 +18,8 @@ public sealed class GravityWellGame
     private readonly ColonizationSystem colonization = new();
     private readonly FreighterSystem freighters = new();
     private readonly FreighterAutopilot autopilot = new();
+    private readonly EconomySystem economy = new();
+    private readonly RepairSystem repairs = new();
     private readonly GameRenderer renderer = new();
     private bool showHelp = true;
 
@@ -36,6 +39,8 @@ public sealed class GravityWellGame
         collisions.Update(world);
         colonization.Update(world);
         freighters.Update(world, deltaTime);
+        economy.Update(world, deltaTime);
+        repairs.Update(world, deltaTime);
         renderer.Draw(world, controls, showHelp);
     }
 }
