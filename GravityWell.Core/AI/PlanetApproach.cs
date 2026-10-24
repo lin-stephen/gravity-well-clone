@@ -119,6 +119,10 @@ public sealed class PlanetApproach(DockingSystem docking, PhysicsSystem physics,
     private Vector2 HoverAcceleration(GameWorld world, Ship ship, Vector2 normal, Vector2 drift) =>
         normal * tuning.HoverSpeed - drift * 2f - physics.GetGravity(world, ship.Position);
 
+    /// <summary>Fly to and stay at the plan's hold position.</summary>
+    public ShipControls HoldAt(GameWorld world, Ship ship, FlightPlan plan) =>
+        Seek(world, ship, plan.HoldPosition, tuning.HoldSpeed);
+
     public ShipControls Seek(GameWorld world, Ship ship, Vector2 destination, float maxSpeed)
     {
         var offset = destination - ship.Position;

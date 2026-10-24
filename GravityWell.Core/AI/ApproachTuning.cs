@@ -18,6 +18,7 @@ public sealed record ApproachTuning
     public float AlignTriggerSpeed { get; init; }        // ...provided the ship is slower than this.
     public float BrakeDeceleration { get; init; }        // Deceleration assumed when slowing for a destination.
     public float BrakeTurnSeconds { get; init; }         // Time reserved to turn rear-first before braking.
+    public float HoldSpeed { get; init; }                // Speed cap when returning to a hold position.
 
     public static ApproachTuning ForFreighter { get; } = new()
     {
@@ -34,6 +35,7 @@ public sealed record ApproachTuning
         AlignTriggerSpeed = 15f,
         BrakeDeceleration = 40f,
         BrakeTurnSeconds = 1.2f,
+        HoldSpeed = 20f,
     };
 
     // The freighter's tuning, raised to the fighter's limits. Seek caps speed at sqrt(BrakeDeceleration * d),
