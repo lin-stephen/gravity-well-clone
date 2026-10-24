@@ -6,9 +6,13 @@ namespace GravityWell.Physics;
 
 public sealed class CollisionSystem
 {
-    public const float Restitution = 0.8f;
-    public const float DamageSpeedThreshold = 100f;
-    public const float SpeedPerDamagePoint = 25f;
+    private readonly CollisionSettings settings;
+
+    public CollisionSystem(CollisionSettings? settings = null)
+    {
+        this.settings = settings ?? new CollisionSettings();
+        this.settings.Validate();
+    }
 
     private HashSet<(ICollisionBody, ICollisionBody)> contacts = [];
 
@@ -51,7 +55,7 @@ public sealed class CollisionSystem
         contacts = touching;
     }
 
-    public static void ResolveContact(ICollisionBody first, ICollisionBody second)
+    public void ResolveContact(ICollisionBody first, ICollisionBody second)
     {
         var inverseMass = first.InverseMass + second.InverseMass;
         if (inverseMass <= 0f) return;
@@ -65,7 +69,7 @@ public sealed class CollisionSystem
         var normal = GetContactNormal(first, second);
         var normalSpeed = Vector2.Dot(relativeVelocity, normal);
         var impulse = normalSpeed < 0f
-            ? -(1f + Restitution) * normalSpeed / inverseMass * normal
+            ? -(1f + settings.Restitution) * normalSpeed / inverseMass * normal
             : Vector2.Zero;
         var correction = normal * (penetration / inverseMass);
         first.ApplyCollision(-correction * first.InverseMass, -impulse * first.InverseMass);
@@ -86,8 +90,8 @@ public sealed class CollisionSystem
     public static float GetClosingSpeed(ICollisionBody first, ICollisionBody second) =>
         MathF.Max(0f, Vector2.Dot(first.Velocity - second.Velocity, GetContactNormal(first, second)));
 
-    public static int CalculateDamage(float closingSpeed) =>
-        closingSpeed <= DamageSpeedThreshold
+    public int CalculateDamage(float closingSpeed) =>
+        closingSpeed <= settings.DamageSpeedThreshold
             ? 0
-            : (int)MathF.Ceiling((closingSpeed - DamageSpeedThreshold) / SpeedPerDamagePoint);
+            : (int)MathF.Ceiling((closingSpeed - settings.DamageSpeedThreshold) / settings.SpeedPerDamagePoint);
 }
