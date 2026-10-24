@@ -135,6 +135,11 @@ supplies its own `ApproachTuning`. If two fighters reach the same planet togethe
 in `GameWorld.Fighters` order (the player, then the AI fighters) keeps it and the other
 re-picks. See [ADR 0007](docs/adr/0007-ai-fighters-share-the-planet-approach-logic.md).
 
+Both autopilots are thin wrappers over `ShipAutopilot<TShip>`, which keeps a flight plan per ship
+and asks an `IAutopilotStrategy<TShip>` what each ship should do. `FreighterStrategy` follows
+dispatch orders and `PeacefulFighterStrategy` claims planets, so a new fighter behaviour is a new
+strategy. See [ADR 0008](docs/adr/0008-autopilots-are-strategies-over-a-shared-runner.md).
+
 Run the deterministic simulation checks without browser or rendering dependencies:
 
 ```sh
