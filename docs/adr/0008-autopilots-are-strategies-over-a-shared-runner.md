@@ -53,9 +53,8 @@ bottom, to save about 15 lines.
   This is a bet that fighter behaviour will vary, and it is cheap to unwind if it doesn't.
 - Strategy logic can be tested without the runner. The runner has its own tests with a fake
   strategy.
-- `ApproachTuning` properties default to zero. A tuning built from scratch rather than copied
-  from `ForFreighter` or `ForFighter` would break approach flight, including the new hold
-  speed. Marking the properties `required` would catch that at compile time and was left for a
-  separate decision.
+- `ApproachTuning` properties are `required`. A tuning must either set every value or be copied
+  with `with` from `ForFreighter` or `ForFighter`; leaving one out is a compile error rather
+  than a silent zero that breaks approach flight (for example a hold speed of 0).
 - The runner copies the strategy's ship list and prunes each tick. At these ship counts the
   cost is negligible.

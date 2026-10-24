@@ -5,20 +5,20 @@ namespace GravityWell.Core.AI;
 /// <summary>Per-ship-class values that shape how <see cref="PlanetApproach"/> flies to a planet and docks.</summary>
 public sealed record ApproachTuning
 {
-    public float CruiseSpeed { get; init; }              // Speed cap on the final leg of the route.
-    public float RouteWaypointSpeed { get; init; }       // Speed cap while intermediate waypoints remain.
-    public float ApproachClearance { get; init; }        // Gap between the hull and the approach point.
-    public float CorridorBreakDistance { get; init; }    // Farther than this from the surface, abandon Align/Approach.
-    public float CorridorBreakSpeed { get; init; }       // Faster than this, abandon Align/Approach.
-    public float AlignedSidewaysSpeed { get; init; }     // Sideways drift allowed to start the final approach.
-    public float HoverSpeed { get; init; }               // Outward speed used to hold off the surface while aligning.
-    public float TouchdownSpeed { get; init; }           // Closing speed during the final approach.
-    public float WaypointReachedDistance { get; init; }
-    public float AlignTriggerDistance { get; init; }     // Distance to the last waypoint that starts Align...
-    public float AlignTriggerSpeed { get; init; }        // ...provided the ship is slower than this.
-    public float BrakeDeceleration { get; init; }        // Deceleration assumed when slowing for a destination.
-    public float BrakeTurnSeconds { get; init; }         // Time reserved to turn rear-first before braking.
-    public float HoldSpeed { get; init; }                // Speed cap when returning to a hold position.
+    public required float CruiseSpeed { get; init; }              // Speed cap on the final leg of the route.
+    public required float RouteWaypointSpeed { get; init; }       // Speed cap while intermediate waypoints remain.
+    public required float ApproachClearance { get; init; }        // Gap between the hull and the approach point.
+    public required float CorridorBreakDistance { get; init; }    // Farther than this from the surface, abandon Align/Approach.
+    public required float CorridorBreakSpeed { get; init; }       // Faster than this, abandon Align/Approach.
+    public required float AlignedSidewaysSpeed { get; init; }     // Sideways drift allowed to start the final approach.
+    public required float HoverSpeed { get; init; }               // Outward speed used to hold off the surface while aligning.
+    public required float TouchdownSpeed { get; init; }           // Closing speed during the final approach.
+    public required float WaypointReachedDistance { get; init; }
+    public required float AlignTriggerDistance { get; init; }     // Distance to the last waypoint that starts Align...
+    public required float AlignTriggerSpeed { get; init; }        // ...provided the ship is slower than this.
+    public required float BrakeDeceleration { get; init; }        // Deceleration assumed when slowing for a destination.
+    public required float BrakeTurnSeconds { get; init; }         // Time reserved to turn rear-first before braking.
+    public required float HoldSpeed { get; init; }                // Speed cap when returning to a hold position.
 
     public static ApproachTuning ForFreighter { get; } = new()
     {
