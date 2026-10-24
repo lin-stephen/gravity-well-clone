@@ -10,6 +10,18 @@ public enum FlightPhase { Holding, Cruise, Brake, Align, Approach, Dock }
 
 public sealed class FreighterAutopilot
 {
+    private const float HoldSpeed = 20f;
+    private const float ApproachClearance = 90f;        // Gap between the hull and the approach point.
+    private const float CorridorBreakDistance = 150f;   // Farther than this from the surface, abandon Align/Approach.
+    private const float CorridorBreakSpeed = 65f;       // Faster than this, abandon Align/Approach.
+    private const float AlignedSidewaysSpeed = 5f;      // Sideways drift allowed to start the final approach.
+    private const float HoverSpeed = 20f;               // Outward speed used to hold off the surface while aligning.
+    private const float TouchdownSpeed = 12f;           // Closing speed during the final approach.
+    private const float WaypointReachedDistance = 20f;
+    private const float AlignTriggerDistance = 18f;     // Distance to the last waypoint that starts Align...
+    private const float AlignTriggerSpeed = 15f;        // ...provided the ship is slower than this.
+    private const float RouteWaypointSpeed = 55f;       // Speed cap while intermediate waypoints remain.
+
     private readonly DockingSystem docking;
     private readonly PhysicsSystem physics;
 
@@ -61,7 +73,7 @@ public sealed class FreighterAutopilot
         if (ship.State != FreighterState.Traveling || ship.TargetPlanet is null)
         {
             plan.Phase = FlightPhase.Holding;
-            return Seek(world, ship, plan.HoldPosition, 20f);
+            return Seek(world, ship, plan.HoldPosition, HoldSpeed);
         }
 
         var planet = ship.TargetPlanet;
@@ -90,7 +102,7 @@ public sealed class FreighterAutopilot
         if (planet.HasOperationalStructure(StructureType.SpaceDock) && plan.LandingNormal.Y < -0.4f)
             plan.LandingNormal = Vector2.UnitX;
         plan.ApproachPoint = planet.Position + plan.LandingNormal *
-            (Planet.Radius + ship.CollisionRadius + 90f);
+            (Planet.Radius + ship.CollisionRadius + ApproachClearance);
         plan.Route = RoutePlanner.Plan(world, ship, plan.ApproachPoint);
         plan.ReplanDelay = 1f;
         plan.Phase = FlightPhase.Cruise;
@@ -101,7 +113,7 @@ public sealed class FreighterAutopilot
         Vector2 normal, float surfaceDistance)
     {
         // A bounce or another ship can displace us: return to the corridor.
-        if (surfaceDistance > 150f || ship.Velocity.Length() > 65f)
+        if (surfaceDistance > CorridorBreakDistance || ship.Velocity.Length() > CorridorBreakSpeed)
         {
             plan.Phase = FlightPhase.Cruise;
             plan.Route = RoutePlanner.Plan(world, ship, plan.ApproachPoint);
@@ -111,16 +123,15 @@ public sealed class FreighterAutopilot
         var sideways = ship.Velocity - Vector2.Dot(ship.Velocity, normal) * normal;
         if (plan.Phase == FlightPhase.Align)
         {
-            if (docking.IsRearAligned(ship, planet) && sideways.Length() < 5f)
+            if (docking.IsRearAligned(ship, planet) && sideways.Length() < AlignedSidewaysSpeed)
                 plan.Phase = FlightPhase.Approach;
             else
-                return Accelerate(ship, normal * 20f - sideways * 2f -
-                    physics.GetGravity(world, ship.Position), normal);
+                return Accelerate(ship, HoverAcceleration(world, ship, normal, sideways), normal);
         }
         if (surfaceDistance <= docking.CaptureDistance &&
             docking.IsRearAligned(ship, planet) && docking.IsSpeedSafe(ship, planet))
             return default(ShipControls);
-        var desiredVelocity = -normal * 12f;
+        var desiredVelocity = -normal * TouchdownSpeed;
         var acceleration = (desiredVelocity - ship.Velocity) * 2f -
             physics.GetGravity(world, ship.Position);
         return Accelerate(ship, acceleration, normal);
@@ -128,7 +139,7 @@ public sealed class FreighterAutopilot
 
     private static void FollowRoute(GameWorld world, Freighter ship, FlightPlan plan)
     {
-        while (plan.Route.Count > 1 && Vector2.Distance(ship.Position, plan.Route[0]) < 20f)
+        while (plan.Route.Count > 1 && Vector2.Distance(ship.Position, plan.Route[0]) < WaypointReachedDistance)
             plan.Route.RemoveAt(0);
         if (plan.ReplanDelay <= 0f && (plan.Route.Count == 0 ||
             !RoutePlanner.IsClear(ship.Position, plan.Route[0], ship, RoutePlanner.Obstacles(world))))
@@ -144,17 +155,20 @@ public sealed class FreighterAutopilot
             return Seek(world, ship, ship.Position, 0f); // Brake and retry instead of flying through obstacles.
         var waypoint = plan.Route[0];
         var remaining = Vector2.Distance(ship.Position, waypoint);
-        if (plan.Route.Count == 1 && remaining < 18f && ship.Velocity.Length() < 15f)
+        if (plan.Route.Count == 1 && remaining < AlignTriggerDistance && ship.Velocity.Length() < AlignTriggerSpeed)
         {
             plan.Phase = FlightPhase.Align;
-            return Accelerate(ship, normal * 20f - ship.Velocity * 2f -
-                physics.GetGravity(world, ship.Position), normal);
+            return Accelerate(ship, HoverAcceleration(world, ship, normal, ship.Velocity), normal);
         }
         // Reserve distance for both the turn to face backwards and braking.
         var brakingDistance = ship.Velocity.LengthSquared() / 80f + ship.Velocity.Length() * 1.2f;
         plan.Phase = remaining < brakingDistance ? FlightPhase.Brake : FlightPhase.Cruise;
-        return Seek(world, ship, waypoint, plan.Route.Count > 1 ? 55f : Freighter.Speed);
+        return Seek(world, ship, waypoint, plan.Route.Count > 1 ? RouteWaypointSpeed : Freighter.Speed);
     }
+
+    /// <summary>Hold off the surface at <see cref="HoverSpeed"/> while damping the given drift and countering gravity.</summary>
+    private Vector2 HoverAcceleration(GameWorld world, Freighter ship, Vector2 normal, Vector2 drift) =>
+        normal * HoverSpeed - drift * 2f - physics.GetGravity(world, ship.Position);
 
     private ShipControls Seek(GameWorld world, Freighter ship, Vector2 destination, float maxSpeed)
     {
