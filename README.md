@@ -120,6 +120,21 @@ freighter orders build surface facilities; spacedocks are obstacles on these
 routes. Avoidance is a basic controller, not a guarantee against collisions in
 arbitrarily dense traffic or an unrecoverable impact.
 
+### AI fighters
+
+Every faction with a homeworld, other than the player's, gets one peaceful AI fighter
+(there are no weapons yet). `GravityWell.Core/AI/FighterAutopilot.cs` sends it to the
+nearest uncolonized planet and docks, which claims the planet. The claiming faction's own
+freighters then build on it. Once the claim lands the fighter undocks by itself and heads
+for the next nearest free planet. It re-picks if another faction claims its target first,
+and holds position when no free planet is left or when it is wrecked.
+
+AI fighters fly with the player fighter's own speed, thrust and turn limits. They share the
+approach, align and dock logic in `PlanetApproach` with the freighters; each ship class
+supplies its own `ApproachTuning`. If two fighters reach the same planet together, the first
+in `GameWorld.Fighters` order (the player, then the AI fighters) keeps it and the other
+re-picks. See [ADR 0007](docs/adr/0007-ai-fighters-share-the-planet-approach-logic.md).
+
 Run the deterministic simulation checks without browser or rendering dependencies:
 
 ```sh

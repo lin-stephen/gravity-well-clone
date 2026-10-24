@@ -12,6 +12,7 @@ its tradeoffs.
 | [0004](0004-separate-state-systems-and-renderers.md) | Separate state, systems, and renderers | Accepted |
 | [0005](0005-use-invariant-globalization.md) | Use invariant globalization | Accepted |
 | [0006](0006-colonize-planets-on-touch.md) | Colonize planets on touch until collision exists | Accepted |
+| [0007](0007-ai-fighters-share-the-planet-approach-logic.md) | AI fighters share the planet approach logic | Accepted |
 
 New records should copy [the template](template.md), use the next four-digit
 number, and be added to this table. Accepted ADRs aren't edited to disguise a
