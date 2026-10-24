@@ -1,11 +1,12 @@
 using System.Numerics;
 using AwesomeAssertions;
 using GravityWell.Core.AI;
+using GravityWell.Core.AI.Fighters;
 using GravityWell.Core.Entities;
 using GravityWell.Core.Physics;
 using GravityWell.Core.World;
 
-namespace GravityWell.Tests.AI;
+namespace GravityWell.Tests.AI.Fighters;
 
 /// <summary>
 /// Flies a Red AI fighter at full fighter speed to a free planet at the origin through the real

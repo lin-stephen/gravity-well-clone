@@ -4,7 +4,7 @@ using GravityWell.Core.Input;
 using GravityWell.Core.Physics;
 using GravityWell.Core.World;
 
-namespace GravityWell.Core.AI;
+namespace GravityWell.Core.AI.Freighters;
 
 /// <summary>Freighters fly where they are sent: to the planet they were dispatched to, otherwise they hold.</summary>
 internal sealed class FreighterStrategy(DockingSystem docking, PhysicsSystem physics) : IAutopilotStrategy<Freighter>

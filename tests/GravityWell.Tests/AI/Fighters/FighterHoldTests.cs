@@ -1,12 +1,13 @@
 using System.Numerics;
 using AwesomeAssertions;
 using GravityWell.Core.AI;
+using GravityWell.Core.AI.Fighters;
 using GravityWell.Core.Colonization;
 using GravityWell.Core.Entities;
 using GravityWell.Core.Physics;
 using GravityWell.Core.World;
 
-namespace GravityWell.Tests.AI;
+namespace GravityWell.Tests.AI.Fighters;
 
 public class FighterHoldTests
 {

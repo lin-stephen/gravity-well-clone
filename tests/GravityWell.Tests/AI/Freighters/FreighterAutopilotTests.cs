@@ -1,11 +1,12 @@
 using System.Numerics;
 using GravityWell.Core.AI;
+using GravityWell.Core.AI.Freighters;
 using GravityWell.Core.Entities;
 using GravityWell.Core.Physics;
 using GravityWell.Core.World;
 using AwesomeAssertions;
 
-namespace GravityWell.Tests.AI;
+namespace GravityWell.Tests.AI.Freighters;
 
 /// <summary>
 /// Characterization tests: each scenario flies a freighter through the real game loop and

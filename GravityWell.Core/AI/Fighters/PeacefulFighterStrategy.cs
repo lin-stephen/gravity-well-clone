@@ -4,7 +4,7 @@ using GravityWell.Core.Input;
 using GravityWell.Core.Physics;
 using GravityWell.Core.World;
 
-namespace GravityWell.Core.AI;
+namespace GravityWell.Core.AI.Fighters;
 
 /// <summary>
 /// A fighter with no weapons to use: it claims planets. It picks the nearest uncolonized planet, docks

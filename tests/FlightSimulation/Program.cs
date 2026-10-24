@@ -1,5 +1,6 @@
 using System.Numerics;
 using GravityWell.Core.AI;
+using GravityWell.Core.AI.Freighters;
 using GravityWell.Core.Entities;
 using GravityWell.Core.Input;
 using GravityWell.Core.Physics;

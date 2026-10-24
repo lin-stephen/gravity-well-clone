@@ -1,4 +1,5 @@
-using GravityWell.Core.AI;
+using GravityWell.Core.AI.Fighters;
+using GravityWell.Core.AI.Freighters;
 using GravityWell.Core.Colonization;
 using GravityWell.Core.Economy;
 using GravityWell.Core.Physics;

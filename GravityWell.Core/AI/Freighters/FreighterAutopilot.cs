@@ -2,7 +2,7 @@ using GravityWell.Core.Entities;
 using GravityWell.Core.Physics;
 using GravityWell.Core.World;
 
-namespace GravityWell.Core.AI;
+namespace GravityWell.Core.AI.Freighters;
 
 /// <summary>Flies every freighter to the planet it was dispatched to. See <see cref="FreighterStrategy"/>.</summary>
 public sealed class FreighterAutopilot

@@ -110,7 +110,7 @@ shared motion and docking state; `PhysicsSystem` applies acceleration, gravity,
 rotation limits, and speed limits to every active ship. Collisions change the
 actual velocity rather than adding a separate freighter drift effect.
 
-`GravityWell.Core/AI/FreighterAutopilot.cs` follows cruise, brake, align, approach, and dock phases.
+`GravityWell.Core/AI/Freighters/FreighterAutopilot.cs` follows cruise, brake, align, approach, and dock phases.
 It compensates for gravity, slows before waypoints, and makes a slow rear-first
 final descent. `GravityWell.Core/AI/RoutePlanner.cs` plans detours around expanded planet and
 operational spacedock bounds. Predictive local avoidance slows and steers around
@@ -125,7 +125,7 @@ arbitrarily dense traffic or an unrecoverable impact.
 ### AI fighters
 
 Every faction with a homeworld, other than the player's, gets one peaceful AI fighter
-(there are no weapons yet). `GravityWell.Core/AI/FighterAutopilot.cs` sends it to the
+(there are no weapons yet). `GravityWell.Core/AI/Fighters/FighterAutopilot.cs` sends it to the
 nearest uncolonized planet and docks, which claims the planet. The claiming faction's own
 freighters then build on it. Once the claim lands the fighter undocks by itself and heads
 for the next nearest free planet. It re-picks if another faction claims its target first,
