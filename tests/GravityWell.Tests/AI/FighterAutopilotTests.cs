@@ -15,8 +15,13 @@ public class FighterAutopilotTests
 
     private static GameWorld NewWorld(Planet[] planets, params Fighter[] aiFighters)
     {
-        var world = new GameWorld(planets, [], aiFighters);
-        world.Player.Position = new Vector2(10000f, 10000f);
+        var world = new GameWorld(planets, [], aiFighters)
+        {
+            Player =
+            {
+                Position = new Vector2(10000f, 10000f)
+            }
+        };
         return world;
     }
 
