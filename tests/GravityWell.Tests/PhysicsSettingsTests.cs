@@ -1,7 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.Numerics;
+using AwesomeAssertions;
+using AwesomeAssertions.Execution;
 using GravityWell.Entities;
-using GravityWell.Input;
 using GravityWell.Physics;
 using GravityWell.World;
 
@@ -12,15 +13,20 @@ public class PhysicsSettingsTests
     [Test]
     public void Validate_AcceptsDefaultsAndZeroGravity()
     {
-        Assert.DoesNotThrow(new PhysicsSettings().Validate);
-        Assert.DoesNotThrow(new PhysicsSettings { PlanetGravityStrength = 0f }.Validate);
+        var validateDefaults = new PhysicsSettings().Validate;
+        var validateZeroGravity = new PhysicsSettings { PlanetGravityStrength = 0f }.Validate;
+
+        validateDefaults.Should().NotThrow();
+        validateZeroGravity.Should().NotThrow();
     }
 
     [Test]
     public void Constructor_ValidatesSettings()
     {
-        Assert.Throws<ValidationException>(() => new PhysicsSystem(
-            new PhysicsSettings { MinimumGravityDistanceSquared = 0f }));
+        Action construct = () => new PhysicsSystem(
+            new PhysicsSettings { MinimumGravityDistanceSquared = 0f });
+
+        construct.Should().Throw<ValidationException>();
     }
 
     [TestCase(0f, 0f)]
@@ -35,8 +41,7 @@ public class PhysicsSettingsTests
             MinimumGravityDistanceSquared = 100f
         });
 
-        Assert.That(physics.GetGravity(world, new Vector2(distance, 0f)),
-            Is.EqualTo(new Vector2(expected, 0f)));
+        physics.GetGravity(world, new Vector2(distance, 0f)).Should().Be(new Vector2(expected, 0f));
     }
 
     [Test]
@@ -58,10 +63,8 @@ public class PhysicsSettingsTests
 
         physics.Update(world, default, 0.5f);
 
-        Assert.Multiple(() =>
-        {
-            Assert.That(world.Player.Velocity, Is.EqualTo(new Vector2(-5f, 0f)));
-            Assert.That(world.Player.Position, Is.EqualTo(new Vector2(7.5f, 0f)));
-        });
+        using var scope = new AssertionScope();
+        world.Player.Velocity.Should().Be(new Vector2(-5f, 0f));
+        world.Player.Position.Should().Be(new Vector2(7.5f, 0f));
     }
 }
