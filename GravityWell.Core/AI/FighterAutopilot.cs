@@ -26,7 +26,8 @@ public sealed class FighterAutopilot
         {
             if (!plans.TryGetValue(fighter, out var plan))
             {
-                plan = new FlightPlan { HoldPosition = fighter.Position };
+                // A new plan already reads as Holding, so Hold will not recompute this.
+                plan = new FlightPlan { HoldPosition = ClearOfPlanets(world, fighter.Position) };
                 plans.Add(fighter, plan);
             }
             fighter.Controls = Steer(world, fighter, plan, deltaTime);
@@ -65,12 +66,25 @@ public sealed class FighterAutopilot
 
     private ShipControls Hold(GameWorld world, Fighter fighter, FlightPlan plan)
     {
-        // Hold wherever the fighter was when it stopped having something to do.
+        // Hold where the fighter was when it stopped having something to do, but never pressed
+        // against a planet it has just left.
         if (plan.Phase != FlightPhase.Holding)
-            plan.HoldPosition = fighter.Position;
+            plan.HoldPosition = ClearOfPlanets(world, fighter.Position);
         plan.Target = null;
         plan.Phase = FlightPhase.Holding;
         return approach.Seek(world, fighter, plan.HoldPosition, HoldSpeed);
+    }
+
+    /// <summary>The position itself, or the nearest point at the standoff distance if it is closer to a planet than that.</summary>
+    private static Vector2 ClearOfPlanets(GameWorld world, Vector2 position)
+    {
+        var planet = world.Planets.MinBy(candidate => Vector2.DistanceSquared(candidate.Position, position));
+        if (planet is null) return position;
+        var offset = position - planet.Position;
+        var minimumDistance = Planet.Radius + Fighter.Radius + ApproachTuning.ForFighter.ApproachClearance;
+        if (offset.Length() >= minimumDistance) return position;
+        var outward = offset.LengthSquared() > 0f ? Vector2.Normalize(offset) : Vector2.UnitY;
+        return planet.Position + outward * minimumDistance;
     }
 
     private static bool IsOwned(ICollisionBody body) => body switch
