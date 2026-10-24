@@ -1,6 +1,6 @@
 # 0008: Autopilots are strategies over a shared runner
 
-- Status: Accepted
+- Status: Accepted (the strategy interface and the runner were later narrowed by [0010](0010-fighter-behaviour-is-an-enum-chosen-per-faction-at-spawn.md))
 - Date: 2026-10-24
 
 ## Context

@@ -140,7 +140,9 @@ re-picks. See [ADR 0007](docs/adr/0007-ai-fighters-share-the-planet-approach-log
 Both autopilots are thin wrappers over `ShipAutopilot<TShip>`, which keeps a flight plan per ship
 and asks an `IAutopilotStrategy<TShip>` what each ship should do. `FreighterStrategy` follows
 dispatch orders and `PeacefulFighterStrategy` claims planets, so a new fighter behaviour is a new
-strategy. See [ADR 0008](docs/adr/0008-autopilots-are-strategies-over-a-shared-runner.md).
+strategy. A fighter's strategy is chosen from its `Behavior`, fixed at spawn and set per faction (see
+`GameWorld.CreateAiFighters`). See [ADR 0008](docs/adr/0008-autopilots-are-strategies-over-a-shared-runner.md)
+and [ADR 0010](docs/adr/0010-fighter-behaviour-is-an-enum-chosen-per-faction-at-spawn.md).
 
 Run the deterministic simulation checks without browser or rendering dependencies:
 
