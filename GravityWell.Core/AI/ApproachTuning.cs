@@ -35,4 +35,15 @@ public sealed record ApproachTuning
         BrakeDeceleration = 40f,
         BrakeTurnSeconds = 1.2f,
     };
+
+    // The freighter's tuning, raised to the fighter's limits. Seek caps speed at sqrt(BrakeDeceleration * d),
+    // which implies a braking rate of BrakeDeceleration / 2, so 160 means 80 u/s^2 against the fighter's
+    // 230 thrust. The freighter's 40 would hold a fighter near 150 on typical legs, and its 55 waypoint cap
+    // is below freighter pace. FighterApproachTests fly the fighter to prove both speed and safety.
+    public static ApproachTuning ForFighter { get; } = ForFreighter with
+    {
+        CruiseSpeed = Fighter.MaxSpeed,
+        RouteWaypointSpeed = 180f,
+        BrakeDeceleration = 160f,
+    };
 }
