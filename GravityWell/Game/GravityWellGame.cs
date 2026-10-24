@@ -1,10 +1,10 @@
-using GravityWell.Colonization;
-using GravityWell.Economy;
-using GravityWell.AI;
+using GravityWell.Core.AI;
+using GravityWell.Core.Colonization;
+using GravityWell.Core.Economy;
+using GravityWell.Core.Physics;
+using GravityWell.Core.World;
 using GravityWell.Input;
-using GravityWell.Physics;
 using GravityWell.Rendering;
-using GravityWell.World;
 
 namespace GravityWell.Game;
 

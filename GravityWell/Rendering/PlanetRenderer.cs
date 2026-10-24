@@ -1,5 +1,5 @@
-using GravityWell.Entities;
-using GravityWell.Physics;
+using GravityWell.Core.Entities;
+using GravityWell.Core.Physics;
 using Raylib_cs;
 
 namespace GravityWell.Rendering;

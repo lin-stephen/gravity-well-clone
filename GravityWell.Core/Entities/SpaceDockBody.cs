@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace GravityWell.Entities;
+namespace GravityWell.Core.Entities;
 
 // The dock glyph is offset from the shared starbase orbital anchor.
 public sealed class SpaceDockBody(Planet planet) : ICollisionBody

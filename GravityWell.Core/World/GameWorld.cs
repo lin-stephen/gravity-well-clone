@@ -1,7 +1,7 @@
 using System.Numerics;
-using GravityWell.Entities;
+using GravityWell.Core.Entities;
 
-namespace GravityWell.World;
+namespace GravityWell.Core.World;
 
 public sealed class GameWorld
 {

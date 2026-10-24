@@ -1,9 +1,9 @@
 using System.Numerics;
-using GravityWell.AI;
-using GravityWell.Entities;
-using GravityWell.Input;
-using GravityWell.Physics;
-using GravityWell.World;
+using GravityWell.Core.AI;
+using GravityWell.Core.Entities;
+using GravityWell.Core.Input;
+using GravityWell.Core.Physics;
+using GravityWell.Core.World;
 
 static void Check(bool ok, string name) { if (!ok) throw new Exception(name); }
 static void Flight(string name, Vector2 start, Vector2 velocity, Planet[]? obstacles = null,
@@ -84,7 +84,7 @@ Flight("sideways drift", new Vector2(-500, 0), new Vector2(0, 70));
     var physics = new PhysicsSystem();
     var docking = new DockingSystem();
     var collisions = new CollisionSystem();
-    var freighters = new GravityWell.Colonization.FreighterSystem();
+    var freighters = new GravityWell.Core.Colonization.FreighterSystem();
     for (var step = 0; step < 60 * 180; step++)
     {
         ai.Update(world, 1f / 60);

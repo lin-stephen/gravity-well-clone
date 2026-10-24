@@ -1,8 +1,8 @@
 using System.Numerics;
-using GravityWell.Entities;
-using GravityWell.World;
+using GravityWell.Core.Entities;
+using GravityWell.Core.World;
 
-namespace GravityWell.AI;
+namespace GravityWell.Core.AI;
 
 // A small visibility graph around expanded circular obstacles. Replanned per
 // order, not per frame; following a fixed route also prevents left/right jitter.

@@ -1,4 +1,4 @@
-using GravityWell.Entities;
+using GravityWell.Core.Entities;
 using Raylib_cs;
 
 namespace GravityWell.Rendering;

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace GravityWell.Physics;
+namespace GravityWell.Core.Physics;
 
 public sealed record CollisionSettings
 {

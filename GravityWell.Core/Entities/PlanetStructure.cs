@@ -1,4 +1,4 @@
-namespace GravityWell.Entities;
+namespace GravityWell.Core.Entities;
 
 public sealed class PlanetStructure
 {

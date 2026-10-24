@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace GravityWell.Entities;
+namespace GravityWell.Core.Entities;
 
 public sealed class Freighter : Ship
 {

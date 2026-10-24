@@ -1,7 +1,7 @@
 using System.Numerics;
-using GravityWell.Entities;
+using GravityWell.Core.Entities;
+using GravityWell.Core.World;
 using GravityWell.Game;
-using GravityWell.World;
 using Raylib_cs;
 
 namespace GravityWell.Rendering;

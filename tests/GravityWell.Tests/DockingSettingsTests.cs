@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using GravityWell.Physics;
+using GravityWell.Core.Physics;
 
 namespace GravityWell.Tests;
 

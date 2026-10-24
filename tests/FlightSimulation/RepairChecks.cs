@@ -1,9 +1,9 @@
 using System.Numerics;
-using GravityWell.Economy;
-using GravityWell.Entities;
-using GravityWell.Input;
-using GravityWell.Physics;
-using GravityWell.World;
+using GravityWell.Core.Economy;
+using GravityWell.Core.Entities;
+using GravityWell.Core.Input;
+using GravityWell.Core.Physics;
+using GravityWell.Core.World;
 
 internal static class RepairChecks
 {

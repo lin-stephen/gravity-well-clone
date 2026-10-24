@@ -1,4 +1,4 @@
-namespace GravityWell.Input;
+namespace GravityWell.Core.Input;
 
 public readonly record struct PlayerControls(
     bool TurnLeft,

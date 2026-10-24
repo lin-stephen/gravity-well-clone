@@ -1,8 +1,8 @@
-using GravityWell.Entities;
+using GravityWell.Core.Input;
+using GravityWell.Core.Physics;
+using GravityWell.Core.World;
 using GravityWell.Game;
 using GravityWell.Input;
-using GravityWell.Physics;
-using GravityWell.World;
 using Raylib_cs;
 
 namespace GravityWell.Rendering;

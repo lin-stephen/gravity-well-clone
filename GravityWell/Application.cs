@@ -2,6 +2,8 @@ using System.Runtime.InteropServices.JavaScript;
 using GravityWell.Game;
 using Raylib_cs;
 
+namespace GravityWell;
+
 public partial class Application
 {
     private static readonly GravityWellGame Game = new();

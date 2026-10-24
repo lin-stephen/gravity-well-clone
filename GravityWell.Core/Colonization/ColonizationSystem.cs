@@ -1,7 +1,7 @@
-using GravityWell.Entities;
-using GravityWell.World;
+using GravityWell.Core.Entities;
+using GravityWell.Core.World;
 
-namespace GravityWell.Colonization;
+namespace GravityWell.Core.Colonization;
 
 public sealed class ColonizationSystem
 {

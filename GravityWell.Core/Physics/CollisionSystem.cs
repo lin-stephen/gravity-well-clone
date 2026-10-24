@@ -1,8 +1,8 @@
 using System.Numerics;
-using GravityWell.Entities;
-using GravityWell.World;
+using GravityWell.Core.Entities;
+using GravityWell.Core.World;
 
-namespace GravityWell.Physics;
+namespace GravityWell.Core.Physics;
 
 public sealed class CollisionSystem
 {

@@ -1,7 +1,7 @@
 using System.Numerics;
-using GravityWell.Input;
+using GravityWell.Core.Input;
 
-namespace GravityWell.Entities;
+namespace GravityWell.Core.Entities;
 
 public abstract class Ship : ICollisionBody
 {

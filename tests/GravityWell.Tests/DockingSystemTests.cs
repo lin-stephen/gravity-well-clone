@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.Numerics;
-using GravityWell.Entities;
-using GravityWell.Physics;
-using GravityWell.World;
+using GravityWell.Core.Entities;
+using GravityWell.Core.Physics;
+using GravityWell.Core.World;
 
 namespace GravityWell.Tests;
 

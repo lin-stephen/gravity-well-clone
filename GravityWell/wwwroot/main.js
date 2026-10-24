@@ -23,11 +23,11 @@ function resizeCanvas() {
     const width = Math.max(1, Math.round(window.innerWidth * pixelRatio));
     const height = Math.max(1, Math.round(window.innerHeight * pixelRatio));
 
-    exports.Application.ResizeCanvas(width, height);
+    exports.GravityWell.Application.ResizeCanvas(width, height);
 }
 
 function mainLoop() {
-    exports.Application.UpdateFrame();
+    exports.GravityWell.Application.UpdateFrame();
     loadingScreen?.remove();
     window.requestAnimationFrame(mainLoop);
 }
