@@ -1,5 +1,8 @@
 # Gravity Well clone
 
+[![Tests](https://github.com/lin-stephen/gravity-well-clone/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/lin-stephen/gravity-well-clone/actions/workflows/tests.yml)
+[![Core coverage](https://codecov.io/gh/lin-stephen/gravity-well-clone/branch/main/graph/badge.svg)](https://app.codecov.io/gh/lin-stephen/gravity-well-clone)
+
 A C# WebAssembly recreation of the 1995 space strategy/action game, rendered with
 [raylib-cs](https://github.com/ChrisDill/Raylib-cs).
 
@@ -10,6 +13,30 @@ A C# WebAssembly recreation of the 1995 space strategy/action game, rendered wit
 - `tests/`: NUnit tests and deterministic flight simulation checks, referencing `GravityWell.Core`.
 
 Run the NUnit tests with `dotnet test tests/GravityWell.Tests/GravityWell.Tests.csproj`.
+
+## Tests and coverage
+
+The Tests workflow runs NUnit tests and flight simulation checks on pull requests
+and pushes to `main`. Unit-test coverage measures `GravityWell.Core` only;
+rendering and the separate flight simulation checks are not included. Line and
+branch coverage appear in the workflow summary, and the `test-results` artifact
+contains the TRX test results and Cobertura coverage report.
+
+Generate the same coverage report locally:
+
+```sh
+dotnet test tests/GravityWell.Tests/GravityWell.Tests.csproj --configuration Release --collect:"XPlat Code Coverage" --settings coverage.runsettings --results-directory TestResults
+```
+
+Codecov provides the coverage badge and pull request coverage feedback. To enable
+it, sign in to [Codecov](https://app.codecov.io/gh/lin-stephen/gravity-well-clone)
+with GitHub and enable this repository, granting the Codecov GitHub App access
+if prompted. Uploads authenticate using GitHub Actions OIDC, so no
+`CODECOV_TOKEN` secret is needed. Coverage is informational, with no minimum
+percentage enforced; Codecov upload failures do not fail the Tests workflow.
+Fork pull requests still run tests and generate coverage artifacts and summaries,
+but skip the OIDC upload. The coverage badge populates after the first successful
+upload from `main`.
 
 ## Run locally
 

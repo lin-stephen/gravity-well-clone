@@ -1,0 +1,78 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Run unit tests with core coverage
+        run: >-
+          dotnet test tests/GravityWell.Tests/GravityWell.Tests.csproj
+          --configuration Release
+          --collect:"XPlat Code Coverage"
+          --settings coverage.runsettings
+          --results-directory TestResults
+          --logger "trx;LogFileName=unit-tests.trx"
+
+      - name: Summarize coverage
+        run: |
+          python3 - <<'PY'
+          import os
+          import shutil
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+
+          reports = list(Path("TestResults").glob("*/coverage.cobertura.xml"))
+          if len(reports) != 1:
+              raise SystemExit(f"Expected one coverage report, found {len(reports)}")
+          report = ET.parse(reports[0]).getroot()
+          shutil.copyfile(reports[0], "TestResults/coverage.cobertura.xml")
+          lines = float(report.attrib["line-rate"]) * 100
+          branches = float(report.attrib["branch-rate"]) * 100
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary:
+              summary.write("## GravityWell.Core unit-test coverage\n\n")
+              summary.write(f"| Lines | Branches |\n| --- | --- |\n| {lines:.2f}% | {branches:.2f}% |\n\n")
+              summary.write("Flight simulation checks run separately and are not included in these figures.\n")
+          PY
+
+      - name: Run flight simulation checks
+        if: ${{ !cancelled() }}
+        run: dotnet run --project tests/FlightSimulation/FlightSimulation.csproj --configuration Release
+
+      - name: Preserve test results and coverage
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: TestResults/
+          if-no-files-found: warn
+
+      - name: Upload coverage to Codecov
+        if: ${{ success() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+        uses: codecov/codecov-action@v5
+        continue-on-error: true
+        with:
+          use_oidc: true
+          files: TestResults/coverage.cobertura.xml
+          disable_search: true
+          fail_ci_if_error: true
