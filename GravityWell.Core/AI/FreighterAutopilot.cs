@@ -11,10 +11,12 @@ public enum FlightPhase { Holding, Cruise, Brake, Align, Approach, Dock }
 public sealed class FreighterAutopilot
 {
     private readonly DockingSystem docking;
+    private readonly PhysicsSystem physics;
 
-    public FreighterAutopilot(DockingSystem? docking = null)
+    public FreighterAutopilot(DockingSystem? docking = null, PhysicsSystem? physics = null)
     {
         this.docking = docking ?? new DockingSystem();
+        this.physics = physics ?? new PhysicsSystem();
     }
 
     private sealed class FlightPlan
@@ -100,14 +102,14 @@ public sealed class FreighterAutopilot
                         plan.Phase = FlightPhase.Approach;
                     else
                         return Accelerate(ship, normal * 20f - sideways * 2f -
-                            PhysicsSystem.GetGravity(world, ship.Position), normal);
+                            physics.GetGravity(world, ship.Position), normal);
                 }
                 if (surfaceDistance <= docking.CaptureDistance &&
                     docking.IsRearAligned(ship, planet) && docking.IsSpeedSafe(ship, planet))
                     return default;
                 var desiredVelocity = -normal * 12f;
                 var acceleration = (desiredVelocity - ship.Velocity) * 2f -
-                    PhysicsSystem.GetGravity(world, ship.Position);
+                    physics.GetGravity(world, ship.Position);
                 return Accelerate(ship, acceleration, normal);
             }
         }
@@ -128,7 +130,7 @@ public sealed class FreighterAutopilot
         {
             plan.Phase = FlightPhase.Align;
             return Accelerate(ship, normal * 20f - ship.Velocity * 2f -
-                PhysicsSystem.GetGravity(world, ship.Position), normal);
+                physics.GetGravity(world, ship.Position), normal);
         }
         // Reserve distance for both the turn to face backwards and braking.
         var brakingDistance = ship.Velocity.LengthSquared() / 80f + ship.Velocity.Length() * 1.2f;
@@ -136,7 +138,7 @@ public sealed class FreighterAutopilot
         return Seek(world, ship, waypoint, plan.Route.Count > 1 ? 55f : Freighter.Speed);
     }
 
-    private static ShipControls Seek(GameWorld world, Freighter ship, Vector2 destination, float maxSpeed)
+    private ShipControls Seek(GameWorld world, Freighter ship, Vector2 destination, float maxSpeed)
     {
         var offset = destination - ship.Position;
         var distance = offset.Length();
@@ -160,7 +162,7 @@ public sealed class FreighterAutopilot
             desiredVelocity *= 0.5f;
             desiredVelocity += (away + right) * (clearance - closest.Length()) * 0.8f;
         }
-        var acceleration = (desiredVelocity - ship.Velocity) * 2f - PhysicsSystem.GetGravity(world, ship.Position);
+        var acceleration = (desiredVelocity - ship.Velocity) * 2f - physics.GetGravity(world, ship.Position);
         return Accelerate(ship, acceleration, offset);
     }
 

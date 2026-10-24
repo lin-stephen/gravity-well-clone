@@ -7,7 +7,13 @@ namespace GravityWell.Physics;
 
 public sealed class PhysicsSystem
 {
-    private const float PlanetGravityStrength = 1_350_000f * 0.09f;
+    private readonly PhysicsSettings settings;
+
+    public PhysicsSystem(PhysicsSettings? settings = null)
+    {
+        this.settings = settings ?? new PhysicsSettings();
+        this.settings.Validate();
+    }
 
     public void Update(GameWorld world, PlayerControls controls, float deltaTime)
     {
@@ -22,7 +28,7 @@ public sealed class PhysicsSystem
         }
     }
 
-    private static void Integrate(Ship ship, GameWorld world, float deltaTime)
+    private void Integrate(Ship ship, GameWorld world, float deltaTime)
     {
         if (deltaTime <= 0f) return;
         var throttle = Math.Clamp(ship.Controls.Throttle, 0f, 1f);
@@ -40,7 +46,7 @@ public sealed class PhysicsSystem
         ship.Position += ship.Velocity * deltaTime;
     }
 
-    public static Vector2 GetGravity(GameWorld world, Vector2 position)
+    public Vector2 GetGravity(GameWorld world, Vector2 position)
     {
         var acceleration = Vector2.Zero;
         foreach (var planet in world.Planets)
@@ -49,7 +55,7 @@ public sealed class PhysicsSystem
             var distanceSquared = offset.LengthSquared();
             if (distanceSquared > 0f)
                 acceleration += Vector2.Normalize(offset) *
-                    (PlanetGravityStrength / MathF.Max(distanceSquared, 2_500f));
+                    (settings.PlanetGravityStrength / MathF.Max(distanceSquared, settings.MinimumGravityDistanceSquared));
         }
         return acceleration;
     }

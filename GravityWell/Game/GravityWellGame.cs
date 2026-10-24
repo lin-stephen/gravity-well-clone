@@ -25,7 +25,7 @@ public sealed class GravityWellGame
 
     public GravityWellGame()
     {
-        autopilot = new FreighterAutopilot(docking);
+        autopilot = new FreighterAutopilot(docking, physics);
         renderer = new GameRenderer(docking);
     }
 
