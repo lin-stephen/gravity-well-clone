@@ -22,13 +22,15 @@ public static class RoutePlanner
         var obstacles = Obstacles(world).ToArray();
         var nodes = new List<Vector2> { ship.Position, destination };
         foreach (var obstacle in obstacles)
-        for (var i = 0; i < 16; i++)
         {
-            var angle = i * MathF.Tau / 16;
-            var point = obstacle.Position + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) *
-                (obstacle.CollisionRadius + ship.CollisionRadius + 60f);
-            if (obstacles.All(other => Vector2.Distance(point, other.Position) >
-                other.CollisionRadius + ship.CollisionRadius + 20f)) nodes.Add(point);
+            for (var i = 0; i < 16; i++)
+            {
+                var angle = i * MathF.Tau / 16;
+                var point = obstacle.Position + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) *
+                    (obstacle.CollisionRadius + ship.CollisionRadius + 60f);
+                if (obstacles.All(other => Vector2.Distance(point, other.Position) >
+                                           other.CollisionRadius + ship.CollisionRadius + 20f)) nodes.Add(point);
+            }
         }
 
         var costs = Enumerable.Repeat(float.PositiveInfinity, nodes.Count).ToArray();
