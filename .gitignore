@@ -3,4 +3,5 @@ obj/
 publish/
 .DS_Store
 .idea/
+*.user
 TestResults/
