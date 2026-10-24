@@ -1,6 +1,7 @@
 using GravityWell.Entities;
 using GravityWell.Game;
 using GravityWell.Input;
+using GravityWell.Physics;
 using GravityWell.World;
 using Raylib_cs;
 
@@ -12,9 +13,16 @@ public sealed class GameRenderer
     private readonly StarfieldRenderer starfield = new();
     private readonly ShipRenderer ships = new();
     private readonly FreighterRenderer freighters = new();
-    private readonly PlanetRenderer planets = new();
+    private readonly PlanetRenderer planets;
+
     private readonly HudRenderer hud = new();
     private readonly RadarRenderer radar = new();
+
+
+    public GameRenderer(DockingSystem? docking = null)
+    {
+        planets = new PlanetRenderer(docking);
+    }
 
     public void Initialize()
     {

@@ -10,6 +10,13 @@ public enum FlightPhase { Holding, Cruise, Brake, Align, Approach, Dock }
 
 public sealed class FreighterAutopilot
 {
+    private readonly DockingSystem docking;
+
+    public FreighterAutopilot(DockingSystem? docking = null)
+    {
+        this.docking = docking ?? new DockingSystem();
+    }
+
     private sealed class FlightPlan
     {
         public Planet? Target;
@@ -42,7 +49,7 @@ public sealed class FreighterAutopilot
         }
     }
 
-    private static ShipControls Steer(GameWorld world, Freighter ship, FlightPlan plan, float deltaTime)
+    private ShipControls Steer(GameWorld world, Freighter ship, FlightPlan plan, float deltaTime)
     {
         if (ship.DockingTarget is not null)
         {
@@ -89,14 +96,14 @@ public sealed class FreighterAutopilot
                 var sideways = ship.Velocity - Vector2.Dot(ship.Velocity, normal) * normal;
                 if (plan.Phase == FlightPhase.Align)
                 {
-                    if (DockingSystem.IsRearAligned(ship, planet) && sideways.Length() < 5f)
+                    if (docking.IsRearAligned(ship, planet) && sideways.Length() < 5f)
                         plan.Phase = FlightPhase.Approach;
                     else
                         return Accelerate(ship, normal * 20f - sideways * 2f -
                             PhysicsSystem.GetGravity(world, ship.Position), normal);
                 }
-                if (surfaceDistance <= DockingSystem.CaptureDistance &&
-                    DockingSystem.IsRearAligned(ship, planet) && DockingSystem.IsSpeedSafe(ship, planet))
+                if (surfaceDistance <= docking.CaptureDistance &&
+                    docking.IsRearAligned(ship, planet) && docking.IsSpeedSafe(ship, planet))
                     return default;
                 var desiredVelocity = -normal * 12f;
                 var acceleration = (desiredVelocity - ship.Velocity) * 2f -

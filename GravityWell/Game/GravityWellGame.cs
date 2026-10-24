@@ -17,11 +17,17 @@ public sealed class GravityWellGame
     private readonly DockingSystem docking = new();
     private readonly ColonizationSystem colonization = new();
     private readonly FreighterSystem freighters = new();
-    private readonly FreighterAutopilot autopilot = new();
+    private readonly FreighterAutopilot autopilot;
     private readonly EconomySystem economy = new();
     private readonly RepairSystem repairs = new();
-    private readonly GameRenderer renderer = new();
+    private readonly GameRenderer renderer;
     private bool showHelp = true;
+
+    public GravityWellGame()
+    {
+        autopilot = new FreighterAutopilot(docking);
+        renderer = new GameRenderer(docking);
+    }
 
     public void Initialize() => renderer.Initialize();
     public void Resize(int width, int height) => renderer.Resize(width, height);

@@ -7,6 +7,13 @@ namespace GravityWell.Rendering;
 
 public sealed class StructureRenderer
 {
+    private readonly DockingSystem docking;
+
+    public StructureRenderer(DockingSystem? docking = null)
+    {
+        this.docking = docking ?? new DockingSystem();
+    }
+
     public void Draw(Planet planet, Fighter fighter)
     {
         foreach (var structure in planet.Structures)
@@ -15,7 +22,7 @@ public sealed class StructureRenderer
             var color = GetColor(planet, structure);
             var dockThickness = structure.Type == StructureType.SpaceDock &&
                 structure.State == StructureState.Operational &&
-                DockingSystem.ShouldHighlight(fighter, planet.SpaceDock) ? 3f : 1f;
+                docking.ShouldHighlight(fighter, planet.SpaceDock) ? 3f : 1f;
             DrawGlyph(structure.Type, position, color, dockThickness);
 
             if (structure.State == StructureState.Building)

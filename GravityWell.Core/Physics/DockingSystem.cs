@@ -6,10 +6,15 @@ namespace GravityWell.Physics;
 
 public sealed class DockingSystem
 {
-    public const float SpeedThreshold = 60f;
-    public const float AlignmentDegrees = 30f;
-    public const float CaptureDistance = 4f;
-    public const float DampingRate = 8f;
+    private readonly DockingSettings settings;
+
+    public DockingSystem(DockingSettings? settings = null)
+    {
+        this.settings = settings ?? new DockingSettings();
+        this.settings.Validate();
+    }
+
+    public float CaptureDistance => settings.CaptureDistance;
 
     public void Update(GameWorld world, float deltaTime)
     {
@@ -17,7 +22,7 @@ public sealed class DockingSystem
             UpdateShip(world, ship, deltaTime);
     }
 
-    private static void UpdateShip(GameWorld world, Ship ship, float deltaTime)
+    private void UpdateShip(GameWorld world, Ship ship, float deltaTime)
     {
         if (ship.ReleasedDockingTarget is { } released &&
             Vector2.Distance(ship.Position, released.Position) >
@@ -46,7 +51,7 @@ public sealed class DockingSystem
         if (ship.DockingTarget is not { } target) return;
         var destination = target.Position + ship.DockingNormal *
             (ship.CollisionRadius + target.CollisionRadius);
-        var blend = 1f - MathF.Exp(-DampingRate * MathF.Max(0f, deltaTime));
+        var blend = 1f - MathF.Exp(-settings.DampingRate * MathF.Max(0f, deltaTime));
         // Forward is (sin(rotation), -cos(rotation)), so align it with the
         // outward surface normal. Wrap the error to take the shortest turn.
         var dockingRotation = MathF.Atan2(ship.DockingNormal.X, -ship.DockingNormal.Y)
@@ -66,31 +71,31 @@ public sealed class DockingSystem
         }
     }
 
-    public static bool IsSpeedSafe(Ship ship, ICollisionBody target) =>
-        (ship.Velocity - target.Velocity).LengthSquared() < SpeedThreshold * SpeedThreshold;
+    public bool IsSpeedSafe(Ship ship, ICollisionBody target) =>
+        (ship.Velocity - target.Velocity).LengthSquared() < settings.SpeedThreshold * settings.SpeedThreshold;
 
-    public static bool IsApproachSpeedSafe(Ship ship, ICollisionBody target)
+    public bool IsApproachSpeedSafe(Ship ship, ICollisionBody target)
     {
         var towardTarget = target.Position - ship.Position;
         if (towardTarget.LengthSquared() == 0f) return false;
         var approachSpeed = Vector2.Dot(ship.Velocity - target.Velocity,
             Vector2.Normalize(towardTarget));
         // Receding motion has no closing speed; sideways motion contributes zero.
-        return MathF.Max(0f, approachSpeed) < SpeedThreshold;
+        return MathF.Max(0f, approachSpeed) < settings.SpeedThreshold;
     }
 
-    public static bool IsRearAligned(Ship ship, ICollisionBody target)
+    public bool IsRearAligned(Ship ship, ICollisionBody target)
     {
         var outward = ship.Position - target.Position;
         return outward.LengthSquared() > 0f &&
             Vector2.Dot(ship.Forward, Vector2.Normalize(outward)) >=
-            MathF.Cos(AlignmentDegrees * MathF.PI / 180f);
+            MathF.Cos(settings.AlignmentDegrees * MathF.PI / 180f);
     }
 
-    public static bool ShouldHighlight(Ship ship, ICollisionBody target) =>
+    public bool ShouldHighlight(Ship ship, ICollisionBody target) =>
         IsApproachSpeedSafe(ship, target) && IsRearAligned(ship, target);
 
-    private static bool TryCapture(Ship ship, ICollisionBody target)
+    private bool TryCapture(Ship ship, ICollisionBody target)
     {
         if (target == ship.ReleasedDockingTarget) return false;
         var offset = ship.Position - target.Position;
