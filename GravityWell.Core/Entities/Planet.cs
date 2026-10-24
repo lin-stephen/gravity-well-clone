@@ -37,7 +37,15 @@ public sealed class Planet : ICollisionBody
     public bool IsColonized => Owner.HasValue;
     public IReadOnlyList<PlanetStructure> Structures => structures;
 
-    public void Claim(Faction faction) => Owner ??= faction;
+    /// <summary>
+    /// Takes an unowned planet, or one owned by another faction that has no base. A base, even one still
+    /// being built, guards a planet from being taken.
+    /// </summary>
+    public void Claim(Faction faction)
+    {
+        if (Owner is null || (Owner != faction && !HasStructure(StructureType.Base)))
+            Owner = faction;
+    }
 
     public bool HasStructure(StructureType type) =>
         structures.Any(structure => structure.Type == type && structure.State != StructureState.Destroyed);

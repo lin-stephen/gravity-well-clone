@@ -37,6 +37,19 @@ public sealed class Freighter : Ship
         State = FreighterState.Traveling;
     }
 
+    /// <summary>Cancels the order of a freighter that is still on its way, keeping its cargo so it can be sent elsewhere.</summary>
+    public void Recall()
+    {
+        if (State != FreighterState.Traveling)
+            return;
+
+        if (DockingTarget is not null)
+            Undock();
+        TargetPlanet = null;
+        TargetStructure = null;
+        State = FreighterState.Idle;
+    }
+
     public bool BeginBuilding()
     {
         if (State != FreighterState.Traveling || !IsDocked || DockingTarget != TargetPlanet)

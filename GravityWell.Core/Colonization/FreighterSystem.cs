@@ -21,6 +21,11 @@ public sealed class FreighterSystem
     {
         foreach (var freighter in world.Freighters)
         {
+            // A planet can change hands before the freighter arrives. It must not then build for the new owner.
+            if (freighter.State == FreighterState.Traveling &&
+                freighter.TargetPlanet is { Owner: { } owner } && owner != freighter.Faction)
+                freighter.Recall();
+
             if (freighter.BeginBuilding())
                 BeginConstruction(freighter);
 
