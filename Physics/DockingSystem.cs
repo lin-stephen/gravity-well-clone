@@ -1,6 +1,5 @@
 using System.Numerics;
 using GravityWell.Entities;
-using GravityWell.Input;
 using GravityWell.World;
 
 namespace GravityWell.Physics;
@@ -11,97 +10,98 @@ public sealed class DockingSystem
     public const float AlignmentDegrees = 30f;
     public const float CaptureDistance = 4f;
     public const float DampingRate = 8f;
-    private ICollisionBody? releasedTarget;
 
-    public void Update(GameWorld world, PlayerControls controls, float deltaTime)
+    public void Update(GameWorld world, float deltaTime)
     {
-        var fighter = world.Player;
-        if (controls.Reset) releasedTarget = null;
-        if (controls.Thrust && fighter.DockingTarget is { } departing)
-        {
-            releasedTarget = departing;
-            fighter.Undock();
-        }
+        foreach (var ship in world.Ships)
+            UpdateShip(world, ship, deltaTime);
+    }
 
-        if (releasedTarget is { } released &&
-            Vector2.Distance(fighter.Position, released.Position) >
-            Fighter.Radius + released.CollisionRadius + CaptureDistance)
-            releasedTarget = null;
+    private static void UpdateShip(GameWorld world, Ship ship, float deltaTime)
+    {
+        if (ship.ReleasedDockingTarget is { } released &&
+            Vector2.Distance(ship.Position, released.Position) >
+            ship.CollisionRadius + released.CollisionRadius + CaptureDistance)
+            ship.ReleasedDockingTarget = null;
 
-        if (fighter.DockingTarget is SpaceDockBody dock &&
+        if (ship.DockingTarget is SpaceDockBody dock &&
             !dock.Planet.HasOperationalStructure(StructureType.SpaceDock))
-            fighter.Undock();
+            ship.Undock();
 
-        if (fighter.DockingTarget is null && !controls.Thrust)
+        if (ship.DockingTarget is null && ship.Controls.Throttle <= 0f)
         {
             // Prefer the dock when its capture zone overlaps the planet's.
             foreach (var planet in world.Planets)
             {
-                if (planet.HasOperationalStructure(StructureType.SpaceDock) && TryCapture(fighter, planet.SpaceDock))
+                if (ship is Freighter freighter &&
+                    (freighter.State != FreighterState.Traveling || freighter.TargetPlanet != planet))
+                    continue;
+                if (ship is not Freighter && planet.HasOperationalStructure(StructureType.SpaceDock) &&
+                    TryCapture(ship, planet.SpaceDock))
                     break;
-                if (TryCapture(fighter, planet)) break;
+                if (TryCapture(ship, planet)) break;
             }
         }
 
-        if (fighter.DockingTarget is not { } target) return;
-        var destination = target.Position + fighter.DockingNormal *
-            (Fighter.Radius + target.CollisionRadius);
+        if (ship.DockingTarget is not { } target) return;
+        var destination = target.Position + ship.DockingNormal *
+            (ship.CollisionRadius + target.CollisionRadius);
         var blend = 1f - MathF.Exp(-DampingRate * MathF.Max(0f, deltaTime));
         // Forward is (sin(rotation), -cos(rotation)), so align it with the
         // outward surface normal. Wrap the error to take the shortest turn.
-        var dockingRotation = MathF.Atan2(fighter.DockingNormal.X, -fighter.DockingNormal.Y)
+        var dockingRotation = MathF.Atan2(ship.DockingNormal.X, -ship.DockingNormal.Y)
             * 180f / MathF.PI;
-        var rotationError = MathF.IEEERemainder(dockingRotation - fighter.Rotation, 360f);
-        fighter.Rotation += rotationError * blend;
-        fighter.Position = Vector2.Lerp(fighter.Position, destination, blend);
-        fighter.Velocity = Vector2.Lerp(fighter.Velocity, target.Velocity, blend);
-        if (Vector2.DistanceSquared(fighter.Position, destination) < 0.01f &&
-            (fighter.Velocity - target.Velocity).LengthSquared() < 0.25f &&
+        var rotationError = MathF.IEEERemainder(dockingRotation - ship.Rotation, 360f);
+        ship.Rotation += rotationError * blend;
+        ship.Position = Vector2.Lerp(ship.Position, destination, blend);
+        ship.Velocity = Vector2.Lerp(ship.Velocity, target.Velocity, blend);
+        if (Vector2.DistanceSquared(ship.Position, destination) < 0.01f &&
+            (ship.Velocity - target.Velocity).LengthSquared() < 0.25f &&
             MathF.Abs(rotationError) < 0.1f)
         {
-            fighter.Position = destination;
-            fighter.Velocity = target.Velocity;
-            fighter.Rotation = dockingRotation;
-            fighter.CompleteDocking();
+            ship.Position = destination;
+            ship.Velocity = target.Velocity;
+            ship.Rotation = dockingRotation;
+            ship.CompleteDocking();
         }
     }
 
-    public static bool IsSpeedSafe(Fighter fighter, ICollisionBody target) =>
-        (fighter.Velocity - target.Velocity).LengthSquared() < SpeedThreshold * SpeedThreshold;
+    public static bool IsSpeedSafe(Ship ship, ICollisionBody target) =>
+        (ship.Velocity - target.Velocity).LengthSquared() < SpeedThreshold * SpeedThreshold;
 
-    public static bool IsApproachSpeedSafe(Fighter fighter, ICollisionBody target)
+    public static bool IsApproachSpeedSafe(Ship ship, ICollisionBody target)
     {
-        var towardTarget = target.Position - fighter.Position;
+        var towardTarget = target.Position - ship.Position;
         if (towardTarget.LengthSquared() == 0f) return false;
-        var approachSpeed = Vector2.Dot(fighter.Velocity - target.Velocity,
+        var approachSpeed = Vector2.Dot(ship.Velocity - target.Velocity,
             Vector2.Normalize(towardTarget));
         // Receding motion has no closing speed; sideways motion contributes zero.
         return MathF.Max(0f, approachSpeed) < SpeedThreshold;
     }
 
-    public static bool IsRearAligned(Fighter fighter, ICollisionBody target)
+    public static bool IsRearAligned(Ship ship, ICollisionBody target)
     {
-        var outward = fighter.Position - target.Position;
+        var outward = ship.Position - target.Position;
         return outward.LengthSquared() > 0f &&
-            Vector2.Dot(fighter.Forward, Vector2.Normalize(outward)) >=
+            Vector2.Dot(ship.Forward, Vector2.Normalize(outward)) >=
             MathF.Cos(AlignmentDegrees * MathF.PI / 180f);
     }
 
-    public static bool ShouldHighlight(Fighter fighter, ICollisionBody target) =>
-        IsApproachSpeedSafe(fighter, target) && IsRearAligned(fighter, target);
+    public static bool ShouldHighlight(Ship ship, ICollisionBody target) =>
+        IsApproachSpeedSafe(ship, target) && IsRearAligned(ship, target);
 
-    private bool TryCapture(Fighter fighter, ICollisionBody target)
+    private static bool TryCapture(Ship ship, ICollisionBody target)
     {
-        if (target == releasedTarget || fighter.Health <= 0 || target.Health <= 0) return false;
-        var offset = fighter.Position - target.Position;
+        if (target == ship.ReleasedDockingTarget || ship.Health <= 0 || target.Health <= 0) return false;
+        var offset = ship.Position - target.Position;
         var distance = offset.Length();
-        var radius = Fighter.Radius + target.CollisionRadius;
+        var radius = ship.CollisionRadius + target.CollisionRadius;
         if (distance < radius - CaptureDistance || distance > radius + CaptureDistance || distance == 0f)
             return false;
         var normal = offset / distance;
-        if (!IsRearAligned(fighter, target) || !IsSpeedSafe(fighter, target))
+        if (!IsRearAligned(ship, target) || !IsSpeedSafe(ship, target))
             return false;
-        fighter.BeginDocking(target, normal);
+        ship.BeginDocking(target, normal);
         return true;
     }
 }

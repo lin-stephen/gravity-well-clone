@@ -2,36 +2,25 @@ using System.Numerics;
 
 namespace GravityWell.Entities;
 
-public sealed class Freighter : ICollisionBody
+public sealed class Freighter : Ship
 {
-    private Vector2 collisionVelocity;
-
     public const float Radius = 12f;
     public const float Speed = 90f;
     public const int CargoCapacity = 1;
+    public const int MaxHealth = 6;
 
     public Freighter(Vector2 position, Faction faction)
     {
         Position = position;
         Faction = faction;
+        Health = MaxHealth;
     }
 
-    public float CollisionRadius => Radius;
-    public float InverseMass => 1f;
-
-    public void ApplyCollision(Vector2 displacement, Vector2 velocityChange)
-    {
-        Position += displacement;
-        Velocity += velocityChange;
-        collisionVelocity += velocityChange;
-    }
-
-    public const int MaxHealth = 6;
-    public int Health { get; set; } = MaxHealth;
-    public Vector2 Velocity { get; private set; }
-
-    public Vector2 Position { get; private set; }
-    public Vector2 Heading { get; private set; } = -Vector2.UnitY;
+    public override float CollisionRadius => Radius;
+    public override float SpeedLimit => Speed;
+    public override float ThrustAcceleration => 180f;
+    public override float TurnRate => 168f;
+    public Vector2 Heading => Forward;
     public Faction Faction { get; }
     public FreighterState State { get; private set; } = FreighterState.Idle;
     public int RawMaterials { get; private set; } = CargoCapacity;
@@ -48,37 +37,12 @@ public sealed class Freighter : ICollisionBody
         State = FreighterState.Traveling;
     }
 
-    public bool Travel(float deltaTime)
+    public bool BeginBuilding()
     {
-        if (deltaTime <= 0f || State == FreighterState.Consumed)
+        if (State != FreighterState.Traveling || !IsDocked || DockingTarget != TargetPlanet)
             return false;
-
-        Position += collisionVelocity * deltaTime;
-        collisionVelocity *= MathF.Exp(-2f * deltaTime);
-        Velocity = collisionVelocity;
-        if (State != FreighterState.Traveling || TargetPlanet is null)
-            return false;
-
-        var offset = TargetPlanet.Position - Position;
-        var distance = offset.Length();
-        var arrivalDistance = Planet.Radius + Radius;
-        var travelDistance = Speed * deltaTime;
-        if (distance > arrivalDistance)
-        {
-            Heading = Vector2.Normalize(offset);
-            Velocity += Heading * Speed;
-        }
-        if (distance <= arrivalDistance + travelDistance)
-        {
-            if (distance > arrivalDistance)
-                Position += Vector2.Normalize(offset) * (distance - arrivalDistance);
-            State = FreighterState.Building;
-            return true;
-        }
-
-        Heading = Vector2.Normalize(offset);
-        Position += Heading * travelDistance;
-        return false;
+        State = FreighterState.Building;
+        return true;
     }
 
     public void Consume()

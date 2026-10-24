@@ -8,47 +8,49 @@ namespace GravityWell.Physics;
 public sealed class PhysicsSystem
 {
     private const float PlanetGravityStrength = 1_350_000f * 0.09f;
-    private const float ThrustStrength = 230f;
-    private const float TurnSpeed = 2.8f;
 
     public void Update(GameWorld world, PlayerControls controls, float deltaTime)
     {
-        var fighter = world.Player;
-        if (controls.Reset)
+        if (controls.Reset) world.Player.Reset();
+        world.Player.Controls = new ShipControls(
+            (controls.TurnRight ? 1f : 0f) - (controls.TurnLeft ? 1f : 0f),
+            controls.Thrust ? 1f : 0f);
+        foreach (var ship in world.Ships)
         {
-            fighter.Reset();
-            return;
+            if (controls.Reset && ReferenceEquals(ship, world.Player)) continue;
+            Integrate(ship, world, deltaTime);
         }
-        // DockingSystem releases the target after thrust moves the ship.
-        if (fighter.DockingTarget is not null && !controls.Thrust) return;
+    }
 
-        if (controls.TurnLeft) fighter.Rotation -= TurnSpeed * deltaTime * 60f;
-        if (controls.TurnRight) fighter.Rotation += TurnSpeed * deltaTime * 60f;
-        if (controls.Thrust) fighter.Velocity += fighter.Forward * ThrustStrength * deltaTime;
+    private static void Integrate(Ship ship, GameWorld world, float deltaTime)
+    {
+        if (deltaTime <= 0f) return;
+        var throttle = Math.Clamp(ship.Controls.Throttle, 0f, 1f);
+        if (ship.DockingTarget is not null)
+        {
+            if (throttle <= 0f) return;
+            ship.Undock();
+        }
+        ship.Rotation = MathF.IEEERemainder(ship.Rotation +
+            Math.Clamp(ship.Controls.Turn, -1f, 1f) * ship.TurnRate * deltaTime, 360f);
+        ship.Velocity += (ship.Forward * (throttle * ship.ThrustAcceleration) +
+            GetGravity(world, ship.Position)) * deltaTime;
+        if (ship.Velocity.LengthSquared() > ship.SpeedLimit * ship.SpeedLimit)
+            ship.Velocity = Vector2.Normalize(ship.Velocity) * ship.SpeedLimit;
+        ship.Position += ship.Velocity * deltaTime;
+    }
 
+    public static Vector2 GetGravity(GameWorld world, Vector2 position)
+    {
+        var acceleration = Vector2.Zero;
         foreach (var planet in world.Planets)
-            ApplyGravity(fighter, planet.Position, PlanetGravityStrength, deltaTime);
-        LimitSpeed(fighter);
-        fighter.Position += fighter.Velocity * deltaTime;
-
-    }
-
-    private static void ApplyGravity(
-        Fighter fighter,
-        Vector2 bodyPosition,
-        float strength,
-        float deltaTime)
-    {
-        var offset = bodyPosition - fighter.Position;
-        var distanceSquared = MathF.Max(offset.LengthSquared(), 2_500f);
-        if (offset.LengthSquared() == 0f) return;
-        fighter.Velocity += Vector2.Normalize(offset) * (strength / distanceSquared) * deltaTime;
-    }
-
-    private static void LimitSpeed(Fighter fighter)
-    {
-        var maxSpeedSquared = Fighter.MaxSpeed * Fighter.MaxSpeed;
-        if (fighter.Velocity.LengthSquared() > maxSpeedSquared)
-            fighter.Velocity = Vector2.Normalize(fighter.Velocity) * Fighter.MaxSpeed;
+        {
+            var offset = planet.Position - position;
+            var distanceSquared = offset.LengthSquared();
+            if (distanceSquared > 0f)
+                acceleration += Vector2.Normalize(offset) *
+                    (PlanetGravityStrength / MathF.Max(distanceSquared, 2_500f));
+        }
+        return acceleration;
     }
 }

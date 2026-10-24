@@ -28,7 +28,8 @@ public sealed class CollisionSystem
         {
             var first = bodies[i];
             var second = bodies[j];
-            if (first is Fighter { DockingTarget: { } target } && ReferenceEquals(target, second))
+            if ((first is Ship { DockingTarget: { } target } && ReferenceEquals(target, second)) ||
+                (second is Ship { DockingTarget: { } otherTarget } && ReferenceEquals(otherTarget, first)))
                 continue;
             var radius = first.CollisionRadius + second.CollisionRadius;
             if (Vector2.DistanceSquared(first.Position, second.Position) > radius * radius)

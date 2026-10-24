@@ -21,7 +21,7 @@ public sealed class FreighterSystem
     {
         foreach (var freighter in world.Freighters)
         {
-            if (freighter.Travel(deltaTime))
+            if (freighter.BeginBuilding())
                 BeginConstruction(freighter);
 
             if (freighter.State != FreighterState.Building || freighter.TargetPlanet is null ||
