@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/tests/">
+    <Project Path="tests/GravityWell.Tests/GravityWell.Tests.csproj" />
+  </Folder>
+  <Project Path="GravityWell/GravityWell.csproj" />
+  <Project Path="GravityWell.Core/GravityWell.Core.csproj" />
+</Solution>

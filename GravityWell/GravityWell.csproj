@@ -19,9 +19,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="tests/**/*.cs" />
     <StaticWebAssetFingerprintPattern Include="MainJS" Pattern="main.js"
                                       Expression="#[.{fingerprint}]!" />
     <PackageReference Include="Raylib-cs" Version="8.1.0" />
+    <ProjectReference Include="../GravityWell.Core/GravityWell.Core.csproj" />
   </ItemGroup>
 </Project>

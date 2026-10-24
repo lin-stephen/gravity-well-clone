@@ -3,13 +3,21 @@
 A C# WebAssembly recreation of the 1995 space strategy/action game, rendered with
 [raylib-cs](https://github.com/ChrisDill/Raylib-cs).
 
+## Project structure
+
+- `GravityWell.Core/`: platform-independent simulation, state, and control types.
+- `GravityWell/`: WebAssembly app, raylib input, rendering, and browser assets.
+- `tests/`: NUnit tests and deterministic flight simulation checks, referencing `GravityWell.Core`.
+
+Run the NUnit tests with `dotnet test tests/GravityWell.Tests/GravityWell.Tests.csproj`.
+
 ## Run locally
 
 Requires the .NET 10 SDK and the `wasm-tools` workload.
 
 ```sh
 dotnet workload install wasm-tools
-dotnet run
+dotnet run --project GravityWell/GravityWell.csproj
 ```
 
 Use Left/Right to rotate, Up to thrust, and Home to reset the ship. The initial
@@ -18,7 +26,7 @@ prototype models gravity from a star and planet.
 ## Publish
 
 ```sh
-dotnet publish -c Release -o publish
+dotnet publish GravityWell/GravityWell.csproj -c Release -o publish
 ```
 
 The static site is written to `publish/wwwroot`. Pushes to `main` deploy that
@@ -35,7 +43,7 @@ above 100; slower contacts are harmless. Closing speed is the relative velocity
 projected toward the other body along the contact normal. Sideways motion does
 not count, and separating bodies take no damage. Damage applies once per contact;
 separating and touching again allows another hit. Health is clamped to zero.
-The shared tuning constants live in `Physics/CollisionSystem.cs`.
+The shared tuning constants live in `GravityWell.Core/Physics/CollisionSystem.cs`.
 
 Ships bounce with equal mass and restitution 0.8; planets remain fixed. Contact
 resolution separates overlaps and changes only inward velocity along the contact
@@ -57,7 +65,7 @@ bounds follow the dock glyph near the orbital starbase. Thrust releases the ship
 it must leave the capture zone before docking to that target again. Home resets
 all fighter docking state. Docking does not interpret ship or target health;
 destruction and respawning belong to a separate lifecycle system. Tune capture
-and damping in `Physics/DockingSystem.cs`.
+and damping in `GravityWell.Core/Physics/DockingSystem.cs`.
 
 Planet outlines and operational spacedock glyphs use thicker lines while the
 fighter's approach speed toward that particular target is below the docking
@@ -73,9 +81,9 @@ shared motion and docking state; `PhysicsSystem` applies acceleration, gravity,
 rotation limits, and speed limits to every active ship. Collisions change the
 actual velocity rather than adding a separate freighter drift effect.
 
-`AI/FreighterAutopilot.cs` follows cruise, brake, align, approach, and dock phases.
+`GravityWell.Core/AI/FreighterAutopilot.cs` follows cruise, brake, align, approach, and dock phases.
 It compensates for gravity, slows before waypoints, and makes a slow rear-first
-final descent. `AI/RoutePlanner.cs` plans detours around expanded planet and
+final descent. `GravityWell.Core/AI/RoutePlanner.cs` plans detours around expanded planet and
 operational spacedock bounds. Predictive local avoidance slows and steers around
 other ships, with a consistent passing direction. Idle freighters hold near their
 starting positions, and replacement freighters spawn clear of existing bodies.
