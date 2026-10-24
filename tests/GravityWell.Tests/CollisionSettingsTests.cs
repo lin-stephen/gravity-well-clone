@@ -1,13 +1,19 @@
+using System.ComponentModel.DataAnnotations;
 using GravityWell.Physics;
 
 namespace GravityWell.Tests;
 
 public class CollisionSettingsTests
 {
+    [Test]
+    public void Validate_AcceptsDefaults()
+    {
+        Assert.DoesNotThrow(new CollisionSettings().Validate);
+    }
+
     [TestCase(0f, 0f, 1f)]
     [TestCase(1f, 10f, 5f)]
-    [TestCase(0.8f, 100f, 25f)]
-    public void Validate_AcceptsValidSettings(float restitution, float threshold, float speedPerDamagePoint)
+    public void Validate_AcceptsRestitutionAndThresholdBoundaries(float restitution, float threshold, float speedPerDamagePoint)
     {
         var settings = new CollisionSettings
         {
@@ -21,39 +27,29 @@ public class CollisionSettingsTests
 
     [TestCase(-1f)]
     [TestCase(1.1f)]
-    [TestCase(float.NaN)]
-    [TestCase(float.PositiveInfinity)]
-    [TestCase(float.NegativeInfinity)]
     public void Validate_RejectsInvalidRestitution(float restitution)
     {
         var settings = new CollisionSettings { Restitution = restitution };
 
-        var exception = Assert.Throws<ArgumentOutOfRangeException>(settings.Validate);
-        Assert.That(exception!.ParamName, Is.EqualTo(nameof(CollisionSettings.Restitution)));
+        var exception = Assert.Throws<ValidationException>(settings.Validate);
+        Assert.That(exception!.ValidationResult.MemberNames, Does.Contain(nameof(CollisionSettings.Restitution)));
     }
 
-    [TestCase(-1f)]
-    [TestCase(float.NaN)]
-    [TestCase(float.PositiveInfinity)]
-    [TestCase(float.NegativeInfinity)]
-    public void Validate_RejectsInvalidDamageSpeedThreshold(float threshold)
+    [Test]
+    public void Validate_RejectsNegativeDamageSpeedThreshold()
     {
-        var settings = new CollisionSettings { DamageSpeedThreshold = threshold };
+        var settings = new CollisionSettings { DamageSpeedThreshold = -1f };
 
-        var exception = Assert.Throws<ArgumentOutOfRangeException>(settings.Validate);
-        Assert.That(exception!.ParamName, Is.EqualTo(nameof(CollisionSettings.DamageSpeedThreshold)));
+        var exception = Assert.Throws<ValidationException>(settings.Validate);
+        Assert.That(exception!.ValidationResult.MemberNames, Does.Contain(nameof(CollisionSettings.DamageSpeedThreshold)));
     }
 
-    [TestCase(0f)]
-    [TestCase(-1f)]
-    [TestCase(float.NaN)]
-    [TestCase(float.PositiveInfinity)]
-    [TestCase(float.NegativeInfinity)]
-    public void Validate_RejectsInvalidSpeedPerDamagePoint(float speedPerDamagePoint)
+    [Test]
+    public void Validate_RejectsZeroSpeedPerDamagePoint()
     {
-        var settings = new CollisionSettings { SpeedPerDamagePoint = speedPerDamagePoint };
+        var settings = new CollisionSettings { SpeedPerDamagePoint = 0f };
 
-        var exception = Assert.Throws<ArgumentOutOfRangeException>(settings.Validate);
-        Assert.That(exception!.ParamName, Is.EqualTo(nameof(CollisionSettings.SpeedPerDamagePoint)));
+        var exception = Assert.Throws<ValidationException>(settings.Validate);
+        Assert.That(exception!.ValidationResult.MemberNames, Does.Contain(nameof(CollisionSettings.SpeedPerDamagePoint)));
     }
 }

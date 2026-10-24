@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Numerics;
 using GravityWell.Entities;
 using GravityWell.Physics;
@@ -80,6 +81,6 @@ public class DockingSystemTests
     [Test]
     public void Constructor_ValidatesSettings()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => new DockingSystem(new DockingSettings { SpeedThreshold = 0f }));
+        Assert.Throws<ValidationException>(() => new DockingSystem(new DockingSettings { SpeedThreshold = 0f }));
     }
 }

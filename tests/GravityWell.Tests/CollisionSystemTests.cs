@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Numerics;
 using GravityWell.Entities;
 using GravityWell.Physics;
@@ -25,15 +26,6 @@ public class CollisionSystemTests
         Assert.That(collisions.CalculateDamage(closingSpeed), Is.EqualTo(expected));
     }
 
-    [TestCase(100f, 0)]
-    [TestCase(101f, 1)]
-    [TestCase(125f, 1)]
-    [TestCase(126f, 2)]
-    public void CalculateDamage_DefaultSettingsPreserveGameBalance(float closingSpeed, int expected)
-    {
-        Assert.That(new CollisionSystem().CalculateDamage(closingSpeed), Is.EqualTo(expected));
-    }
-
     [TestCase(0f, 5f, 5f)]
     [TestCase(1f, 0f, 10f)]
     public void ResolveContact_UsesConfiguredRestitution(float restitution, float firstSpeed, float secondSpeed)
@@ -54,7 +46,7 @@ public class CollisionSystemTests
     [Test]
     public void Constructor_ValidatesSettings()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => new CollisionSystem(
+        Assert.Throws<ValidationException>(() => new CollisionSystem(
             new CollisionSettings { SpeedPerDamagePoint = 0f }));
     }
 

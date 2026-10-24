@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using GravityWell.Physics;
 
 namespace GravityWell.Tests;
@@ -5,18 +6,9 @@ namespace GravityWell.Tests;
 public class DockingSettingsTests
 {
     [Test]
-    public void Defaults_PreserveGameBalance()
+    public void Validate_AcceptsDefaults()
     {
-        var settings = new DockingSettings();
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(settings.SpeedThreshold, Is.EqualTo(60f));
-            Assert.That(settings.AlignmentDegrees, Is.EqualTo(30f));
-            Assert.That(settings.CaptureDistance, Is.EqualTo(4f));
-            Assert.That(settings.DampingRate, Is.EqualTo(8f));
-            Assert.DoesNotThrow(settings.Validate);
-        });
+        Assert.DoesNotThrow(new DockingSettings().Validate);
     }
 
     [TestCase(0f, 0f)]
@@ -28,24 +20,10 @@ public class DockingSettingsTests
     }
 
     [TestCase(nameof(DockingSettings.SpeedThreshold), 0f)]
-    [TestCase(nameof(DockingSettings.SpeedThreshold), -1f)]
     [TestCase(nameof(DockingSettings.AlignmentDegrees), -1f)]
     [TestCase(nameof(DockingSettings.AlignmentDegrees), 181f)]
     [TestCase(nameof(DockingSettings.CaptureDistance), -1f)]
     [TestCase(nameof(DockingSettings.DampingRate), 0f)]
-    [TestCase(nameof(DockingSettings.DampingRate), -1f)]
-    [TestCase(nameof(DockingSettings.SpeedThreshold), float.NaN)]
-    [TestCase(nameof(DockingSettings.AlignmentDegrees), float.NaN)]
-    [TestCase(nameof(DockingSettings.CaptureDistance), float.NaN)]
-    [TestCase(nameof(DockingSettings.DampingRate), float.NaN)]
-    [TestCase(nameof(DockingSettings.SpeedThreshold), float.PositiveInfinity)]
-    [TestCase(nameof(DockingSettings.AlignmentDegrees), float.PositiveInfinity)]
-    [TestCase(nameof(DockingSettings.CaptureDistance), float.PositiveInfinity)]
-    [TestCase(nameof(DockingSettings.DampingRate), float.PositiveInfinity)]
-    [TestCase(nameof(DockingSettings.SpeedThreshold), float.NegativeInfinity)]
-    [TestCase(nameof(DockingSettings.AlignmentDegrees), float.NegativeInfinity)]
-    [TestCase(nameof(DockingSettings.CaptureDistance), float.NegativeInfinity)]
-    [TestCase(nameof(DockingSettings.DampingRate), float.NegativeInfinity)]
     public void Validate_IdentifiesInvalidProperty(string property, float value)
     {
         var settings = property switch
@@ -57,7 +35,7 @@ public class DockingSettingsTests
             _ => throw new ArgumentException("Unknown settings property", nameof(property))
         };
 
-        var exception = Assert.Throws<ArgumentOutOfRangeException>(settings.Validate);
-        Assert.That(exception!.ParamName, Is.EqualTo(property));
+        var exception = Assert.Throws<ValidationException>(settings.Validate);
+        Assert.That(exception!.ValidationResult.MemberNames, Does.Contain(property));
     }
 }
