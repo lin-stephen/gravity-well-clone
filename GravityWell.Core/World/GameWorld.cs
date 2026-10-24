@@ -6,6 +6,7 @@ namespace GravityWell.Core.World;
 public sealed class GameWorld
 {
     private readonly List<Freighter> freighters;
+    private readonly List<Fighter> aiFighters;
 
     public Fighter Player { get; } = new();
 
@@ -13,7 +14,8 @@ public sealed class GameWorld
     {
         get
         {
-            yield return Player;
+            foreach (var fighter in Fighters)
+                yield return fighter;
             foreach (var freighter in freighters)
                 if (freighter.State != FreighterState.Consumed)
                     yield return freighter;
@@ -22,11 +24,24 @@ public sealed class GameWorld
 
     public IReadOnlyList<Planet> Planets { get; }
     public IReadOnlyList<Freighter> Freighters => freighters;
+    public IReadOnlyList<Fighter> AiFighters => aiFighters;
 
-    public GameWorld(IEnumerable<Planet> planets, IEnumerable<Freighter> freighters)
+    public IEnumerable<Fighter> Fighters
+    {
+        get
+        {
+            yield return Player;
+            foreach (var fighter in aiFighters)
+                yield return fighter;
+        }
+    }
+
+    public GameWorld(IEnumerable<Planet> planets, IEnumerable<Freighter> freighters,
+        IEnumerable<Fighter>? aiFighters = null)
     {
         Planets = planets.ToArray();
         this.freighters = freighters.ToList();
+        this.aiFighters = aiFighters?.ToList() ?? [];
     }
 
     public GameWorld()
@@ -60,6 +75,28 @@ public sealed class GameWorld
             var producer = Planets.MinBy(planet => Vector2.DistanceSquared(planet.Position, ship.Position))!;
             FaceOutward(ship, producer);
         }
+        aiFighters = CreateAiFighters(Planets, Player.Faction);
+    }
+
+    /// <summary>One fighter per faction that owns a homeworld, except the player's faction.</summary>
+    public static List<Fighter> CreateAiFighters(IEnumerable<Planet> planets, Faction playerFaction)
+    {
+        var fighters = new List<Fighter>();
+        foreach (var homeworld in planets)
+        {
+            if (homeworld.Owner is not { } faction || faction == playerFaction ||
+                !homeworld.HasOperationalStructure(StructureType.TechCenter) ||
+                fighters.Any(fighter => fighter.Faction == faction))
+                continue;
+            fighters.Add(new Fighter
+            {
+                Faction = faction,
+                Position = homeworld.Position + new Vector2(0f, 100f),
+                Velocity = Vector2.Zero,
+                Rotation = 180f, // Faces outward, away from the homeworld.
+            });
+        }
+        return fighters;
     }
 
     public void AddFreighter(Planet producer, Faction faction)
