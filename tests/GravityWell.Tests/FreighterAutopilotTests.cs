@@ -46,21 +46,68 @@ public class FreighterAutopilotTests
             if (ship.IsDocked)
                 return new Flight(string.Join(">", phases), step, ship.Position);
         }
+
         return new Flight(string.Join(">", phases), -1, ship.Position);
     }
 
+    // TestCaseData takes positional arguments, so these name the otherwise opaque null/true/false values.
+    private static readonly Planet[]? NoObstacles = null;
+    private const bool NoBump = false;
+    private const bool Bump = true;
+    private const bool NoSpaceDock = false;
+    private const bool WithSpaceDock = true;
+
     private static IEnumerable<TestCaseData> Scenarios()
     {
-        yield return new TestCaseData(new Vector2(-500, 0), Vector2.Zero, null, false, false,
-            "Cruise>Brake>Align>Approach>Dock", 838, new Vector2(-46f, -0.1f)).SetName("Clear landing");
-        yield return new TestCaseData(new Vector2(-700, 0), Vector2.Zero, new[] { new Planet(new Vector2(-350, 0)) }, false, false,
-            "Cruise>Brake>Cruise>Brake>Cruise>Brake>Align>Approach>Dock", 1338, new Vector2(-46f, 0.1f)).SetName("Blocked route replans around planet");
-        yield return new TestCaseData(new Vector2(-500, 0), new Vector2(0, 70), null, false, false,
-            "Cruise>Brake>Align>Approach>Dock", 863, new Vector2(-46f, 0.3f)).SetName("Sideways drift");
-        yield return new TestCaseData(new Vector2(-500, 0), Vector2.Zero, null, true, false,
-            "Cruise>Brake>Cruise>Brake>Align>Approach>Dock", 1008, new Vector2(-46f, 1f)).SetName("Bounce returns to corridor");
-        yield return new TestCaseData(new Vector2(0, -500), Vector2.Zero, null, false, true,
-            "Cruise>Brake>Align>Approach>Dock", 1057, new Vector2(46f, -0.6f)).SetName("Orbital dock avoidance lands on far side");
+        yield return new TestCaseData(
+            new Vector2(-500, 0),
+            Vector2.Zero,
+            NoObstacles,
+            NoBump,
+            NoSpaceDock,
+            "Cruise>Brake>Align>Approach>Dock",
+            838,
+            new Vector2(-46f, -0.1f)).SetName("Clear landing");
+
+        yield return new TestCaseData(
+            new Vector2(-700, 0),
+            Vector2.Zero,
+            new[] { new Planet(new Vector2(-350, 0)) },
+            NoBump,
+            NoSpaceDock,
+            "Cruise>Brake>Cruise>Brake>Cruise>Brake>Align>Approach>Dock",
+            1338,
+            new Vector2(-46f, 0.1f)).SetName("Blocked route replans around planet");
+
+        yield return new TestCaseData(
+            new Vector2(-500, 0),
+            new Vector2(0, 70),
+            NoObstacles,
+            NoBump,
+            NoSpaceDock,
+            "Cruise>Brake>Align>Approach>Dock",
+            863,
+            new Vector2(-46f, 0.3f)).SetName("Sideways drift");
+
+        yield return new TestCaseData(
+            new Vector2(-500, 0),
+            Vector2.Zero,
+            NoObstacles,
+            Bump,
+            NoSpaceDock,
+            "Cruise>Brake>Cruise>Brake>Align>Approach>Dock",
+            1008,
+            new Vector2(-46f, 1f)).SetName("Bounce returns to corridor");
+
+        yield return new TestCaseData(
+            new Vector2(0, -500),
+            Vector2.Zero,
+            NoObstacles,
+            NoBump,
+            WithSpaceDock,
+            "Cruise>Brake>Align>Approach>Dock",
+            1057,
+            new Vector2(46f, -0.6f)).SetName("Orbital dock avoidance lands on far side");
     }
 
     [TestCaseSource(nameof(Scenarios))]
