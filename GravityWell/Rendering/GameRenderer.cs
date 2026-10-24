@@ -71,7 +71,7 @@ public sealed class GameRenderer
         foreach (var freighter in world.Freighters)
             freighters.Draw(freighter);
         foreach (var aiFighter in world.AiFighters)
-            ships.Draw(aiFighter, aiFighter.Controls.Throttle > 0f);
-        ships.Draw(world.Player, controls.Thrust);
+            ships.Draw(aiFighter, aiFighter.Controls.Throttle);
+        ships.Draw(world.Player, controls.Thrust ? 1f : 0f);
     }
 }
