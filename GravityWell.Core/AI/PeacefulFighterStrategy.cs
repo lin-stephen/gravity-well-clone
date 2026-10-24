@@ -12,28 +12,25 @@ namespace GravityWell.Core.AI;
 /// </summary>
 internal sealed class PeacefulFighterStrategy : IAutopilotStrategy<Fighter>
 {
-    private readonly ApproachTuning tuning;
     private readonly PlanetApproach approach;
 
-    public PeacefulFighterStrategy(DockingSystem docking, PhysicsSystem physics, ApproachTuning tuning)
-    {
-        this.tuning = tuning;
+    public PeacefulFighterStrategy(DockingSystem docking, PhysicsSystem physics, ApproachTuning tuning) =>
         approach = new PlanetApproach(docking, physics, tuning);
-    }
 
     public IEnumerable<Fighter> ShipsToPilot(GameWorld world) => world.AiFighters;
 
     // A new plan already reads as Holding, so Hold will not recompute this.
-    public Vector2 InitialHoldPosition(GameWorld world, Fighter ship) => ClearOfPlanets(world, ship.Position);
+    public Vector2 InitialHoldPosition(GameWorld world, Fighter ship) => approach.ClearOfPlanets(world, ship);
 
     public ShipControls Decide(GameWorld world, Fighter fighter, FlightPlan plan, float deltaTime)
     {
-        // A wrecked fighter never claims: it holds where it is, stays put on a planet that is already
-        // owned, and releases a free planet it was part-way through docking at.
+        // A wrecked fighter never claims: it holds where it is, stays put on a planet its own faction owns,
+        // and releases any other planet. That includes an enemy planet without a base, which it would
+        // otherwise take on finishing the dock and keep taking, since nothing repairs a wreck.
         if (fighter.Health <= 0)
         {
             if (fighter.DockingTarget is not { } held) return Hold(world, fighter, plan);
-            return IsOwned(held) ? default : new ShipControls(0f, 1f);
+            return IsOwnedBy(held, fighter.Faction) ? default : new ShipControls(0f, 1f);
         }
 
         if (fighter.DockingTarget is { } docked)
@@ -61,22 +58,10 @@ internal sealed class PeacefulFighterStrategy : IAutopilotStrategy<Fighter>
         // Hold where the fighter was when it stopped having something to do, but never pressed
         // against a planet it has just left.
         if (plan.Phase != FlightPhase.Holding)
-            plan.HoldPosition = ClearOfPlanets(world, fighter.Position);
+            plan.HoldPosition = approach.ClearOfPlanets(world, fighter);
         plan.Target = null;
         plan.Phase = FlightPhase.Holding;
         return approach.HoldAt(world, fighter, plan);
-    }
-
-    /// <summary>The position itself, or the nearest point at the standoff distance if it is closer to a planet than that.</summary>
-    private Vector2 ClearOfPlanets(GameWorld world, Vector2 position)
-    {
-        var planet = world.Planets.MinBy(candidate => Vector2.DistanceSquared(candidate.Position, position));
-        if (planet is null) return position;
-        var offset = position - planet.Position;
-        var minimumDistance = Planet.Radius + Fighter.Radius + tuning.ApproachClearance;
-        if (offset.Length() >= minimumDistance) return position;
-        var outward = offset.LengthSquared() > 0f ? Vector2.Normalize(offset) : Vector2.UnitY;
-        return planet.Position + outward * minimumDistance;
     }
 
     private static bool IsOwned(ICollisionBody body) => body switch
@@ -84,6 +69,13 @@ internal sealed class PeacefulFighterStrategy : IAutopilotStrategy<Fighter>
         Planet planet => planet.IsColonized,
         SpaceDockBody dock => dock.Planet.IsColonized,
         _ => true,
+    };
+
+    private static bool IsOwnedBy(ICollisionBody body, Faction faction) => body switch
+    {
+        Planet planet => planet.Owner == faction,
+        SpaceDockBody dock => dock.Planet.Owner == faction,
+        _ => false,
     };
 
     private static Fighter? FirstDockingAt(GameWorld world, ICollisionBody body) =>

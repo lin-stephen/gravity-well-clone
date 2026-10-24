@@ -152,6 +152,23 @@ public class FighterAutopilotTests
     }
 
     [Test]
+    public void Update_ZeroHealthFighterDockingAtAnotherFactionsUnbasedPlanet_ReleasesItWithoutTakingIt()
+    {
+        // Planets can now be taken from a faction that has no base there, so a wreck that finished docking
+        // would take the planet, and keep taking it every tick because nothing repairs a wreck.
+        var planet = new Planet(Vector2.Zero, owner: Faction.Blue);
+        var wreck = NewFighter(Faction.Red, new Vector2(0f, -(Planet.Radius + Fighter.Radius) - 2f));
+        wreck.Rotation = 0f;
+        wreck.Health = 0;
+        wreck.BeginDocking(planet, -Vector2.UnitY);
+        var world = NewWorld([planet], wreck);
+
+        Run(world, new FighterAutopilot(), 30f);
+
+        planet.Owner.Should().Be(Faction.Blue);
+    }
+
+    [Test]
     public void Update_DockedAtOwnedNonTargetPlanet_LeavesAndCarriesOn()
     {
         var owned = new Planet(Vector2.Zero, owner: Faction.Red);

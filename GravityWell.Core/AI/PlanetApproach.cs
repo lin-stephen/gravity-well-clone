@@ -119,6 +119,21 @@ public sealed class PlanetApproach(DockingSystem docking, PhysicsSystem physics,
     private Vector2 HoverAcceleration(GameWorld world, Ship ship, Vector2 normal, Vector2 drift) =>
         normal * tuning.HoverSpeed - drift * 2f - physics.GetGravity(world, ship.Position);
 
+    /// <summary>
+    /// The ship's own position, or the nearest point at the approach standoff distance if it is closer to a
+    /// planet than that. Used to pick a hold position that is not pressed against a planet.
+    /// </summary>
+    public Vector2 ClearOfPlanets(GameWorld world, Ship ship)
+    {
+        var planet = world.Planets.MinBy(candidate => Vector2.DistanceSquared(candidate.Position, ship.Position));
+        if (planet is null) return ship.Position;
+        var offset = ship.Position - planet.Position;
+        var minimumDistance = Planet.Radius + ship.CollisionRadius + tuning.ApproachClearance;
+        if (offset.Length() >= minimumDistance) return ship.Position;
+        var outward = offset.LengthSquared() > 0f ? Vector2.Normalize(offset) : Vector2.UnitY;
+        return planet.Position + outward * minimumDistance;
+    }
+
     /// <summary>Fly to and stay at the plan's hold position.</summary>
     public ShipControls HoldAt(GameWorld world, Ship ship, FlightPlan plan) =>
         Seek(world, ship, plan.HoldPosition, tuning.HoldSpeed);
