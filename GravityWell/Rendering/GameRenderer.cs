@@ -70,6 +70,8 @@ public sealed class GameRenderer
             planets.Draw(planet, world.Player);
         foreach (var freighter in world.Freighters)
             freighters.Draw(freighter);
+        foreach (var aiFighter in world.AiFighters)
+            ships.Draw(aiFighter, aiFighter.Controls.Throttle > 0f);
         ships.Draw(world.Player, controls.Thrust);
     }
 }
