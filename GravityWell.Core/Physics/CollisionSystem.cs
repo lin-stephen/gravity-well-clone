@@ -21,6 +21,7 @@ public sealed class CollisionSystem
     public void Update(GameWorld world)
     {
         List<ICollisionBody> bodies = [world.Player];
+        bodies.AddRange(world.AiFighters);
         bodies.AddRange(world.Planets);
         bodies.AddRange(world.Planets.Where(planet => planet.HasOperationalStructure(StructureType.SpaceDock))
             .Select(planet => planet.SpaceDock));

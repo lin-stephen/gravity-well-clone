@@ -76,4 +76,27 @@ public class CollisionSystemTests
             Assert.That(world.Player.Velocity.X, Is.EqualTo(16f));
         });
     }
+
+    [Test]
+    public void Update_AiFighterHitsFreighter_BothTakeDamage()
+    {
+        var collisions = new CollisionSystem(new CollisionSettings
+        {
+            DamageSpeedThreshold = 10f,
+            SpeedPerDamagePoint = 5f
+        });
+        var fighter = new Fighter { Faction = Faction.Red, Position = Vector2.Zero, Velocity = new Vector2(8f, 0f) };
+        var freighter = new Freighter(new Vector2(20f, 0f), Faction.Red) { Velocity = new Vector2(-8f, 0f) };
+        var world = new GameWorld([new Planet(new Vector2(5000f, 5000f))], [freighter], [fighter]);
+        world.Player.Position = new Vector2(10000f, 10000f);
+
+        collisions.Update(world);
+
+        Assert.Multiple(() =>
+        {
+            // Closing at 16 is six above the threshold, which rounds up to two damage points.
+            Assert.That(fighter.Health, Is.EqualTo(Fighter.MaxHealth - 2));
+            Assert.That(freighter.Health, Is.EqualTo(Freighter.MaxHealth - 2));
+        });
+    }
 }
