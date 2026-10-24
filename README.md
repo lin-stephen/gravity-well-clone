@@ -43,3 +43,15 @@ motion decays over time. Damage uses impact velocity before the bounce.
 
 Destruction is not yet implemented. Detection uses positions each frame, so
 sufficiently fast bodies can pass through each other between frames.
+
+## Landing and docking
+
+Point the fighter's rear toward a planet or an operational spacedock and approach
+below 60 speed units, within 30 degrees of rear-first alignment. Within 4 units
+of contact, docking gently damps motion, rotates the ship perpendicular to the
+surface with its rear facing inward, and settles it against the target,
+without collision damage or bounce from that target. Planets can be landed on
+regardless of ownership; a completed landing claims an unowned planet. Spacedock
+bounds follow the dock glyph near the orbital starbase. Thrust releases the ship;
+it must leave the capture zone before docking to that target again. Home resets
+all fighter docking state. Tune capture and damping in `Physics/DockingSystem.cs`.

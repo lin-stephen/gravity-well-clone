@@ -1,5 +1,6 @@
 using System.Numerics;
 using Raylib_cs;
+using GravityWell.Entities;
 
 namespace GravityWell.Rendering;
 
@@ -10,6 +11,15 @@ public sealed class HudRenderer
 
     public void Initialize() =>
         font = Raylib.LoadFontEx("fonts/Orbitron-Medium.ttf", FontAtlasSize, null, 0);
+
+    public void DrawDockingStatus(Fighter fighter)
+    {
+        if (fighter.DockingTarget is null) return;
+        var target = fighter.DockingTarget is SpaceDockBody ? "SPACEDOCK" : "PLANET";
+        var status = fighter.IsDocked ? "DOCKED" : "DOCKING";
+        Raylib.DrawTextEx(font, $"{status}: {target}  |  UP TO DEPART",
+            new Vector2(30, 166), 15, 0.5f, Color.Lime);
+    }
 
     public void Draw(float viewportWidth)
     {

@@ -42,6 +42,7 @@ public sealed class GameRenderer
         Raylib.BeginMode2D(screenCamera);
         if (showHelp)
             hud.Draw(viewport.LogicalWidth);
+        hud.DrawDockingStatus(world.Player);
         radar.Draw(world, viewport.LogicalWidth);
         Raylib.EndMode2D();
 

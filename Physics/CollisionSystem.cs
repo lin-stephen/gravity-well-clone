@@ -18,6 +18,8 @@ public sealed class CollisionSystem
     {
         List<ICollisionBody> bodies = [world.Player];
         bodies.AddRange(world.Planets);
+        bodies.AddRange(world.Planets.Where(planet => planet.HasOperationalStructure(StructureType.SpaceDock))
+            .Select(planet => planet.SpaceDock));
         bodies.AddRange(world.Freighters.Where(body => body.State != FreighterState.Consumed));
         HashSet<(ICollisionBody, ICollisionBody)> touching = [];
 
@@ -26,6 +28,8 @@ public sealed class CollisionSystem
         {
             var first = bodies[i];
             var second = bodies[j];
+            if (first is Fighter { DockingTarget: { } target } && ReferenceEquals(target, second))
+                continue;
             var radius = first.CollisionRadius + second.CollisionRadius;
             if (Vector2.DistanceSquared(first.Position, second.Position) > radius * radius)
                 continue;

@@ -14,6 +14,13 @@ public sealed class PhysicsSystem
     public void Update(GameWorld world, PlayerControls controls, float deltaTime)
     {
         var fighter = world.Player;
+        if (controls.Reset)
+        {
+            fighter.Reset();
+            return;
+        }
+        // DockingSystem releases the target after thrust moves the ship.
+        if (fighter.DockingTarget is not null && !controls.Thrust) return;
 
         if (controls.TurnLeft) fighter.Rotation -= TurnSpeed * deltaTime * 60f;
         if (controls.TurnRight) fighter.Rotation += TurnSpeed * deltaTime * 60f;
@@ -24,7 +31,6 @@ public sealed class PhysicsSystem
         LimitSpeed(fighter);
         fighter.Position += fighter.Velocity * deltaTime;
 
-        if (controls.Reset) fighter.Reset();
     }
 
     private static void ApplyGravity(

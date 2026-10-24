@@ -22,6 +22,25 @@ public sealed class Fighter : ICollisionBody
     }
 
 
+    public ICollisionBody? DockingTarget { get; private set; }
+    public bool IsDocked { get; private set; }
+    public Vector2 DockingNormal { get; private set; }
+
+    public void BeginDocking(ICollisionBody target, Vector2 normal)
+    {
+        DockingTarget = target;
+        DockingNormal = normal;
+        IsDocked = false;
+    }
+
+    public void CompleteDocking() => IsDocked = true;
+
+    public void Undock()
+    {
+        DockingTarget = null;
+        IsDocked = false;
+    }
+
     public Vector2 Position { get; set; }
     public Vector2 Velocity { get; set; }
     public float Rotation { get; set; }
@@ -40,6 +59,7 @@ public sealed class Fighter : ICollisionBody
 
     public void Reset()
     {
+        Undock();
         Position = InitialPosition;
         Velocity = InitialVelocity;
         Rotation = 90f;

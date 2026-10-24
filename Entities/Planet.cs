@@ -15,6 +15,7 @@ public sealed class Planet : ICollisionBody
         Faction? owner = null)
     {
         Position = position;
+        SpaceDock = new SpaceDockBody(this);
         Type = type;
         Owner = owner;
     }
@@ -27,6 +28,7 @@ public sealed class Planet : ICollisionBody
     public int Health { get; set; } = MaxHealth;
     public Vector2 Velocity => Vector2.Zero;
 
+    public SpaceDockBody SpaceDock { get; }
     public Vector2 Position { get; }
     public PlanetType Type { get; }
     public Faction? Owner { get; private set; }
