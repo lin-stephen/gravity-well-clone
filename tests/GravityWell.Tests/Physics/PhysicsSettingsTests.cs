@@ -6,7 +6,7 @@ using GravityWell.Core.Entities;
 using GravityWell.Core.Physics;
 using GravityWell.Core.World;
 
-namespace GravityWell.Tests;
+namespace GravityWell.Tests.Physics;
 
 public class PhysicsSettingsTests
 {

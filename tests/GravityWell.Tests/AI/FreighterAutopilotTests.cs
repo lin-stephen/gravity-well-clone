@@ -5,7 +5,7 @@ using GravityWell.Core.Physics;
 using GravityWell.Core.World;
 using AwesomeAssertions;
 
-namespace GravityWell.Tests;
+namespace GravityWell.Tests.AI;
 
 /// <summary>
 /// Characterization tests: each scenario flies a freighter through the real game loop and

@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using GravityWell.Core.Physics;
 
-namespace GravityWell.Tests;
+namespace GravityWell.Tests.Physics;
 
 public class DockingSettingsTests
 {
