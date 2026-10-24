@@ -7,5 +7,8 @@ namespace GravityWell.Core.Entities;
 public enum FighterBehavior
 {
     /// <summary>No weapons to use: it claims free planets and holds when none are left.</summary>
-    Peaceful
+    Peaceful,
+
+    /// <summary>Does nothing: it gives no controls and never claims a planet.</summary>
+    Null
 }

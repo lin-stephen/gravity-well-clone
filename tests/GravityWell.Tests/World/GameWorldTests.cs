@@ -8,29 +8,59 @@ namespace GravityWell.Tests.World;
 public class GameWorldTests
 {
     [Test]
-    public void DefaultWorld_HasOneRedAiFighterAndNoBlueAiFighter()
+    public void DefaultWorld_HasRedAndYellowAiFightersAndNoBlueAiFighter()
     {
         var world = new GameWorld();
 
-        world.AiFighters.Should().ContainSingle().Which.Faction.Should().Be(Faction.Red);
+        world.AiFighters.Select(fighter => fighter.Faction).Should().BeEquivalentTo([Faction.Red, Faction.Yellow]);
         world.Player.Faction.Should().Be(Faction.Blue);
         world.AiFighters.Should().NotContain(world.Player);
     }
 
     [Test]
-    public void DefaultWorld_AiFighterSpawnsClearOfEveryPlanetAndFreighter()
+    public void DefaultWorld_HasTenPlanetsAndAHomeworldPerFaction()
     {
         var world = new GameWorld();
-        var fighter = world.AiFighters.Single();
-        var homeworld = world.Planets.Single(planet => planet.Owner == fighter.Faction);
 
-        foreach (var planet in world.Planets)
-            Vector2.Distance(fighter.Position, planet.Position)
-                .Should().BeGreaterThanOrEqualTo(Planet.Radius + Fighter.Radius);
-        foreach (var freighter in world.Freighters)
-            Vector2.Distance(fighter.Position, freighter.Position)
-                .Should().BeGreaterThanOrEqualTo(Fighter.Radius + Freighter.Radius);
-        Vector2.Distance(fighter.Position, homeworld.Position).Should().BeLessThan(200f);
+        world.Planets.Should().HaveCount(10);
+        world.Planets.Where(planet => planet.Owner is not null).Select(planet => planet.Owner)
+            .Should().BeEquivalentTo([Faction.Blue, Faction.Red, Faction.Yellow]);
+    }
+
+    [Test]
+    public void DefaultWorld_PlanetsDoNotOverlap()
+    {
+        var world = new GameWorld();
+
+        foreach (var (first, second) in world.Planets.SelectMany((a, i) => world.Planets.Skip(i + 1), (a, b) => (a, b)))
+            Vector2.Distance(first.Position, second.Position).Should().BeGreaterThan(Planet.Radius * 4f);
+    }
+
+    [Test]
+    public void DefaultWorld_YellowFighterIsNullAndRedFighterIsPeaceful()
+    {
+        var world = new GameWorld();
+
+        world.AiFighters.Single(fighter => fighter.Faction == Faction.Yellow).Behavior.Should().Be(FighterBehavior.Null);
+        world.AiFighters.Single(fighter => fighter.Faction == Faction.Red).Behavior.Should().Be(FighterBehavior.Peaceful);
+    }
+
+    [Test]
+    public void DefaultWorld_AiFightersSpawnClearOfEveryPlanetAndFreighter()
+    {
+        var world = new GameWorld();
+
+        foreach (var fighter in world.AiFighters)
+        {
+            var homeworld = world.Planets.Single(planet => planet.Owner == fighter.Faction);
+            foreach (var planet in world.Planets)
+                Vector2.Distance(fighter.Position, planet.Position)
+                    .Should().BeGreaterThanOrEqualTo(Planet.Radius + Fighter.Radius);
+            foreach (var freighter in world.Freighters)
+                Vector2.Distance(fighter.Position, freighter.Position)
+                    .Should().BeGreaterThanOrEqualTo(Fighter.Radius + Freighter.Radius);
+            Vector2.Distance(fighter.Position, homeworld.Position).Should().BeLessThan(200f);
+        }
     }
 
     [Test]
@@ -41,8 +71,8 @@ public class GameWorldTests
         var ships = world.Ships.ToList();
 
         ships[0].Should().BeSameAs(world.Player);
-        ships[1].Should().BeSameAs(world.AiFighters[0]);
-        ships.Skip(2).Should().Equal(world.Freighters);
+        ships.Skip(1).Take(world.AiFighters.Count).Should().Equal(world.AiFighters);
+        ships.Skip(1 + world.AiFighters.Count).Should().Equal(world.Freighters);
         world.Fighters.Should().Equal([world.Player, .. world.AiFighters]);
     }
 
@@ -64,12 +94,6 @@ public class GameWorldTests
         fighters.Select(fighter => fighter.Faction).Should().BeEquivalentTo([Faction.Purple, Faction.Red]);
         fighters.Single(fighter => fighter.Faction == Faction.Red).Position
             .Should().Be(red.Position + new Vector2(0f, 100f)); // The first homeworld wins.
-    }
-
-    [Test]
-    public void DefaultWorld_AiFightersAreAllPeaceful()
-    {
-        new GameWorld().AiFighters.Should().OnlyContain(fighter => fighter.Behavior == FighterBehavior.Peaceful);
     }
 
     [Test]

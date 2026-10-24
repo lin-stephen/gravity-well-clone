@@ -252,6 +252,25 @@ public class FighterAutopilotTests
         update.Should().Throw<ArgumentOutOfRangeException>();
     }
 
+    [Test]
+    public void Update_NullFighterNextToAFreePlanet_GivesNoControlsAndClaimsNothing()
+    {
+        var planet = new Planet(new Vector2(500f, 0f));
+        var fighter = new Fighter
+        {
+            Faction = Faction.Yellow, Behavior = FighterBehavior.Null, Position = Vector2.Zero, Velocity = Vector2.Zero,
+        };
+        var world = NewWorld([planet], fighter);
+        var autopilot = new FighterAutopilot();
+
+        for (var i = 0; i < 120; i++)
+            autopilot.Update(world, Dt);
+
+        fighter.Controls.Should().Be(default(ShipControls));
+        autopilot.GetTarget(fighter).Should().BeNull();
+        planet.IsColonized.Should().BeFalse();
+    }
+
     private static IEnumerable<FighterBehavior> AllBehaviors() => Enum.GetValues<FighterBehavior>();
 
     [Test]

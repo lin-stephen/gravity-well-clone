@@ -52,13 +52,21 @@ public sealed class GameWorld
         var rivalHomeworld = new Planet(new Vector2(1900, 900), owner: Faction.Red);
         rivalHomeworld.BuildHomeworld();
 
+        var yellowHomeworld = new Planet(new Vector2(1750, 230), owner: Faction.Yellow);
+        yellowHomeworld.BuildHomeworld();
+
         Planets =
         [
             homeworld,
             rivalHomeworld,
+            yellowHomeworld,
             new Planet(new Vector2(950, 95)),
             new Planet(new Vector2(1260, 530), PlanetType.Barren),
             new Planet(new Vector2(290, 760)),
+            new Planet(new Vector2(640, 540)),
+            new Planet(new Vector2(1000, 760)),
+            new Planet(new Vector2(1560, 640)),
+            new Planet(new Vector2(1480, 200)),
         ];
 
         freighters =
@@ -69,13 +77,17 @@ public sealed class GameWorld
             new Freighter(rivalHomeworld.Position + new Vector2(-44f, 50f), Faction.Red),
             new Freighter(rivalHomeworld.Position + new Vector2(0f, 58f), Faction.Red),
             new Freighter(rivalHomeworld.Position + new Vector2(44f, 50f), Faction.Red),
+            new Freighter(yellowHomeworld.Position + new Vector2(-44f, 50f), Faction.Yellow),
+            new Freighter(yellowHomeworld.Position + new Vector2(0f, 58f), Faction.Yellow),
+            new Freighter(yellowHomeworld.Position + new Vector2(44f, 50f), Faction.Yellow),
         ];
         foreach (var ship in freighters)
         {
             var producer = Planets.MinBy(planet => Vector2.DistanceSquared(planet.Position, ship.Position))!;
             FaceOutward(ship, producer);
         }
-        aiFighters = CreateAiFighters(Planets, Player.Faction);
+        aiFighters = CreateAiFighters(Planets, Player.Faction,
+            faction => faction == Faction.Yellow ? FighterBehavior.Null : FighterBehavior.Peaceful);
     }
 
     /// <summary>

@@ -24,8 +24,9 @@ Three ways to give a ship its own behaviour were weighed:
 ## Decision
 
 - **`FighterBehavior` is an enum on `Fighter`.** It is `init`-only, so it is fixed when the fighter
-  spawns. It is plain data like `Faction`, and it is ignored for the player's fighter. The only
-  value today is `Peaceful`.
+  spawns. It is plain data like `Faction`, and it is ignored for the player's fighter. Its values
+  are `Peaceful` and `Null`, a strategy that gives no controls. The default world flies Yellow's
+  fighter as `Null` and the rest as `Peaceful`.
 - **Chosen per faction.** `GameWorld.CreateAiFighters` takes a `Func<Faction, FighterBehavior>`
   that defaults to `Peaceful` for every faction, so game setup can supply the mapping later.
 - **The runner takes its ships and its strategy lookup as arguments.** `ShipAutopilot<TShip>` is

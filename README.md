@@ -124,8 +124,10 @@ arbitrarily dense traffic or an unrecoverable impact.
 
 ### AI fighters
 
-Every faction with a homeworld, other than the player's, gets one peaceful AI fighter
-(there are no weapons yet). `GravityWell.Core/AI/Fighters/FighterAutopilot.cs` sends it to the
+Every faction with a homeworld, other than the player's, gets one AI fighter (there are no
+weapons yet). The default world has Blue (the player), Red and Yellow homeworlds among 10
+planets. Red's fighter is peaceful; Yellow's uses `NullFighterStrategy`, which does nothing,
+so Yellow only keeps its homeworld. The peaceful behaviour works as follows. `GravityWell.Core/AI/Fighters/FighterAutopilot.cs` sends it to the
 nearest uncolonized planet and docks, which claims the planet. The claiming faction's own
 freighters then build on it. Once the claim lands the fighter undocks by itself and heads
 for the next nearest free planet. It re-picks if another faction claims its target first,

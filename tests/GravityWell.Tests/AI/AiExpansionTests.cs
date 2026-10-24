@@ -50,8 +50,10 @@ public class AiExpansionTests
 
         world.Planets.Should().OnlyContain(planet => planet.IsColonized);
         world.Planets.Count(planet => planet.Owner == Faction.Blue).Should().Be(1);
+        // The yellow fighter does nothing, so yellow keeps its homeworld and claims no more.
+        world.Planets.Count(planet => planet.Owner == Faction.Yellow).Should().Be(1);
         var redPlanets = world.Planets.Where(planet => planet.Owner == Faction.Red).ToList();
-        redPlanets.Should().HaveCount(world.Planets.Count - 1);
+        redPlanets.Should().HaveCount(world.Planets.Count - 2);
         redPlanets.Should().OnlyContain(planet => planet.HasOperationalStructure(StructureType.Base));
         world.AiFighters.Should().OnlyContain(fighter => fighter.Health == Fighter.MaxHealth);
     }
