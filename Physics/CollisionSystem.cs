@@ -39,8 +39,7 @@ public sealed class CollisionSystem
             if (!contacts.Contains(pair))
             {
                 // Damage uses the velocities before the bounce impulse.
-                var relativeSpeed = (first.Velocity - second.Velocity).Length();
-                var damage = CalculateDamage(relativeSpeed);
+                var damage = CalculateDamage(GetClosingSpeed(first, second));
                 first.Health = Math.Max(0, first.Health - damage);
                 second.Health = Math.Max(0, second.Health - damage);
             }
@@ -62,11 +61,7 @@ public sealed class CollisionSystem
         if (penetration < 0f) return;
 
         var relativeVelocity = second.Velocity - first.Velocity;
-        // Coincident centers have no geometric normal. Oppose relative motion
-        // when possible, otherwise use a deterministic axis to separate them.
-        var normal = distance > 0f ? offset / distance
-            : relativeVelocity.LengthSquared() > 0f ? -Vector2.Normalize(relativeVelocity)
-            : Vector2.UnitX;
+        var normal = GetContactNormal(first, second);
         var normalSpeed = Vector2.Dot(relativeVelocity, normal);
         var impulse = normalSpeed < 0f
             ? -(1f + Restitution) * normalSpeed / inverseMass * normal
@@ -76,8 +71,22 @@ public sealed class CollisionSystem
         second.ApplyCollision(correction * second.InverseMass, impulse * second.InverseMass);
     }
 
-    public static int CalculateDamage(float relativeSpeed) =>
-        relativeSpeed <= DamageSpeedThreshold
+    private static Vector2 GetContactNormal(ICollisionBody first, ICollisionBody second)
+    {
+        var offset = second.Position - first.Position;
+        if (offset.LengthSquared() > 0f) return Vector2.Normalize(offset);
+        // Match bounce resolution when coincident centers have no surface normal.
+        var relativeVelocity = second.Velocity - first.Velocity;
+        return relativeVelocity.LengthSquared() > 0f
+            ? -Vector2.Normalize(relativeVelocity)
+            : Vector2.UnitX;
+    }
+
+    public static float GetClosingSpeed(ICollisionBody first, ICollisionBody second) =>
+        MathF.Max(0f, Vector2.Dot(first.Velocity - second.Velocity, GetContactNormal(first, second)));
+
+    public static int CalculateDamage(float closingSpeed) =>
+        closingSpeed <= DamageSpeedThreshold
             ? 0
-            : (int)MathF.Ceiling((relativeSpeed - DamageSpeedThreshold) / SpeedPerDamagePoint);
+            : (int)MathF.Ceiling((closingSpeed - DamageSpeedThreshold) / SpeedPerDamagePoint);
 }

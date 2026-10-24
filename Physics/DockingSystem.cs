@@ -66,6 +66,19 @@ public sealed class DockingSystem
         }
     }
 
+    public static bool IsSpeedSafe(Fighter fighter, ICollisionBody target) =>
+        (fighter.Velocity - target.Velocity).LengthSquared() < SpeedThreshold * SpeedThreshold;
+
+    public static bool IsApproachSpeedSafe(Fighter fighter, ICollisionBody target)
+    {
+        var towardTarget = target.Position - fighter.Position;
+        if (towardTarget.LengthSquared() == 0f) return false;
+        var approachSpeed = Vector2.Dot(fighter.Velocity - target.Velocity,
+            Vector2.Normalize(towardTarget));
+        // Receding motion has no closing speed; sideways motion contributes zero.
+        return MathF.Max(0f, approachSpeed) < SpeedThreshold;
+    }
+
     private bool TryCapture(Fighter fighter, ICollisionBody target)
     {
         if (target == releasedTarget || fighter.Health <= 0 || target.Health <= 0) return false;
@@ -76,7 +89,7 @@ public sealed class DockingSystem
             return false;
         var normal = offset / distance;
         if (Vector2.Dot(fighter.Forward, normal) < MathF.Cos(AlignmentDegrees * MathF.PI / 180f) ||
-            (fighter.Velocity - target.Velocity).Length() >= SpeedThreshold)
+            !IsSpeedSafe(fighter, target))
             return false;
         fighter.BeginDocking(target, normal);
         return true;

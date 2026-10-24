@@ -30,9 +30,10 @@ Original-game research lives under [`docs/reference`](docs/reference/README.md).
 ## Collision damage
 
 Fighters, freighters, and planets use circular collision bounds. On first contact,
-both bodies lose `ceil((relative speed - 100) / 25)` health if relative speed is
-above 100; slower contacts are harmless. Relative speed is the magnitude of the
-velocity difference, with planets stationary. Damage applies once per contact;
+both bodies lose `ceil((closing speed - 100) / 25)` health if closing speed is
+above 100; slower contacts are harmless. Closing speed is the relative velocity
+projected toward the other body along the contact normal. Sideways motion does
+not count, and separating bodies take no damage. Damage applies once per contact;
 separating and touching again allows another hit. Health is clamped to zero.
 The shared tuning constants live in `Physics/CollisionSystem.cs`.
 
@@ -55,3 +56,9 @@ regardless of ownership; a completed landing claims an unowned planet. Spacedock
 bounds follow the dock glyph near the orbital starbase. Thrust releases the ship;
 it must leave the capture zone before docking to that target again. Home resets
 all fighter docking state. Tune capture and damping in `Physics/DockingSystem.cs`.
+
+Planet outlines and operational spacedock glyphs use thicker lines while the
+fighter's approach speed toward that particular target is below the docking
+threshold. Sideways motion does not count, and receding motion has zero approach
+speed. Docking still requires safe total relative speed, rear-first alignment,
+and proximity.

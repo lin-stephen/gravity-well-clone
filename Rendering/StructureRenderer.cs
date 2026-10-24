@@ -1,18 +1,22 @@
 using System.Numerics;
 using GravityWell.Entities;
+using GravityWell.Physics;
 using Raylib_cs;
 
 namespace GravityWell.Rendering;
 
 public sealed class StructureRenderer
 {
-    public void Draw(Planet planet)
+    public void Draw(Planet planet, Fighter fighter)
     {
         foreach (var structure in planet.Structures)
         {
             var position = GetPosition(planet, structure.Type);
             var color = GetColor(planet, structure);
-            DrawGlyph(structure.Type, position, color);
+            var dockThickness = structure.Type == StructureType.SpaceDock &&
+                structure.State == StructureState.Operational &&
+                DockingSystem.IsApproachSpeedSafe(fighter, planet.SpaceDock) ? 3f : 1f;
+            DrawGlyph(structure.Type, position, color, dockThickness);
 
             if (structure.State == StructureState.Building)
                 DrawProgress(position, structure.ConstructionProgress);
@@ -43,7 +47,7 @@ public sealed class StructureRenderer
         _ => Palette.StructureDestroyed
     };
 
-    private static void DrawGlyph(StructureType type, Vector2 position, Color color)
+    private static void DrawGlyph(StructureType type, Vector2 position, Color color, float dockThickness)
     {
         switch (type)
         {
@@ -75,8 +79,10 @@ public sealed class StructureRenderer
                     position + new Vector2(16f, 7f), color);
                 break;
             case StructureType.SpaceDock:
-                Raylib.DrawRectangleLines((int)position.X - 15, (int)position.Y - 12, 10, 12, color);
-                Raylib.DrawLineV(position + new Vector2(-15f, -12f), position + new Vector2(-6f, -17f), color);
+                Raylib.DrawRectangleLinesEx(
+                    new Rectangle(position.X - 15f, position.Y - 12f, 10f, 12f), dockThickness, color);
+                Raylib.DrawLineEx(position + new Vector2(-15f, -12f),
+                    position + new Vector2(-6f, -17f), dockThickness, color);
                 break;
             case StructureType.SensorArray:
                 Raylib.DrawLineV(position + new Vector2(10f, 0f), position + new Vector2(10f, -14f), color);

@@ -59,7 +59,7 @@ public sealed class GameRenderer
     private void DrawWorld(GameWorld world, PlayerControls controls)
     {
         foreach (var planet in world.Planets)
-            planets.Draw(planet);
+            planets.Draw(planet, world.Player);
         foreach (var freighter in world.Freighters)
             freighters.Draw(freighter);
         ships.Draw(world.Player, controls.Thrust);
