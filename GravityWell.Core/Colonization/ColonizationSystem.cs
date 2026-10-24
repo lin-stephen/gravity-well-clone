@@ -7,8 +7,8 @@ public sealed class ColonizationSystem
 {
     public void Update(GameWorld world)
     {
-        var fighter = world.Player;
-        if (fighter.IsDocked && fighter.DockingTarget is Planet planet && !planet.IsColonized)
-            planet.Claim(fighter.Faction);
+        foreach (var fighter in world.Fighters)
+            if (fighter.IsDocked && fighter.DockingTarget is Planet planet && !planet.IsColonized)
+                planet.Claim(fighter.Faction);
     }
 }
