@@ -10,9 +10,17 @@ public sealed class FighterAutopilot
     private readonly ShipAutopilot<Fighter> autopilot;
 
     public FighterAutopilot(DockingSystem? docking = null, PhysicsSystem? physics = null,
-        ApproachTuning? tuning = null) =>
-        autopilot = new ShipAutopilot<Fighter>(new PeacefulFighterStrategy(
-            docking ?? new DockingSystem(), physics ?? new PhysicsSystem(), tuning ?? ApproachTuning.ForFighter));
+        ApproachTuning? tuning = null)
+    {
+        var peaceful = new PeacefulFighterStrategy(
+            docking ?? new DockingSystem(), physics ?? new PhysicsSystem(), tuning ?? ApproachTuning.ForFighter);
+        autopilot = new ShipAutopilot<Fighter>(world => world.AiFighters, fighter => fighter.Behavior switch
+        {
+            FighterBehavior.Peaceful => peaceful,
+            var unknown => throw new ArgumentOutOfRangeException(
+                nameof(fighter), unknown, "No strategy is registered for this fighter behavior."),
+        });
+    }
 
     public Planet? GetTarget(Fighter fighter) => autopilot.PlanOf(fighter)?.Target;
 

@@ -9,9 +9,13 @@ public sealed class FreighterAutopilot
 {
     private readonly ShipAutopilot<Freighter> autopilot;
 
-    public FreighterAutopilot(DockingSystem? docking = null, PhysicsSystem? physics = null) =>
+    public FreighterAutopilot(DockingSystem? docking = null, PhysicsSystem? physics = null)
+    {
+        var strategy = new FreighterStrategy(docking ?? new DockingSystem(), physics ?? new PhysicsSystem());
         autopilot = new ShipAutopilot<Freighter>(
-            new FreighterStrategy(docking ?? new DockingSystem(), physics ?? new PhysicsSystem()));
+            world => world.Freighters.Where(ship => ship.State != FreighterState.Consumed),
+            _ => strategy);
+    }
 
     public FlightPhase GetPhase(Freighter ship) => autopilot.PlanOf(ship)?.Phase ?? FlightPhase.Holding;
 

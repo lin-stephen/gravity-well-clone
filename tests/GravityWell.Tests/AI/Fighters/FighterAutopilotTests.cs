@@ -229,6 +229,31 @@ public class FighterAutopilotTests
         purple.Health.Should().Be(Fighter.MaxHealth);
     }
 
+    [TestCaseSource(nameof(AllBehaviors))]
+    public void Update_HasAStrategyForEveryFighterBehavior(FighterBehavior behavior)
+    {
+        // Adding a FighterBehavior value without registering a strategy for it must fail here.
+        var fighter = new Fighter { Faction = Faction.Red, Behavior = behavior };
+        var world = NewWorld([new Planet(new Vector2(500f, 0f))], fighter);
+
+        var update = () => new FighterAutopilot().Update(world, Dt);
+
+        update.Should().NotThrow();
+    }
+
+    [Test]
+    public void Update_RejectsAFighterBehaviorThatHasNoStrategy()
+    {
+        var unknown = new Fighter { Faction = Faction.Red, Behavior = (FighterBehavior)(-1) };
+        var world = NewWorld([new Planet(new Vector2(500f, 0f))], unknown);
+
+        var update = () => new FighterAutopilot().Update(world, Dt);
+
+        update.Should().Throw<ArgumentOutOfRangeException>();
+    }
+
+    private static IEnumerable<FighterBehavior> AllBehaviors() => Enum.GetValues<FighterBehavior>();
+
     [Test]
     public void Update_DoesNotTouchPlayerControls()
     {

@@ -17,8 +17,6 @@ internal sealed class PeacefulFighterStrategy : IAutopilotStrategy<Fighter>
     public PeacefulFighterStrategy(DockingSystem docking, PhysicsSystem physics, ApproachTuning tuning) =>
         approach = new PlanetApproach(docking, physics, tuning);
 
-    public IEnumerable<Fighter> ShipsToPilot(GameWorld world) => world.AiFighters;
-
     // A new plan already reads as Holding, so Hold will not recompute this.
     public Vector2 InitialHoldPosition(GameWorld world, Fighter ship) => approach.ClearOfPlanets(world, ship);
 

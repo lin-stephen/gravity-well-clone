@@ -11,9 +11,6 @@ internal sealed class FreighterStrategy(DockingSystem docking, PhysicsSystem phy
 {
     private readonly PlanetApproach approach = new(docking, physics, ApproachTuning.ForFreighter);
 
-    public IEnumerable<Freighter> ShipsToPilot(GameWorld world) =>
-        world.Freighters.Where(ship => ship.State != FreighterState.Consumed);
-
     public Vector2 InitialHoldPosition(GameWorld world, Freighter ship) => ship.Position;
 
     public ShipControls Decide(GameWorld world, Freighter ship, FlightPlan plan, float deltaTime)

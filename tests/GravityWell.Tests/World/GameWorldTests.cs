@@ -65,4 +65,39 @@ public class GameWorldTests
         fighters.Single(fighter => fighter.Faction == Faction.Red).Position
             .Should().Be(red.Position + new Vector2(0f, 100f)); // The first homeworld wins.
     }
+
+    [Test]
+    public void DefaultWorld_AiFightersAreAllPeaceful()
+    {
+        new GameWorld().AiFighters.Should().OnlyContain(fighter => fighter.Behavior == FighterBehavior.Peaceful);
+    }
+
+    [Test]
+    public void CreateAiFighters_AsksForTheBehaviorOfEachAiFactionAndAssignsIt()
+    {
+        var purple = new Planet(new Vector2(0, 0), owner: Faction.Purple);
+        purple.BuildHomeworld();
+        var red = new Planet(new Vector2(1000, 0), owner: Faction.Red);
+        red.BuildHomeworld();
+        var blue = new Planet(new Vector2(2000, 0), owner: Faction.Blue);
+        blue.BuildHomeworld();
+        var asked = new List<Faction>();
+        // Only one FighterBehavior exists yet, so a faction-specific value outside the defined range is what
+        // tells "assigned from the function" apart from "left at the default".
+        static FighterBehavior Marker(Faction faction) => (FighterBehavior)(100 + (int)faction);
+
+        var fighters = GameWorld.CreateAiFighters([purple, red, blue], Faction.Blue, faction =>
+        {
+            asked.Add(faction);
+            return Marker(faction);
+        });
+
+        asked.Should().BeEquivalentTo([Faction.Purple, Faction.Red], "the player's faction gets no AI fighter");
+        fighters.ToDictionary(fighter => fighter.Faction, fighter => fighter.Behavior).Should().BeEquivalentTo(
+            new Dictionary<Faction, FighterBehavior>
+            {
+                [Faction.Purple] = Marker(Faction.Purple),
+                [Faction.Red] = Marker(Faction.Red),
+            });
+    }
 }

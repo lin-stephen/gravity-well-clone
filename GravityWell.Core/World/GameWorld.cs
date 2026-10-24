@@ -78,9 +78,14 @@ public sealed class GameWorld
         aiFighters = CreateAiFighters(Planets, Player.Faction);
     }
 
-    /// <summary>One fighter per faction that owns a homeworld, except the player's faction.</summary>
-    public static List<Fighter> CreateAiFighters(IEnumerable<Planet> planets, Faction playerFaction)
+    /// <summary>
+    /// One fighter per faction that owns a homeworld, except the player's faction. <paramref name="behaviorFor"/>
+    /// chooses how each faction's fighter is flown; the default is <see cref="FighterBehavior.Peaceful"/>.
+    /// </summary>
+    public static List<Fighter> CreateAiFighters(IEnumerable<Planet> planets, Faction playerFaction,
+        Func<Faction, FighterBehavior>? behaviorFor = null)
     {
+        behaviorFor ??= _ => FighterBehavior.Peaceful;
         var fighters = new List<Fighter>();
         foreach (var homeworld in planets)
         {
@@ -91,6 +96,7 @@ public sealed class GameWorld
             fighters.Add(new Fighter
             {
                 Faction = faction,
+                Behavior = behaviorFor(faction),
                 Position = homeworld.Position + new Vector2(0f, 100f),
                 Velocity = Vector2.Zero,
                 Rotation = 180f, // Faces outward, away from the homeworld.
