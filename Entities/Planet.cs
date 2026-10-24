@@ -2,7 +2,7 @@ using System.Numerics;
 
 namespace GravityWell.Entities;
 
-public sealed class Planet
+public sealed class Planet : ICollisionBody
 {
     // In the original game's battle and landing views, a planet is roughly
     // three fighter lengths across.
@@ -18,6 +18,11 @@ public sealed class Planet
         Type = type;
         Owner = owner;
     }
+
+    public float CollisionRadius => Radius;
+    public const int MaxHealth = 100;
+    public int Health { get; set; } = MaxHealth;
+    public Vector2 Velocity => Vector2.Zero;
 
     public Vector2 Position { get; }
     public PlanetType Type { get; }

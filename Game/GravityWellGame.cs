@@ -11,6 +11,7 @@ public sealed class GravityWellGame
     private readonly GameWorld world = new();
     private readonly InputSystem input = new();
     private readonly PhysicsSystem physics = new();
+    private readonly CollisionSystem collisions = new();
     private readonly ColonizationSystem colonization = new();
     private readonly FreighterSystem freighters = new();
     private readonly GameRenderer renderer = new();
@@ -28,6 +29,8 @@ public sealed class GravityWellGame
         physics.Update(world, controls, deltaTime);
         colonization.Update(world);
         freighters.Update(world, deltaTime);
+        if (controls.Reset) collisions.Reset();
+        collisions.Update(world);
         renderer.Draw(world, controls, showHelp);
     }
 }

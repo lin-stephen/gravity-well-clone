@@ -2,7 +2,7 @@ using System.Numerics;
 
 namespace GravityWell.Entities;
 
-public sealed class Freighter
+public sealed class Freighter : ICollisionBody
 {
     public const float Radius = 12f;
     public const float Speed = 90f;
@@ -13,6 +13,11 @@ public sealed class Freighter
         Position = position;
         Faction = faction;
     }
+
+    public float CollisionRadius => Radius;
+    public const int MaxHealth = 6;
+    public int Health { get; set; } = MaxHealth;
+    public Vector2 Velocity { get; private set; }
 
     public Vector2 Position { get; private set; }
     public Vector2 Heading { get; private set; } = -Vector2.UnitY;
@@ -34,13 +39,19 @@ public sealed class Freighter
 
     public bool Travel(float deltaTime)
     {
-        if (State != FreighterState.Traveling || TargetPlanet is null)
+        Velocity = Vector2.Zero;
+        if (State != FreighterState.Traveling || TargetPlanet is null || deltaTime <= 0f)
             return false;
 
         var offset = TargetPlanet.Position - Position;
         var distance = offset.Length();
         var arrivalDistance = Planet.Radius + Radius;
         var travelDistance = Speed * deltaTime;
+        if (distance > arrivalDistance)
+        {
+            Heading = Vector2.Normalize(offset);
+            Velocity = Heading * Speed;
+        }
         if (distance <= arrivalDistance + travelDistance)
         {
             if (distance > arrivalDistance)

@@ -2,7 +2,7 @@ using System.Numerics;
 
 namespace GravityWell.Entities;
 
-public sealed class Fighter
+public sealed class Fighter : ICollisionBody
 {
     public const int MaxHealth = 6;
     public const float Radius = 10f;
@@ -12,6 +12,8 @@ public sealed class Fighter
     private static readonly Vector2 InitialVelocity = new(105, 0);
 
     public Faction Faction { get; init; } = Faction.Blue;
+    public float CollisionRadius => Radius;
+
     public Vector2 Position { get; set; }
     public Vector2 Velocity { get; set; }
     public float Rotation { get; set; }

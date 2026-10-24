@@ -35,6 +35,7 @@ public sealed class PhysicsSystem
     {
         var offset = bodyPosition - fighter.Position;
         var distanceSquared = MathF.Max(offset.LengthSquared(), 2_500f);
+        if (offset.LengthSquared() == 0f) return;
         fighter.Velocity += Vector2.Normalize(offset) * (strength / distanceSquared) * deltaTime;
     }
 
