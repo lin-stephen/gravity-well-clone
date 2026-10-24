@@ -66,54 +66,68 @@ public sealed class FreighterAutopilot
 
         var planet = ship.TargetPlanet;
         if (plan.Target != planet)
-        {
-            plan.Target = planet;
-            var offset = ship.Position - planet.Position;
-            plan.LandingNormal = offset.LengthSquared() > 0 ? Vector2.Normalize(offset) : Vector2.UnitY;
-            // Avoid the orbital installation when choosing a landing corridor.
-            if (planet.HasOperationalStructure(StructureType.SpaceDock) && plan.LandingNormal.Y < -0.4f)
-                plan.LandingNormal = Vector2.UnitX;
-            plan.ApproachPoint = planet.Position + plan.LandingNormal *
-                (Planet.Radius + ship.CollisionRadius + 90f);
-            plan.Route = RoutePlanner.Plan(world, ship, plan.ApproachPoint);
-            plan.ReplanDelay = 1f;
-            plan.Phase = FlightPhase.Cruise;
-        }
+            BeginApproach(world, ship, plan, planet);
         plan.ReplanDelay -= deltaTime;
         var outward = ship.Position - planet.Position;
         var distance = outward.Length();
         var normal = distance > 0f ? outward / distance : plan.LandingNormal;
         var surfaceDistance = distance - Planet.Radius - ship.CollisionRadius;
 
-        if (plan.Phase is FlightPhase.Align or FlightPhase.Approach)
+        if (plan.Phase is FlightPhase.Align or FlightPhase.Approach &&
+            SteerTerminal(world, ship, plan, planet, normal, surfaceDistance) is { } terminal)
+            return terminal;
+
+        FollowRoute(world, ship, plan);
+        return SteerCruise(world, ship, plan, normal);
+    }
+
+    private static void BeginApproach(GameWorld world, Freighter ship, FlightPlan plan, Planet planet)
+    {
+        plan.Target = planet;
+        var offset = ship.Position - planet.Position;
+        plan.LandingNormal = offset.LengthSquared() > 0 ? Vector2.Normalize(offset) : Vector2.UnitY;
+        // Avoid the orbital installation when choosing a landing corridor.
+        if (planet.HasOperationalStructure(StructureType.SpaceDock) && plan.LandingNormal.Y < -0.4f)
+            plan.LandingNormal = Vector2.UnitX;
+        plan.ApproachPoint = planet.Position + plan.LandingNormal *
+            (Planet.Radius + ship.CollisionRadius + 90f);
+        plan.Route = RoutePlanner.Plan(world, ship, plan.ApproachPoint);
+        plan.ReplanDelay = 1f;
+        plan.Phase = FlightPhase.Cruise;
+    }
+
+    /// <summary>Handles Align and Approach. Returns null when the ship left the corridor and should resume cruising.</summary>
+    private ShipControls? SteerTerminal(GameWorld world, Freighter ship, FlightPlan plan, Planet planet,
+        Vector2 normal, float surfaceDistance)
+    {
+        // A bounce or another ship can displace us: return to the corridor.
+        if (surfaceDistance > 150f || ship.Velocity.Length() > 65f)
         {
-            // A bounce or another ship can displace us: return to the corridor.
-            if (surfaceDistance > 150f || ship.Velocity.Length() > 65f)
-            {
-                plan.Phase = FlightPhase.Cruise;
-                plan.Route = RoutePlanner.Plan(world, ship, plan.ApproachPoint);
-            }
-            else
-            {
-                var sideways = ship.Velocity - Vector2.Dot(ship.Velocity, normal) * normal;
-                if (plan.Phase == FlightPhase.Align)
-                {
-                    if (docking.IsRearAligned(ship, planet) && sideways.Length() < 5f)
-                        plan.Phase = FlightPhase.Approach;
-                    else
-                        return Accelerate(ship, normal * 20f - sideways * 2f -
-                            physics.GetGravity(world, ship.Position), normal);
-                }
-                if (surfaceDistance <= docking.CaptureDistance &&
-                    docking.IsRearAligned(ship, planet) && docking.IsSpeedSafe(ship, planet))
-                    return default;
-                var desiredVelocity = -normal * 12f;
-                var acceleration = (desiredVelocity - ship.Velocity) * 2f -
-                    physics.GetGravity(world, ship.Position);
-                return Accelerate(ship, acceleration, normal);
-            }
+            plan.Phase = FlightPhase.Cruise;
+            plan.Route = RoutePlanner.Plan(world, ship, plan.ApproachPoint);
+            return null;
         }
 
+        var sideways = ship.Velocity - Vector2.Dot(ship.Velocity, normal) * normal;
+        if (plan.Phase == FlightPhase.Align)
+        {
+            if (docking.IsRearAligned(ship, planet) && sideways.Length() < 5f)
+                plan.Phase = FlightPhase.Approach;
+            else
+                return Accelerate(ship, normal * 20f - sideways * 2f -
+                    physics.GetGravity(world, ship.Position), normal);
+        }
+        if (surfaceDistance <= docking.CaptureDistance &&
+            docking.IsRearAligned(ship, planet) && docking.IsSpeedSafe(ship, planet))
+            return default(ShipControls);
+        var desiredVelocity = -normal * 12f;
+        var acceleration = (desiredVelocity - ship.Velocity) * 2f -
+            physics.GetGravity(world, ship.Position);
+        return Accelerate(ship, acceleration, normal);
+    }
+
+    private static void FollowRoute(GameWorld world, Freighter ship, FlightPlan plan)
+    {
         while (plan.Route.Count > 1 && Vector2.Distance(ship.Position, plan.Route[0]) < 20f)
             plan.Route.RemoveAt(0);
         if (plan.ReplanDelay <= 0f && (plan.Route.Count == 0 ||
@@ -122,6 +136,10 @@ public sealed class FreighterAutopilot
             plan.Route = RoutePlanner.Plan(world, ship, plan.ApproachPoint);
             plan.ReplanDelay = 1f;
         }
+    }
+
+    private ShipControls SteerCruise(GameWorld world, Freighter ship, FlightPlan plan, Vector2 normal)
+    {
         if (plan.Route.Count == 0)
             return Seek(world, ship, ship.Position, 0f); // Brake and retry instead of flying through obstacles.
         var waypoint = plan.Route[0];
