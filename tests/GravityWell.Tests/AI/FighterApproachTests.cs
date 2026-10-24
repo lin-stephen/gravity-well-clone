@@ -21,7 +21,8 @@ public class FighterApproachTests
     private const bool Bump = true;
 
     private sealed record Flight(Fighter Fighter, Planet Target, Freighter? Freighter, bool Finite,
-        float ClosestFreighter, float PeakSpeed, float DockSeconds, float PeakSpeedBeforeX);
+        float ClosestFreighter, float PeakSpeed, float DockSeconds, float PeakSpeedBeforeX,
+        Planet? FighterTarget);
 
     private static Flight Fly(Vector2 start, Vector2 velocity, Planet[]? obstacles = null, bool bump = false,
         Freighter? freighter = null, float seconds = 120f, float? measureBeforeX = null)
@@ -62,7 +63,8 @@ public class FighterApproachTests
                 break;
             }
         }
-        return new Flight(fighter, target, freighter, finite, closest, peakSpeed, dockSeconds, peakBeforeX);
+        return new Flight(fighter, target, freighter, finite, closest, peakSpeed, dockSeconds, peakBeforeX,
+            autopilot.GetTarget(fighter));
     }
 
     private static IEnumerable<TestCaseData> Approaches()
@@ -162,7 +164,12 @@ public class FighterApproachTests
         var flight = Fly(new Vector2(-900f, 0f), Vector2.Zero, freighter: freighter);
 
         flight.Finite.Should().BeTrue();
-        flight.ClosestFreighter.Should().BeGreaterThanOrEqualTo(Fighter.Radius + Freighter.Radius);
+        // The limit is the two hulls' radii, so failing it means they touched. The 90 u/s crossing case
+        // clears it by only about 3.6 units (25.6 against 22 when this was written), so a small change to
+        // Seek's avoidance constants can tip it over. Read the measured closest approach: a value just
+        // under 22 means that margin was lost, while one far below means avoidance has broken.
+        flight.ClosestFreighter.Should().BeGreaterThanOrEqualTo(Fighter.Radius + Freighter.Radius,
+            "the crossing case had only about 3.6 units to spare when this test was written");
         flight.Fighter.Health.Should().Be(Fighter.MaxHealth);
         flight.Freighter!.Health.Should().Be(Freighter.MaxHealth);
         flight.Fighter.IsDocked.Should().BeTrue();
@@ -170,7 +177,7 @@ public class FighterApproachTests
     }
 
     [Test]
-    public void Fighter_BlockedByEnclosingPlanets_StaysSafeAndUndocked()
+    public void Fighter_BlockedByEnclosingPlanets_KeepsRetryingSafely()
     {
         // Twelve owned planets on a ring of radius 130 overlap into a wall around the free target.
         // They are owned so the fighter treats them as obstacles, not as targets.
@@ -183,5 +190,6 @@ public class FighterApproachTests
         flight.Finite.Should().BeTrue();
         flight.Fighter.Health.Should().Be(Fighter.MaxHealth);
         flight.Fighter.IsDocked.Should().BeFalse();
+        flight.FighterTarget.Should().BeSameAs(flight.Target, "an unreachable target is retried, not given up on");
     }
 }
