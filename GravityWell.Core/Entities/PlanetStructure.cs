@@ -7,11 +7,32 @@ public sealed class PlanetStructure
         Type = type;
         State = state;
         ConstructionProgress = state == StructureState.Operational ? 1f : 0f;
+        Health = state == StructureState.Destroyed ? 0 : MaxHealth;
     }
+
+    public const int MaxHealth = 4;
 
     public StructureType Type { get; }
     public StructureState State { get; private set; }
     public float ConstructionProgress { get; private set; }
+    public int Health { get; private set; }
+
+    /// <summary>A structure that is being built or standing can be shot. A planned or destroyed one is not there.</summary>
+    public bool IsTargetable => State is StructureState.Building or StructureState.Operational;
+
+    public void TakeDamage(int damage)
+    {
+        if (damage <= 0 || !IsTargetable)
+        {
+            return;
+        }
+
+        Health = Math.Max(0, Health - damage);
+        if (Health == 0)
+        {
+            State = StructureState.Destroyed;
+        }
+    }
 
     public void BeginConstruction()
     {
