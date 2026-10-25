@@ -49,11 +49,33 @@ public sealed class Planet : ICollisionBody
         }
     }
 
-    public bool HasStructure(StructureType type) =>
-        structures.Any(structure => structure.Type == type && structure.State != StructureState.Destroyed);
+    // Plain loops, not LINQ: every system asks these of every planet every frame, and a LINQ closure here is
+    // garbage on each call.
+    public bool HasStructure(StructureType type)
+    {
+        for (var i = 0; i < structures.Count; i++)
+        {
+            if (structures[i].Type == type && structures[i].State != StructureState.Destroyed)
+            {
+                return true;
+            }
+        }
 
-    public bool HasOperationalStructure(StructureType type) =>
-        structures.Any(structure => structure.Type == type && structure.State == StructureState.Operational);
+        return false;
+    }
+
+    public bool HasOperationalStructure(StructureType type)
+    {
+        for (var i = 0; i < structures.Count; i++)
+        {
+            if (structures[i].Type == type && structures[i].State == StructureState.Operational)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     public bool CanAddStructure(StructureType type)
     {

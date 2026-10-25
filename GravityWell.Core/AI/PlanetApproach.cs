@@ -106,7 +106,7 @@ public sealed class PlanetApproach(DockingSystem docking, PhysicsSystem physics,
         }
 
         if (plan.ReplanDelay <= 0f && (plan.Route.Count == 0 ||
-            !RoutePlanner.IsClear(ship.Position, plan.Route[0], ship, RoutePlanner.Obstacles(world))))
+            !RoutePlanner.IsClear(ship.Position, plan.Route[0], ship, world)))
         {
             plan.Route = RoutePlanner.Plan(world, ship, plan.ApproachPoint);
             plan.ReplanDelay = 1f;

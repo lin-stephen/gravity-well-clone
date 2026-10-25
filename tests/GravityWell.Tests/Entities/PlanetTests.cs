@@ -85,4 +85,27 @@ public class PlanetTests
         planet.Structures.Should().Contain(colony);
         planet.Structures.Should().HaveCount(3);
     }
+
+    [Test]
+    public void StructureQueries_DoNotAllocate()
+    {
+        // These run for every planet, every frame, from several systems, so any garbage here adds up.
+        var planet = new Planet(Vector2.Zero, owner: Faction.Red);
+        planet.BuildHomeworld();
+        var found = 0;
+        for (var i = 0; i < 100; i++)
+        {
+            found += planet.HasStructure(StructureType.Base) ? 1 : 0; // warm up
+        }
+
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        for (var i = 0; i < 1000; i++)
+        {
+            found += planet.HasStructure(StructureType.SensorArray) ? 1 : 0;
+            found += planet.HasOperationalStructure(StructureType.SpaceDock) ? 1 : 0;
+        }
+
+        found.Should().BeGreaterThan(0);
+        (GC.GetAllocatedBytesForCurrentThread() - before).Should().BeLessThan(1024);
+    }
 }
