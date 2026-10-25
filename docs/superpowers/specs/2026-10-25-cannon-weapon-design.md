@@ -59,7 +59,8 @@ placed around its centre, shelters its inner structures.
   as standing (`HasStructure` and `HasOperationalStructure` already ignore destroyed structures).
 - There is no special case for the planet the shooter is docked on. The nose points outward when docked, so
   the bolt starts outside the circle. In an odd "drilling" pose where the nose is inside the circle, the bolt
-  starts inside and is absorbed at the far edge like any other.
+  starts inside. On an enemy planet with a standing structure it can hit a structure or is absorbed at the far
+  edge. On any other planet it is absorbed at once, because that planet absorbs bolts on entry.
 
 **Ships keep their current limits in this phase.** A fighter or freighter can be reduced to 0 health but
 nothing destroys, removes or disables it. Ship destruction is the next phase, for fighters and freighters

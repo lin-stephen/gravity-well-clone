@@ -73,7 +73,7 @@ public sealed class WeaponSystem
     private bool ResolveHit(GameWorld world, Bolt bolt, Vector2 from, Vector2 to)
     {
         HitEvent? first = null;
-        foreach (var candidate in ShipEvents(world, bolt, from, to))
+        foreach (var candidate in ShipEvents(world, bolt, from, to).Concat(PlanetEvents(world, bolt, from, to)))
         {
             if (first is null || candidate.T < first.Value.T)
             {
@@ -89,6 +89,11 @@ public sealed class WeaponSystem
         if (hit.Ship is { } ship)
         {
             ship.Health = Math.Max(0, ship.Health - settings.Damage);
+            world.Impacts.Add(new Impact(Vector2.Lerp(from, to, hit.T)));
+        }
+        else if (hit.Structure is { } structure)
+        {
+            structure.TakeDamage(settings.Damage);
             world.Impacts.Add(new Impact(Vector2.Lerp(from, to, hit.T)));
         }
 
@@ -125,5 +130,51 @@ public sealed class WeaponSystem
             player.Velocity + player.Forward * settings.BoltSpeed,
             settings.BoltLifetime));
         fireTimer = settings.FireInterval;
+    }
+
+    /// <summary>
+    /// A planet is a one-way door for bolts. One this shooter can hurt (an enemy's, or any with friendly fire on,
+    /// with a structure still standing) lets the bolt in: each standing structure can be hit, and the bolt is absorbed
+    /// where it would come out the far side. Any other planet absorbs the bolt on entry, and a friendly planet's own
+    /// structures, such as a Starbase outside the circle, absorb it too.
+    /// </summary>
+    private IEnumerable<HitEvent> PlanetEvents(GameWorld world, Bolt bolt, Vector2 from, Vector2 to)
+    {
+        foreach (var planet in world.Planets)
+        {
+            var friendly = planet.Owner == bolt.Faction;
+            var hostile = planet.Owner is not null && (!friendly || settings.FriendlyFire) &&
+                planet.Structures.Any(structure => structure.IsTargetable);
+            if (hostile || friendly)
+            {
+                // A hostile structure takes the hit. A friendly one only absorbs the bolt.
+                foreach (var structure in planet.Structures)
+                {
+                    if (structure.IsTargetable &&
+                        Sweep.SegmentBox(from, to, StructureLayout.GetBounds(planet, structure.Type), out var enter))
+                    {
+                        yield return new HitEvent(enter, Structure: hostile ? structure : null);
+                    }
+                }
+            }
+
+            if (!hostile)
+            {
+                if (Sweep.SegmentCircle(from, to, planet.Position, Planet.Radius, out var entry, out _))
+                {
+                    yield return new HitEvent(entry);
+                }
+
+                continue;
+            }
+
+            // The bolt is out when the float the next frame will read says so, not when a rounded parameter
+            // says so: a bolt left just inside the edge is still inside next frame, so it is caught then.
+            if (Sweep.SegmentCircle(from, to, planet.Position, Planet.Radius, out _, out var exit) &&
+                (exit <= 1f || Vector2.DistanceSquared(to, planet.Position) >= Planet.Radius * Planet.Radius))
+            {
+                yield return new HitEvent(MathF.Min(exit, 1f));
+            }
+        }
     }
 }
