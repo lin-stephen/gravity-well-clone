@@ -9,7 +9,7 @@ public sealed class ColonizationSystem
     {
         foreach (var fighter in world.Fighters)
         {
-            if (fighter.IsDocked && fighter.DockingTarget is Planet planet)
+            if (fighter is { IsDocked: true, DockingTarget: Planet planet })
             {
                 planet.Claim(fighter.Faction);
             }
