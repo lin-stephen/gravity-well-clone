@@ -22,11 +22,9 @@ public sealed class FreighterSystem
     {
         foreach (var freighter in world.Freighters)
         {
-            // A planet can change hands before the freighter arrives. It must not then build for the new owner.
-            if (freighter.State == FreighterState.Traveling &&
-                freighter.TargetPlanet is { Owner: { } owner } && owner != freighter.Faction)
+            if (freighter.State == FreighterState.Traveling && freighter.TargetPlanet is { } target)
             {
-                freighter.Recall();
+                KeepOrderCurrent(freighter, target);
             }
 
             if (freighter.BeginBuilding())
@@ -55,6 +53,25 @@ public sealed class FreighterSystem
             {
                 freighter.Consume();
             }
+        }
+    }
+
+    /// <summary>
+    /// A planet can change hands before the freighter arrives, and it must not then build for the new owner: the
+    /// freighter is recalled. A structure can also be destroyed on the way, so the planet needs something other than
+    /// what the freighter was sent to build. The order is changed in place, since a freighter already touching the
+    /// planet must not be sent away and back, which its own dock would refuse. With nothing to build it is recalled.
+    /// </summary>
+    private static void KeepOrderCurrent(Freighter freighter, Planet planet)
+    {
+        var next = GetNextStructure(planet);
+        if ((planet.Owner is { } owner && owner != freighter.Faction) || next is null)
+        {
+            freighter.Recall();
+        }
+        else if (next != freighter.TargetStructure)
+        {
+            freighter.Redirect(next.Value);
         }
     }
 

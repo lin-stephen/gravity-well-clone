@@ -94,4 +94,39 @@ public class FreighterTests
         traveling.TargetPlanet.Should().BeSameAs(planet);
         idle.State.Should().Be(FreighterState.Idle);
     }
+
+    [Test]
+    public void Redirect_ChangesWhatATravelingFreighterWillBuild_AndKeepsItsDockAndCargo()
+    {
+        var planet = new Planet(Vector2.Zero, owner: Faction.Blue);
+        var freighter = new Freighter(new Vector2(0f, -46f), Faction.Blue);
+        freighter.Dispatch(planet, StructureType.Colony);
+        freighter.BeginDocking(planet, -Vector2.UnitY);
+
+        freighter.Redirect(StructureType.Base);
+
+        freighter.TargetStructure.Should().Be(StructureType.Base);
+        freighter.TargetPlanet.Should().BeSameAs(planet);
+        freighter.State.Should().Be(FreighterState.Traveling);
+        freighter.DockingTarget.Should().BeSameAs(planet);
+        freighter.RawMaterials.Should().Be(Freighter.CargoCapacity);
+    }
+
+    [Test]
+    public void Redirect_OfAFreighterThatIsNotTraveling_ChangesNothing()
+    {
+        var planet = new Planet(Vector2.Zero, owner: Faction.Blue);
+        var idle = new Freighter(new Vector2(500f, 0f), Faction.Blue);
+        var building = new Freighter(new Vector2(0f, -46f), Faction.Blue);
+        building.Dispatch(planet, StructureType.Colony);
+        building.BeginDocking(planet, -Vector2.UnitY);
+        building.CompleteDocking();
+        building.BeginBuilding().Should().BeTrue();
+
+        idle.Redirect(StructureType.Base);
+        building.Redirect(StructureType.Base);
+
+        idle.TargetStructure.Should().BeNull();
+        building.TargetStructure.Should().Be(StructureType.Colony);
+    }
 }

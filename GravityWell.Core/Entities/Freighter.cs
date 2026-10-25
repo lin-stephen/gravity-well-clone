@@ -58,6 +58,19 @@ public sealed class Freighter : Ship
     }
 
     /// <summary>
+    /// Changes what a traveling freighter will build when the planet's needs have changed on the way. It keeps its
+    /// cargo, its flight and its dock, so one already touching the planet carries on instead of leaving.
+    /// Does nothing unless the freighter is traveling.
+    /// </summary>
+    public void Redirect(StructureType structureType)
+    {
+        if (State == FreighterState.Traveling)
+        {
+            TargetStructure = structureType;
+        }
+    }
+
+    /// <summary>
     /// Gives up a build whose structure was destroyed under it: the freighter lets go of its dock and returns to
     /// idle with its cargo, so it can be sent again. Does nothing unless the freighter is building.
     /// </summary>

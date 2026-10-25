@@ -88,4 +88,49 @@ public class FreighterRecallTests
 
         planet.HasOperationalStructure(StructureType.Base).Should().BeTrue();
     }
+
+    [TestCase(0)]
+    [TestCase(1)]
+    [TestCase(3)]
+    public void Freighter_WhoseBaseIsDestroyedJustAsItDocks_StillRebuildsTheBase(int ticksAfterCapture)
+    {
+        // The Colony freighter is captured by the planet's dock, and the Base is shot out that same tick or a few
+        // later. The order goes stale at the worst moment: the freighter is touching the planet, so it must not be
+        // sent away and straight back (the dock it just left would refuse it for good).
+        var planet = new Planet(new Vector2(300f, 0f), owner: Faction.Red);
+        var planetBase = planet.AddStructure(StructureType.Base, StructureState.Operational);
+        var freighter = new Freighter(new Vector2(-200f, 0f), Faction.Red) { Rotation = 90f };
+        var world = new GameWorld([planet], [freighter]);
+        world.Player.Position = new Vector2(10000f, 10000f);
+        var autopilot = new FreighterAutopilot();
+        var physics = new PhysicsSystem();
+        var docking = new DockingSystem();
+        var collisions = new CollisionSystem();
+        var freighters = new FreighterSystem();
+        freighters.Update(world, Dt);
+        freighter.TargetStructure.Should().Be(StructureType.Colony);
+
+        int? capturedAt = null;
+        for (var step = 0; step < (int)(180f / Dt); step++)
+        {
+            autopilot.Update(world, Dt);
+            physics.Update(world, default, Dt);
+            docking.Update(world, Dt);
+            collisions.Update(world);
+            if (capturedAt is null && freighter.DockingTarget is not null)
+            {
+                capturedAt = step;
+            }
+
+            if (capturedAt is { } at && step == at + ticksAfterCapture)
+            {
+                planetBase.TakeDamage(PlanetStructure.MaxHealth);
+            }
+
+            freighters.Update(world, Dt);
+        }
+
+        capturedAt.Should().NotBeNull("the freighter reaches the planet");
+        planet.HasOperationalStructure(StructureType.Base).Should().BeTrue("the Base is rebuilt");
+    }
 }

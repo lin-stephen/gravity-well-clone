@@ -159,4 +159,94 @@ public class FreighterSystemTests
         freighter.IsDocked.Should().BeFalse();
         freighter.RawMaterials.Should().Be(Freighter.CargoCapacity);
     }
+
+    private static (Planet Planet, Freighter Freighter, GameWorld World, FreighterSystem System) ColonyFreighterOnItsWay()
+    {
+        var planet = new Planet(Vector2.Zero, owner: Faction.Red);
+        planet.AddStructure(StructureType.Base, StructureState.Operational);
+        var freighter = new Freighter(new Vector2(0f, -46f), Faction.Red);
+        var world = new GameWorld([planet], [freighter]);
+        var system = new FreighterSystem();
+        system.Update(world, Dt);
+        freighter.State.Should().Be(FreighterState.Traveling);
+        freighter.TargetStructure.Should().Be(StructureType.Colony);
+        return (planet, freighter, world, system);
+    }
+
+    [Test]
+    public void Update_BaseDestroyedWhileColonyFreighterIsDocking_DoesNotThrowAndRebuildsTheBase()
+    {
+        var (planet, freighter, world, system) = ColonyFreighterOnItsWay();
+        planet.Structures.Single().TakeDamage(PlanetStructure.MaxHealth);
+        freighter.BeginDocking(planet, -Vector2.UnitY);
+        freighter.CompleteDocking();
+
+        Assert.DoesNotThrow(() => system.Update(world, Dt));
+
+        planet.HasStructure(StructureType.Colony).Should().BeFalse("a Colony cannot stand without a Base");
+        var rebuilt = planet.Structures.Should().ContainSingle().Subject;
+        rebuilt.Type.Should().Be(StructureType.Base);
+        rebuilt.State.Should().Be(StructureState.Building);
+        freighter.State.Should().Be(FreighterState.Building, "it was already touching the planet, so it carries on");
+        freighter.TargetStructure.Should().Be(StructureType.Base);
+    }
+
+    [Test]
+    public void Update_BaseDestroyedMidFlight_RedirectsTheColonyFreighterToRebuildTheBase()
+    {
+        var (planet, freighter, world, system) = ColonyFreighterOnItsWay();
+        planet.Structures.Single().TakeDamage(PlanetStructure.MaxHealth);
+
+        system.Update(world, Dt);
+
+        freighter.State.Should().Be(FreighterState.Traveling);
+        freighter.TargetPlanet.Should().BeSameAs(planet);
+        freighter.TargetStructure.Should().Be(StructureType.Base);
+        freighter.RawMaterials.Should().Be(Freighter.CargoCapacity, "a redirected freighter keeps its cargo");
+    }
+
+    [Test]
+    public void Update_BaseDestroyedWhileFreighterIsBeingCaptured_KeepsItsDock()
+    {
+        var (planet, freighter, world, system) = ColonyFreighterOnItsWay();
+        freighter.BeginDocking(planet, -Vector2.UnitY);
+        planet.Structures.Single().TakeDamage(PlanetStructure.MaxHealth);
+
+        system.Update(world, Dt);
+
+        freighter.DockingTarget.Should().BeSameAs(planet, "it is redirected in place, not sent away and back");
+        freighter.ReleasedDockingTarget.Should().BeNull();
+        freighter.TargetStructure.Should().Be(StructureType.Base);
+        freighter.State.Should().Be(FreighterState.Traveling);
+    }
+
+    [Test]
+    public void Update_ColonyDestroyedMidFlight_RedirectsTheStarbaseFreighterToRebuildTheColony()
+    {
+        var planet = new Planet(Vector2.Zero, owner: Faction.Red);
+        planet.AddStructure(StructureType.Base, StructureState.Operational);
+        var colony = planet.AddStructure(StructureType.Colony, StructureState.Operational);
+        var freighter = new Freighter(new Vector2(0f, -46f), Faction.Red);
+        var world = new GameWorld([planet], [freighter]);
+        var system = new FreighterSystem();
+        system.Update(world, Dt);
+        freighter.TargetStructure.Should().Be(StructureType.Starbase);
+        colony.TakeDamage(PlanetStructure.MaxHealth);
+
+        system.Update(world, Dt);
+
+        freighter.TargetStructure.Should().Be(StructureType.Colony);
+    }
+
+    [Test]
+    public void Update_OrderStillMatchesWhatThePlanetNeeds_IsNotRecalled()
+    {
+        var (planet, freighter, world, system) = ColonyFreighterOnItsWay();
+
+        system.Update(world, Dt);
+        system.Update(world, Dt);
+
+        freighter.State.Should().Be(FreighterState.Traveling);
+        freighter.TargetStructure.Should().Be(StructureType.Colony);
+    }
 }
