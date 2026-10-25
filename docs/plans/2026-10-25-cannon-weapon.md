@@ -49,18 +49,18 @@
   - `bool PlanetStructure.IsTargetable` (`State` is `Building` or `Operational`)
   - `void PlanetStructure.TakeDamage(int damage)`: does nothing unless targetable; clamps `Health` at 0; at 0 sets `State = Destroyed`; leaves `ConstructionProgress` alone.
 
-- [ ] **Step 1: Commit the spec and this plan first:** `git add docs/superpowers/specs/2026-10-25-cannon-weapon-design.md docs/plans/2026-10-25-cannon-weapon.md && git commit -m "Add cannon weapon design and plan"`
-- [ ] **Step 2: Write the failing tests** in `PlanetStructureTests`:
+- [x] **Step 1: Commit the spec and this plan first:** `git add docs/superpowers/specs/2026-10-25-cannon-weapon-design.md docs/plans/2026-10-25-cannon-weapon.md && git commit -m "Add cannon weapon design and plan"`
+- [x] **Step 2: Write the failing tests** in `PlanetStructureTests`:
   - `NewStructure_HasFullHealth`: `Health == PlanetStructure.MaxHealth` for each of `Planned`, `Building`, `Operational`.
   - `TakeDamage_OperationalStructure_LosesHealth`: after `TakeDamage(1)`, `Health == MaxHealth - 1` and `State == Operational`.
   - `TakeDamage_ToZero_DestroysStructureAndClamps`: `TakeDamage(MaxHealth + 3)` gives `Health == 0`, `State == Destroyed`.
   - `TakeDamage_BuildingStructure_KeepsConstructionProgress`: advance progress to 0.5, `TakeDamage(1)`: progress still 0.5, health reduced.
   - `TakeDamage_PlannedOrDestroyedStructure_IsUnchanged`.
   - `DestroyedStructure_NoLongerCountsOnPlanet`: an owned `Planet` with an operational Base: after `TakeDamage(MaxHealth)` on the Base, `HasStructure(Base)` and `HasOperationalStructure(Base)` are false.
-- [ ] **Step 3: Run to verify they fail:** `dotnet test tests/GravityWell.Tests --filter "FullyQualifiedName~PlanetStructureTests"`. Expected: compile failure.
-- [ ] **Step 4: Implement** the interface above in `PlanetStructure`.
-- [ ] **Step 5: Run the full suite.** Expected: pass.
-- [ ] **Step 6: Commit** `Give each planet structure its own health`.
+- [x] **Step 3: Run to verify they fail:** `dotnet test tests/GravityWell.Tests --filter "FullyQualifiedName~PlanetStructureTests"`. Expected: compile failure.
+- [x] **Step 4: Implement** the interface above in `PlanetStructure`.
+- [x] **Step 5: Run the full suite.** Expected: pass.
+- [x] **Step 6: Commit** `Give each planet structure its own health`.
 
 ### Task 2: Structure layout in Core
 
@@ -74,11 +74,11 @@
   - `public readonly record struct Aabb(Vector2 Min, Vector2 Max)`
   - `public static class StructureLayout` with `Vector2 GetAnchor(Planet planet, StructureType type)` (the exact offsets in the current `StructureRenderer.GetPosition`) and `Aabb GetBounds(Planet planet, StructureType type)`: the box that encloses the glyph drawn by `DrawGlyph`, as offsets from the anchor.
 
-- [ ] **Step 1: Write the failing tests** (planet at `(100, 200)`). `GetAnchor`: Base `(100,200)`, Colony `(100,219)`, TechCenter `(83,185)`, CommCenter `(114,189)`, and Starbase, SpaceDock and SensorArray each `(100,146)`. `GetBounds` as offsets from the anchor, one `TestCase` per row: Base `(-8,-8)..(8,8)`, Colony `(-15,-6)..(15,6)`, TechCenter `(-7,-12)..(7,6)`, CommCenter `(-6,-15)..(9,8)`, Starbase `(-25,-7)..(25,7)`, SpaceDock `(-15,-17)..(-5,0)`, SensorArray `(3,-14)..(17,0)`.
-- [ ] **Step 2: Run to verify they fail** (`--filter "FullyQualifiedName~StructureLayoutTests"`). Expected: compile failure.
-- [ ] **Step 3: Implement `StructureLayout`**, then make `StructureRenderer` use `GetAnchor`. `DrawGlyph` and every drawn pixel stay unchanged.
-- [ ] **Step 4: Run the full suite and build.** Expected: pass.
-- [ ] **Step 5: Commit** `Move structure layout into Core`.
+- [x] **Step 1: Write the failing tests** (planet at `(100, 200)`). `GetAnchor`: Base `(100,200)`, Colony `(100,219)`, TechCenter `(83,185)`, CommCenter `(114,189)`, and Starbase, SpaceDock and SensorArray each `(100,146)`. `GetBounds` as offsets from the anchor, one `TestCase` per row: Base `(-8,-8)..(8,8)`, Colony `(-15,-6)..(15,6)`, TechCenter `(-7,-12)..(7,6)`, CommCenter `(-6,-15)..(9,8)`, Starbase `(-25,-7)..(25,7)`, SpaceDock `(-15,-17)..(-5,0)`, SensorArray `(3,-14)..(17,0)`.
+- [x] **Step 2: Run to verify they fail** (`--filter "FullyQualifiedName~StructureLayoutTests"`). Expected: compile failure.
+- [x] **Step 3: Implement `StructureLayout`**, then make `StructureRenderer` use `GetAnchor`. `DrawGlyph` and every drawn pixel stay unchanged.
+- [x] **Step 4: Run the full suite and build.** Expected: pass.
+- [x] **Step 5: Commit** `Move structure layout into Core`.
 
 ### Task 3: Bolt state, settings and the fire control
 
@@ -96,11 +96,11 @@
   - `const float Fighter.NoseDistance = 13f`.
   - `public sealed record WeaponSettings` (validated like `CollisionSettings`, with `Validate()`), defaults: `BoltSpeed 520f` (> 0, added along the nose), `BoltLifetime 1.6f` (> 0), `FireInterval 0.25f` (>= 0), `Damage 1` (>= 1), `FriendlyFire false`, `MaxBolts 32` (>= 1), `ImpactDuration 0.3f` (> 0).
 
-- [ ] **Step 1: Write the failing tests** in `WeaponSettingsTests`: `Defaults_AreValid` (`Validate()` does not throw); one `TestCase` each that throws `ValidationException`: `BoltSpeed = 0`, `BoltLifetime = 0`, `FireInterval = -1`, `Damage = 0`, `MaxBolts = 0`, `ImpactDuration = 0`; `Defaults_FriendlyFireIsOff`; `DefaultBoltSpeed_ExceedsFighterMaxSpeed`.
-- [ ] **Step 2: Run to verify they fail** (`--filter "FullyQualifiedName~WeaponSettingsTests"`). Expected: compile failure.
-- [ ] **Step 3: Implement** the types above. Existing `PlayerControls` call sites still compile because the new parameter has a default. The renderer change replaces the literal `-13` with `-Fighter.NoseDistance`.
-- [ ] **Step 4: Run the full suite and build.** Expected: pass.
-- [ ] **Step 5: Commit** `Add bolt state, weapon settings and the fire control flag`.
+- [x] **Step 1: Write the failing tests** in `WeaponSettingsTests`: `Defaults_AreValid` (`Validate()` does not throw); one `TestCase` each that throws `ValidationException`: `BoltSpeed = 0`, `BoltLifetime = 0`, `FireInterval = -1`, `Damage = 0`, `MaxBolts = 0`, `ImpactDuration = 0`; `Defaults_FriendlyFireIsOff`; `DefaultBoltSpeed_ExceedsFighterMaxSpeed`.
+- [x] **Step 2: Run to verify they fail** (`--filter "FullyQualifiedName~WeaponSettingsTests"`). Expected: compile failure.
+- [x] **Step 3: Implement** the types above. Existing `PlayerControls` call sites still compile because the new parameter has a default. The renderer change replaces the literal `-13` with `-Fighter.NoseDistance`.
+- [x] **Step 4: Run the full suite and build.** Expected: pass.
+- [x] **Step 5: Commit** `Add bolt state, weapon settings and the fire control flag`.
 
 ### Task 4: Segment intersection helpers
 
@@ -114,7 +114,7 @@
   - `bool SegmentCircle(Vector2 from, Vector2 to, Vector2 center, float radius, out float enter, out float exit)`: true when the segment `from..to` (parameter 0..1) overlaps the circle. `enter` is the first parameter inside the circle, clamped to at least 0 (so 0 when `from` is inside). `exit` is the unclamped parameter where the line leaves the circle and can exceed 1 when `to` is inside. Degenerate (zero-length) segments are handled without dividing by zero.
   - `bool SegmentBox(Vector2 from, Vector2 to, Aabb box, out float enter)`: true when the segment overlaps the box. `enter` is the first parameter inside the box, clamped to at least 0.
 
-- [ ] **Step 1: Write the failing tests** in `SweepTests`, circle at origin radius 10:
+- [x] **Step 1: Write the failing tests** in `SweepTests`, circle at origin radius 10:
   - `SegmentCircle_CrossingThrough`: from `(-20,0)` to `(20,0)`: true, `enter == 0.25`, `exit == 0.75`.
   - `SegmentCircle_StartsInside`: from `(0,0)` to `(20,0)`: true, `enter == 0`, `exit == 0.5`.
   - `SegmentCircle_EndsInside`: from `(-20,0)` to `(0,0)`: true, `enter == 0.5`, `exit > 1`.
@@ -123,10 +123,10 @@
   - `SegmentCircle_ZeroLengthInside_TrueAndZeroLengthOutside_False`.
   - `SegmentBox_CrossingThrough`: box `(-5,-5)..(5,5)`, from `(-15,0)` to `(15,0)`: `enter == 1/3` (within 0.001).
   - `SegmentBox_StartsInside_EnterIsZero`, `SegmentBox_StopsShort_False`, `SegmentBox_MissesAbove_False`, `SegmentBox_AxisParallelOutsideSlab_False` (a horizontal segment at `y = 8`), `SegmentBox_ZeroLengthInside_True`.
-- [ ] **Step 2: Run to verify they fail** (`--filter "FullyQualifiedName~SweepTests"`). Expected: compile failure.
-- [ ] **Step 3: Implement** the quadratic for the circle and the slab method for the box.
-- [ ] **Step 4: Run the full suite.** Expected: pass.
-- [ ] **Step 5: Commit** `Add segment intersection helpers for bolt hits`.
+- [x] **Step 2: Run to verify they fail** (`--filter "FullyQualifiedName~SweepTests"`). Expected: compile failure.
+- [x] **Step 3: Implement** the quadratic for the circle and the slab method for the box.
+- [x] **Step 4: Run the full suite.** Expected: pass.
+- [x] **Step 5: Commit** `Add segment intersection helpers for bolt hits`.
 
 ### Task 5: Firing
 
@@ -141,17 +141,17 @@
   - `void Update(GameWorld world, PlayerControls controls, float deltaTime)`. Each call, in this order: age impacts, count down the fire timer, move and resolve existing bolts (Tasks 6 to 8), then fire. A bolt fired in a call is not moved in that call.
   - Firing: when `controls.Fire`, the timer is at 0, and `world.Bolts.Count < MaxBolts`, add `new Bolt(world.Player, Player.Position + Player.Forward * Fighter.NoseDistance, Player.Velocity + Player.Forward * BoltSpeed, BoltLifetime)` and set the timer to `FireInterval`. A docked player can fire.
 
-- [ ] **Step 1: Write the failing tests.** Helper builds a `GameWorld` with one far-away unowned planet, no freighters and no AI fighters, `PhysicsSystem(new PhysicsSettings { PlanetGravityStrength = 0f })`, `WeaponSettings { BoltSpeed = 500f, BoltLifetime = 2f, FireInterval = 0.25f }`, and `Player.Position = (0, 0)`.
+- [x] **Step 1: Write the failing tests.** Helper builds a `GameWorld` with one far-away unowned planet, no freighters and no AI fighters, `PhysicsSystem(new PhysicsSettings { PlanetGravityStrength = 0f })`, `WeaponSettings { BoltSpeed = 500f, BoltLifetime = 2f, FireInterval = 0.25f }`, and `Player.Position = (0, 0)`.
   - `Fire_SpawnsBoltAtNoseAlongFacing`: `Rotation = 90`, `Velocity = (30, 0)`. One bolt, `Position == (13, 0)`, `Velocity == (530, 0)`, `Shooter == world.Player`, `TimeRemaining == 2`.
   - `Fire_FacingUp_InheritsSidewaysVelocity`: `Rotation = 0`, `Velocity = (40, 0)`: bolt velocity `(40, -500)` and position `(0, -13)`.
   - `NoFire_NoBolt`.
   - `Fire_TwiceWithinInterval_FiresOnce`: `Fire = true` at `deltaTime = 0.1` three times gives one bolt, a fourth gives two (at 0.3 s the timer has expired).
   - `Fire_AtMaxBolts_DoesNotExceedCap`: `MaxBolts = 2`, `FireInterval = 0`, four fire updates give `Bolts.Count == 2`.
   - `Fire_WhileDocked_StillFires`: `BeginDocking(planet, Vector2.UnitY)` then `CompleteDocking()` on the player, then fire: one bolt.
-- [ ] **Step 2: Run to verify they fail** (`--filter "FullyQualifiedName~WeaponSystemFiringTests"`). Expected: compile failure.
-- [ ] **Step 3: Implement** the firing path and the fire timer in `WeaponSystem`. Leave the move and hit step as an empty private method for Task 6.
-- [ ] **Step 4: Run the full suite.** Expected: pass.
-- [ ] **Step 5: Commit** `Add WeaponSystem firing`.
+- [x] **Step 2: Run to verify they fail** (`--filter "FullyQualifiedName~WeaponSystemFiringTests"`). Expected: compile failure.
+- [x] **Step 3: Implement** the firing path and the fire timer in `WeaponSystem`. Leave the move and hit step as an empty private method for Task 6.
+- [x] **Step 4: Run the full suite.** Expected: pass.
+- [x] **Step 5: Commit** `Add WeaponSystem firing`.
 
 ### Task 6: Bolt flight under gravity
 
@@ -163,17 +163,17 @@
 - Consumes: `PhysicsSystem.GetGravity(GameWorld, Vector2)`.
 - Produces: moving a bolt over `deltaTime`: `Velocity += GetGravity(world, Position) * deltaTime`, then `Position += Velocity * deltaTime` (the same order the ships use), `TimeRemaining -= deltaTime`. A bolt whose `TimeRemaining` is at or below 0 after moving is removed. Impacts get `Age += deltaTime` and are removed once `Age >= ImpactDuration`. Move code must return the segment `(from, to)` for the hit step in Tasks 7 and 8. A `deltaTime <= 0` moves nothing.
 
-- [ ] **Step 1: Write the failing tests** (same helper as Task 5):
+- [x] **Step 1: Write the failing tests** (same helper as Task 5):
   - `Bolt_WithoutGravity_TravelsStraight`: fire, then one update at `0.1`: `Position == (63, 0)` (within 0.001).
   - `Bolt_WithGravity_BendsTowardPlanet`: default `PhysicsSettings`, an unowned planet at `(0, -100)` (clear of the path), 30 updates at `0.02`: `Velocity.Y < 0` and `Position.Y < 0`.
   - `Bolt_PastLifetime_IsRemoved`: `BoltLifetime = 0.5`, fire, then two updates at `0.3`: `Bolts` is empty.
   - `Update_ZeroDeltaTime_DoesNotMoveBolts`: position unchanged and finite, bolt kept.
   - `Update_VeryLargeDeltaTime_RemovesExpiredBoltWithoutNaN`: `deltaTime = 5`: no bolts and no exception.
   - `Impact_AgesAndExpires`: add `new Impact(Vector2.Zero)` to the world with `ImpactDuration = 0.3`: after an update at `0.2` it exists with `Age == 0.2`, after another `0.2` it is gone.
-- [ ] **Step 2: Run to verify they fail** (`--filter "FullyQualifiedName~WeaponSystemFlightTests"`). Expected: fail.
-- [ ] **Step 3: Implement** movement, expiry and impact ageing.
-- [ ] **Step 4: Run the full suite.** Expected: pass.
-- [ ] **Step 5: Commit** `Move bolts under gravity and expire them`.
+- [x] **Step 2: Run to verify they fail** (`--filter "FullyQualifiedName~WeaponSystemFlightTests"`). Expected: fail.
+- [x] **Step 3: Implement** movement, expiry and impact ageing.
+- [x] **Step 4: Run the full suite.** Expected: pass.
+- [x] **Step 5: Commit** `Move bolts under gravity and expire them`.
 
 ### Task 7: Bolts hit ships
 
@@ -185,7 +185,7 @@
 - Consumes: `Sweep.SegmentCircle`, `world.Ships`.
 - Produces: for each bolt's segment this frame, every candidate ship is a circle of `CollisionRadius`. Skipped: the bolt's own `Shooter`; ships of the bolt's faction unless `FriendlyFire`. The earliest hit by segment parameter wins: that ship loses `Damage` health (`Math.Max(0, ...)`), an `Impact` is added at the hit point, and the bolt is removed. Docked ships are hit like any other. No ship is removed or disabled.
 
-- [ ] **Step 1: Write the failing tests** (Task 5 helper; the player at `(0,0)` faces `+x`; a Red `Fighter { Faction = Red, Position = (200,0), Velocity = Zero }` added through the three-argument `GameWorld` constructor; a helper `Run(seconds)` steps at `0.02`):
+- [x] **Step 1: Write the failing tests** (Task 5 helper; the player at `(0,0)` faces `+x`; a Red `Fighter { Faction = Red, Position = (200,0), Velocity = Zero }` added through the three-argument `GameWorld` constructor; a helper `Run(seconds)` steps at `0.02`):
   - `Bolt_HitsEnemyFighter`: after 0.6 s the fighter has `Health == 5`, `Bolts` is empty, `Impacts.Count == 1`, `Impacts[0].Position.X` is `190` within 1.
   - `Bolt_HitsEnemyFreighter`: a Red `Freighter` at `(200,0)`: `Health == Freighter.MaxHealth - 1`.
   - `Bolt_FliesThroughFriendlyShip`: a Blue AI fighter at `(200,0)` and a Red fighter at `(400,0)`: the Blue fighter keeps full health and the Red one takes 1.
@@ -195,10 +195,10 @@
   - `Bolt_HitsNearerOfTwoEnemiesOnly`: Red fighters at `(200,0)` and `(300,0)`: the first takes 1, the second none.
   - `Hit_ClampsHealthAtZero_AndKeepsShipInWorld`: an enemy with `Health = 0` is hit: `Health == 0`, still in `world.AiFighters`.
   - `Bolt_HitsDockedEnemyShip`: a Red fighter with `BeginDocking(farPlanet, Vector2.UnitY)` and `CompleteDocking()` takes 1.
-- [ ] **Step 2: Run to verify they fail** (`--filter "FullyQualifiedName~WeaponSystemShipHitTests"`). Expected: health unchanged.
-- [ ] **Step 3: Implement** the ship part of the hit step. Structure the hit step as "collect candidate events with a parameter, a kind and a payload, apply the earliest", because Task 8 adds planet events to the same list.
-- [ ] **Step 4: Run the full suite.** Expected: pass.
-- [ ] **Step 5: Commit** `Let bolts damage enemy ships`.
+- [x] **Step 2: Run to verify they fail** (`--filter "FullyQualifiedName~WeaponSystemShipHitTests"`). Expected: health unchanged.
+- [x] **Step 3: Implement** the ship part of the hit step. Structure the hit step as "collect candidate events with a parameter, a kind and a payload, apply the earliest", because Task 8 adds planet events to the same list.
+- [x] **Step 4: Run the full suite.** Expected: pass.
+- [x] **Step 5: Commit** `Let bolts damage enemy ships`.
 
 ### Task 8: Bolts meet planets and structures
 
@@ -213,7 +213,7 @@
   - Any other planet: the circle entry (`enter`) is an absorbing event with no damage and no impact. If the owner is the bolt's own faction (friendly fire off), each of its targetable structures' boxes is also an absorbing event, which covers a friendly Starbase outside the circle.
   - A bolt that starts inside a circle is covered by `enter == 0`. There is no per-bolt "inside" state.
 
-- [ ] **Step 1: Write the failing tests.** Planet at `(300, 0)`. Gravity off. The player at `(0,0)` faces `+x` unless stated. A Red `Fighter` at `(500, 0)` behind the planet, `Health 6`, serves as the "bolt did not pass through" witness. Helpers build an owned planet with `AddStructure(StructureType.Base, StructureState.Operational)` and others as needed.
+- [x] **Step 1: Write the failing tests.** Planet at `(300, 0)`. Gravity off. The player at `(0,0)` faces `+x` unless stated. A Red `Fighter` at `(500, 0)` behind the planet, `Health 6`, serves as the "bolt did not pass through" witness. Helpers build an owned planet with `AddStructure(StructureType.Base, StructureState.Operational)` and others as needed.
   - `UnownedPlanet_AbsorbsBolt`: `Bolts` empty, witness at full health, `Impacts` empty.
   - `OwnPlanet_AbsorbsBoltWithoutDamage`: Blue planet with a Base: `Base.Health == MaxHealth`, witness unhurt, no impact.
   - `EnemyPlanetWithNoStructures_AbsorbsBolt`.
@@ -228,10 +228,10 @@
   - `FriendlyStarbase_AbsorbsBoltFromAbove`: Blue planet with Base and Starbase, the player at `(300,-300)` facing down: `Starbase.Health` unchanged, no impact, `Bolts` empty.
   - `FriendlyFireOn_DamagesOwnPlanetStructures`: `FriendlyFire = true`, Blue planet with a Base: `Base.Health == MaxHealth - 1`.
   - `ShipInFrontOfPlanet_IsHitBeforePlanet`: a Red fighter at `(200, 0)` and a Red planet behind it: the fighter takes 1, the planet's Base is unhurt.
-- [ ] **Step 2: Run to verify they fail** (`--filter "FullyQualifiedName~WeaponSystemPlanetHitTests"`). Expected: bolts pass through planets.
-- [ ] **Step 3: Implement** the planet events in the shared candidate list from Task 7.
-- [ ] **Step 4: Run the full suite.** Expected: pass.
-- [ ] **Step 5: Commit** `Let bolts hit planet structures and be absorbed by planets`.
+- [x] **Step 2: Run to verify they fail** (`--filter "FullyQualifiedName~WeaponSystemPlanetHitTests"`). Expected: bolts pass through planets.
+- [x] **Step 3: Implement** the planet events in the shared candidate list from Task 7.
+- [x] **Step 4: Run the full suite.** Expected: pass.
+- [x] **Step 5: Commit** `Let bolts hit planet structures and be absorbed by planets`.
 
 ### Task 9: Wire it into the game and draw it
 
@@ -245,15 +245,25 @@
 - Produces:
   - `InputSystem.ReadControls` sets `Fire` from `IsKeyPressed(KeyboardKey.F) || IsKeyPressed(KeyboardKey.Down)`.
   - `GravityWellGame` owns a `WeaponSystem` built from the shared `PhysicsSystem` and calls `weapons.Update(world, controls, deltaTime)` right after `collisions.Update(world)`.
-  - `BoltRenderer.DrawBolt(Bolt)` draws a short line along the velocity in `Palette.ForFaction(bolt.Faction)`. `DrawImpact(Impact, float duration)` draws an expanding, fading burst at `Impact.Position` in a new `Palette.Impact` colour (a light colour that stands out from all four faction colours). `GameRenderer.DrawWorld` draws bolts and impacts after ships.
+  - `BoltRenderer(float impactDuration)` takes the duration once. `DrawBolt(Bolt)` draws a short line along the velocity in `Palette.ForFaction(bolt.Faction)`. `DrawImpact(Impact)` draws an expanding, fading burst at `Impact.Position` in a new `Palette.Impact` colour (a light colour that stands out from all four faction colours). `GameRenderer.DrawWorld` draws bolts and impacts after ships.
   - The ADR follows `docs/adr/template.md` and records: swept-segment hits, per-structure health, the planet circle as a one-way door, and the friendly-fire setting.
 
-- [ ] **Step 1: Implement** the input, loop, renderer, palette, help text and README changes. The help overlay lists `F` or `Down` for fire.
-- [ ] **Step 2: Write the ADR** and add it to `docs/adr/README.md` if that file keeps an index.
-- [ ] **Step 3: Verify** `dotnet test tests/GravityWell.Tests`, `dotnet run --project tests/FlightSimulation` and `dotnet build GravityWell.slnx`. Expected: all clean.
-- [ ] **Step 4: Play-test** with `dotnet run --project GravityWell/GravityWell.csproj`. Confirm each Success line in the spec: the bolt leaves the nose and curves near a planet; a Red freighter or fighter flashes and loses 1 health in the HUD or radar; shooting Red's homeworld from different directions hits different structures; your own and unclaimed planets absorb bolts; no bolt comes out of the far side of a planet. Report tuning notes for bolt speed, lifetime and interval.
-- [ ] **Step 5: Commit** `Wire the cannon into the game and draw bolts`.
+- [x] **Step 1: Implement** the input, loop, renderer, palette, help text and README changes. The help overlay lists `F` or `Down` for fire.
+- [x] **Step 2: Write the ADR** and add it to `docs/adr/README.md` if that file keeps an index.
+- [x] **Step 3: Verify** `dotnet test tests/GravityWell.Tests`, `dotnet run --project tests/FlightSimulation` and `dotnet build GravityWell.slnx`. Expected: all clean.
+- [x] **Step 4: Play-test** with `dotnet run --project GravityWell/GravityWell.csproj`. Confirm each Success line in the spec: the bolt leaves the nose and curves near a planet; a Red freighter or fighter flashes and loses 1 health in the HUD or radar; shooting Red's homeworld from different directions hits different structures; your own and unclaimed planets absorb bolts; no bolt comes out of the far side of a planet. Report tuning notes for bolt speed, lifetime and interval.
+- [x] **Step 5: Commit** `Wire the cannon into the game and draw bolts`.
 
 ## Progress
 
 (Updated after each task.)
+
+- Task 1: per-structure health. Reviewer added: damage <= 0 ignored, structures created Destroyed start at 0 health.
+- Task 2: `StructureLayout` and `Aabb` in Core, renderer reads the anchors. Hit boxes cover nominal glyph geometry.
+- Task 3: `Bolt`, `Impact`, `WeaponSettings`, `GameWorld.Bolts/Impacts`, `PlayerControls.Fire`, `Fighter.NoseDistance`.
+- Task 4: `Sweep` helpers. `SegmentCircle` fails closed on NaN or infinite input.
+- Task 5: `WeaponSystem` firing. Negative or non-finite `deltaTime` is treated as 0. Shared helper `WeaponTestWorld`.
+- Task 6: bolt flight under gravity, expiry, impact ageing. Gravity-order mutation verified caught.
+- Task 7: ship hits (earliest hit along the frame segment, hit test before expiry). Nearest-hit mutation verified caught.
+- Task 8: planet and structure hits, one-way planet door. The exit margin became an end-point check, with no reproducible failing test.
+- Task 9: input, loop, `BoltRenderer`, palette, help text, README, ADR 0011. Play-tested in the browser: bolt and help overlay seen, hit flash covered by unit tests only.
