@@ -32,15 +32,32 @@ public sealed class WeaponSystem
         }
 
         fireTimer = MathF.Max(0f, fireTimer - deltaTime);
-        MoveBolts(world, deltaTime);
+        AgeImpacts(world, deltaTime);
+        world.Bolts.RemoveAll(bolt => Advance(world, bolt, deltaTime));
         if (controls.Fire)
         {
             Fire(world);
         }
     }
 
-    private void MoveBolts(GameWorld world, float deltaTime)
+    private void AgeImpacts(GameWorld world, float deltaTime)
     {
+        foreach (var impact in world.Impacts)
+        {
+            impact.Age += deltaTime;
+        }
+
+        world.Impacts.RemoveAll(impact => impact.Age >= settings.ImpactDuration);
+    }
+
+    /// <summary>Flies the bolt one step, the way ships fly: gravity changes the velocity, then the velocity moves it.</summary>
+    /// <returns>True when the bolt is spent and should be removed.</returns>
+    private bool Advance(GameWorld world, Bolt bolt, float deltaTime)
+    {
+        bolt.Velocity += physics.GetGravity(world, bolt.Position) * deltaTime;
+        bolt.Position += bolt.Velocity * deltaTime;
+        bolt.TimeRemaining -= deltaTime;
+        return bolt.TimeRemaining <= 0f;
     }
 
     private void Fire(GameWorld world)
