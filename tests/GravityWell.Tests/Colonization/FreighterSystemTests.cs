@@ -43,6 +43,20 @@ public class FreighterSystemTests
     }
 
     [Test]
+    public void Update_CloserFreighterOfAnotherFaction_IsNeverDispatched()
+    {
+        var planet = new Planet(Vector2.Zero, owner: Faction.Blue);
+        var red = new Freighter(new Vector2(0f, 100f), Faction.Red);
+        var blue = new Freighter(new Vector2(900f, 0f), Faction.Blue);
+        var world = new GameWorld([planet], [red, blue]);
+
+        new FreighterSystem().Update(world, Dt);
+
+        blue.TargetPlanet.Should().BeSameAs(planet);
+        red.State.Should().Be(FreighterState.Idle);
+    }
+
+    [Test]
     public void Update_FreighterRecalledMidFlight_IsPickedOverAFartherIdleOne()
     {
         var lost = new Planet(Vector2.Zero, owner: Faction.Blue);
