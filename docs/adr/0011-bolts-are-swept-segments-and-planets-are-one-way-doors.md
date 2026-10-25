@@ -39,6 +39,9 @@ renderer.
   appears twice and the destroyed glyph is not left under the new one. A freighter whose build site is
   destroyed under it calls `Freighter.Abandon()`, lets go of its dock and is sent again with its cargo.
   Neither behaviour is designed further here.
+- A Colony or Starbase that is already being built is finished even if the structure it depended on is
+  destroyed meanwhile (decided 2026-10-25). Only a freighter still on its way has its order changed. The planet
+  then needs a Base again, and a planet without a Base can be taken, as ADR 0009 already says.
 - Ships can drop to 0 health but nothing removes or disables them yet. That is the next phase.
 - Hit boxes cover a glyph's nominal geometry, not its stroke width, so a highlighted dock can poke about a
   pixel outside its box.

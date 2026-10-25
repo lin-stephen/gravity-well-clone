@@ -249,4 +249,28 @@ public class FreighterSystemTests
         freighter.State.Should().Be(FreighterState.Traveling);
         freighter.TargetStructure.Should().Be(StructureType.Colony);
     }
+
+    [Test]
+    public void Update_BaseDestroyedWhileAColonyIsBeingBuilt_TheColonyIsStillFinished()
+    {
+        // Decided: a build that has started is not cancelled when the structure it depended on is destroyed. The
+        // planet then asks for a new Base next, because the Base is what is missing.
+        var (planet, freighter, world, system) = ColonyFreighterOnItsWay();
+        freighter.BeginDocking(planet, -Vector2.UnitY);
+        freighter.CompleteDocking();
+        system.Update(world, Dt);
+        freighter.State.Should().Be(FreighterState.Building);
+        var planetBase = planet.Structures.Single(structure => structure.Type == StructureType.Base);
+        planetBase.TakeDamage(PlanetStructure.MaxHealth);
+
+        for (var i = 0; i < 5; i++)
+        {
+            system.Update(world, 1f);
+        }
+
+        var colony = planet.Structures.Single(structure => structure.Type == StructureType.Colony);
+        colony.State.Should().Be(StructureState.Operational);
+        freighter.State.Should().Be(FreighterState.Consumed);
+        planetBase.State.Should().Be(StructureState.Destroyed);
+    }
 }
