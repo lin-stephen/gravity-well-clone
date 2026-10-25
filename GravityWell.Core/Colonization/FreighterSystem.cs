@@ -1,3 +1,4 @@
+using System.Numerics;
 using GravityWell.Core.Entities;
 using GravityWell.Core.World;
 
@@ -56,8 +57,10 @@ public sealed class FreighterSystem
                     freighter.TargetPlanet == planet && freighter.State != FreighterState.Consumed))
                 continue;
 
-            var freighter = world.Freighters.FirstOrDefault(candidate =>
-                candidate.Faction == planet.Owner && candidate.State == FreighterState.Idle);
+            // The closest idle freighter wins, so one recalled mid-flight beats a freighter sitting at home.
+            var freighter = world.Freighters
+                .Where(candidate => candidate.Faction == planet.Owner && candidate.State == FreighterState.Idle)
+                .MinBy(candidate => Vector2.DistanceSquared(candidate.Position, planet.Position));
             var nextStructure = GetNextStructure(planet);
             if (freighter is null || nextStructure is null)
                 continue;

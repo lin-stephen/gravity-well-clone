@@ -29,6 +29,37 @@ public class FreighterSystemTests
     }
 
     [Test]
+    public void Update_SeveralIdleFreighters_DispatchesTheClosestToThePlanet()
+    {
+        var planet = new Planet(Vector2.Zero, owner: Faction.Blue);
+        var far = new Freighter(new Vector2(900f, 0f), Faction.Blue);
+        var near = new Freighter(new Vector2(0f, 300f), Faction.Blue);
+        var world = new GameWorld([planet], [far, near]);
+
+        new FreighterSystem().Update(world, Dt);
+
+        near.TargetPlanet.Should().BeSameAs(planet);
+        far.State.Should().Be(FreighterState.Idle);
+    }
+
+    [Test]
+    public void Update_FreighterRecalledMidFlight_IsPickedOverAFartherIdleOne()
+    {
+        var lost = new Planet(Vector2.Zero, owner: Faction.Blue);
+        var contested = new Planet(new Vector2(1000f, 0f), owner: Faction.Blue);
+        var midway = new Freighter(new Vector2(800f, 0f), Faction.Blue);
+        var idleAtHome = new Freighter(new Vector2(-900f, 0f), Faction.Blue);
+        var world = new GameWorld([lost, contested], [idleAtHome, midway]);
+        midway.Dispatch(lost, StructureType.Base);
+        lost.Claim(Faction.Red);
+
+        new FreighterSystem().Update(world, Dt);
+
+        midway.TargetPlanet.Should().BeSameAs(contested);
+        idleAtHome.State.Should().Be(FreighterState.Idle);
+    }
+
+    [Test]
     public void Update_RecallingADockedFreighter_ReleasesItsDock()
     {
         var planet = new Planet(Vector2.Zero, owner: Faction.Blue);
