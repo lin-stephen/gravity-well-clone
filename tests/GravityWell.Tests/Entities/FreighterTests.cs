@@ -59,4 +59,39 @@ public class FreighterTests
         building.State.Should().Be(FreighterState.Building);
         building.TargetPlanet.Should().BeSameAs(planet);
     }
+
+    [Test]
+    public void Abandon_ReturnsABuildingFreighterToIdleWithItsCargo()
+    {
+        var planet = new Planet(Vector2.Zero, owner: Faction.Blue);
+        var freighter = new Freighter(new Vector2(0f, -46f), Faction.Blue);
+        freighter.Dispatch(planet, StructureType.Base);
+        freighter.BeginDocking(planet, -Vector2.UnitY);
+        freighter.CompleteDocking();
+        freighter.BeginBuilding().Should().BeTrue();
+
+        freighter.Abandon();
+
+        freighter.State.Should().Be(FreighterState.Idle);
+        freighter.TargetPlanet.Should().BeNull();
+        freighter.TargetStructure.Should().BeNull();
+        freighter.DockingTarget.Should().BeNull();
+        freighter.RawMaterials.Should().Be(Freighter.CargoCapacity);
+    }
+
+    [Test]
+    public void Abandon_OfAFreighterThatIsNotBuilding_ChangesNothing()
+    {
+        var planet = new Planet(Vector2.Zero, owner: Faction.Blue);
+        var traveling = new Freighter(new Vector2(500f, 0f), Faction.Blue);
+        traveling.Dispatch(planet, StructureType.Base);
+        var idle = new Freighter(new Vector2(500f, 0f), Faction.Blue);
+
+        traveling.Abandon();
+        idle.Abandon();
+
+        traveling.State.Should().Be(FreighterState.Traveling);
+        traveling.TargetPlanet.Should().BeSameAs(planet);
+        idle.State.Should().Be(FreighterState.Idle);
+    }
 }

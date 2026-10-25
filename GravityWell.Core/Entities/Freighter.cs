@@ -57,6 +57,27 @@ public sealed class Freighter : Ship
         State = FreighterState.Idle;
     }
 
+    /// <summary>
+    /// Gives up a build whose structure was destroyed under it: the freighter lets go of its dock and returns to
+    /// idle with its cargo, so it can be sent again. Does nothing unless the freighter is building.
+    /// </summary>
+    public void Abandon()
+    {
+        if (State != FreighterState.Building)
+        {
+            return;
+        }
+
+        if (DockingTarget is not null)
+        {
+            Undock();
+        }
+
+        TargetPlanet = null;
+        TargetStructure = null;
+        State = FreighterState.Idle;
+    }
+
     public bool BeginBuilding()
     {
         if (State != FreighterState.Traveling || !IsDocked || DockingTarget != TargetPlanet)

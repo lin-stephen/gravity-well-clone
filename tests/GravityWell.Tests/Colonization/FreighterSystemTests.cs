@@ -117,4 +117,46 @@ public class FreighterSystemTests
 
         blue.State.Should().Be(FreighterState.Traveling);
     }
+
+    [Test]
+    public void Update_FreighterRebuildsADestroyedBase_ReplacesItWithoutThrowing()
+    {
+        var planet = new Planet(Vector2.Zero, owner: Faction.Red);
+        planet.AddStructure(StructureType.Base, StructureState.Operational).TakeDamage(PlanetStructure.MaxHealth);
+        var freighter = new Freighter(new Vector2(0f, -46f), Faction.Red);
+        var world = new GameWorld([planet], [freighter]);
+        var system = new FreighterSystem();
+        system.Update(world, Dt);
+        freighter.State.Should().Be(FreighterState.Traveling);
+        freighter.BeginDocking(planet, -Vector2.UnitY);
+        freighter.CompleteDocking();
+
+        Assert.DoesNotThrow(() => system.Update(world, Dt));
+
+        var bases = planet.Structures.Where(structure => structure.Type == StructureType.Base).ToList();
+        bases.Should().ContainSingle("the destroyed Base is replaced, not kept beside the new one");
+        bases[0].State.Should().Be(StructureState.Building);
+        bases[0].Health.Should().Be(PlanetStructure.MaxHealth);
+    }
+
+    [Test]
+    public void Update_StructureDestroyedWhileBuilding_FreesTheFreighterToTryAgain()
+    {
+        var planet = new Planet(Vector2.Zero, owner: Faction.Red);
+        var freighter = new Freighter(new Vector2(0f, -46f), Faction.Red);
+        var world = new GameWorld([planet], [freighter]);
+        var system = new FreighterSystem();
+        system.Update(world, Dt);
+        freighter.BeginDocking(planet, -Vector2.UnitY);
+        freighter.CompleteDocking();
+        system.Update(world, Dt);
+        freighter.State.Should().Be(FreighterState.Building);
+        planet.Structures.Single().TakeDamage(PlanetStructure.MaxHealth);
+
+        system.Update(world, Dt);
+
+        freighter.State.Should().Be(FreighterState.Traveling, "it is sent again to rebuild");
+        freighter.IsDocked.Should().BeFalse();
+        freighter.RawMaterials.Should().Be(Freighter.CargoCapacity);
+    }
 }

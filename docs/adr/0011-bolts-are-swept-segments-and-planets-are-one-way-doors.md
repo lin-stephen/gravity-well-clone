@@ -34,8 +34,11 @@ renderer.
 ## Consequences
 
 - Structures can now be destroyed, so a destroyed Base removes the takeover guard from
-  [ADR 0009](0009-a-base-guards-a-planet-from-takeover.md) and freighters can rebuild what was destroyed.
-  Neither is designed further here.
+  [ADR 0009](0009-a-base-guards-a-planet-from-takeover.md). The existing freighter logic then rebuilds a
+  destroyed structure. `Planet.AddStructure` replaces a destroyed entry of the same type, so a type never
+  appears twice and the destroyed glyph is not left under the new one. A freighter whose build site is
+  destroyed under it calls `Freighter.Abandon()`, lets go of its dock and is sent again with its cargo.
+  Neither behaviour is designed further here.
 - Ships can drop to 0 health but nothing removes or disables them yet. That is the next phase.
 - Hit boxes cover a glyph's nominal geometry, not its stroke width, so a highlighted dock can poke about a
   pixel outside its box.

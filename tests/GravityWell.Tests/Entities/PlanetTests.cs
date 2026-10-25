@@ -58,4 +58,31 @@ public class PlanetTests
 
         planet.IsColonized.Should().BeTrue();
     }
+
+    [Test]
+    public void AddStructure_AfterTheSameTypeWasDestroyed_ReplacesIt()
+    {
+        var planet = new Planet(Vector2.Zero, owner: Faction.Red);
+        planet.AddStructure(StructureType.Base, StructureState.Operational).TakeDamage(PlanetStructure.MaxHealth);
+
+        var rebuilt = planet.AddStructure(StructureType.Base);
+
+        planet.Structures.Should().ContainSingle().Which.Should().BeSameAs(rebuilt);
+        rebuilt.Health.Should().Be(PlanetStructure.MaxHealth);
+        rebuilt.State.Should().Be(StructureState.Planned);
+    }
+
+    [Test]
+    public void AddStructure_OfAnotherType_KeepsADestroyedStructure()
+    {
+        var planet = new Planet(Vector2.Zero, owner: Faction.Red);
+        planet.AddStructure(StructureType.Base, StructureState.Operational);
+        var colony = planet.AddStructure(StructureType.Colony, StructureState.Operational);
+        colony.TakeDamage(PlanetStructure.MaxHealth);
+
+        planet.AddStructure(StructureType.TechCenter);
+
+        planet.Structures.Should().Contain(colony);
+        planet.Structures.Should().HaveCount(3);
+    }
 }

@@ -42,6 +42,13 @@ public sealed class FreighterSystem
 
             var structure = freighter.TargetPlanet.Structures.Single(candidate =>
                 candidate.Type == freighter.TargetStructure.Value);
+            if (structure.State == StructureState.Destroyed)
+            {
+                // The build site was shot out from under the freighter. It is sent again if the planet still needs it.
+                freighter.Abandon();
+                continue;
+            }
+
             structure.AdvanceConstruction(deltaTime / BuildDurationSeconds);
 
             if (structure.State == StructureState.Operational)

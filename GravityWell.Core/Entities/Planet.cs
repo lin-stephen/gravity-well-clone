@@ -81,6 +81,8 @@ public sealed class Planet : ICollisionBody
             throw new InvalidOperationException($"Cannot add {type} to this planet.");
         }
 
+        // A destroyed structure of this type gives way to its replacement, so a type never appears twice.
+        structures.RemoveAll(existing => existing.Type == type && existing.State == StructureState.Destroyed);
         var structure = new PlanetStructure(type, state);
         structures.Add(structure);
         return structure;
