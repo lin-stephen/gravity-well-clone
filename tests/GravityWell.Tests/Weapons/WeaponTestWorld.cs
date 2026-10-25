@@ -16,7 +16,7 @@ internal static class WeaponTestWorld
 
     public static WeaponSettings Settings(Func<WeaponSettings, WeaponSettings>? tweak = null)
     {
-        var settings = new WeaponSettings { BoltSpeed = 500f, BoltLifetime = 2f, FireInterval = 0.25f };
+        var settings = new WeaponSettings { BoltSpeed = 500f, BoltLifetime = 2f, FireInterval = 0.25f, ImpactDuration = 10f };
         return tweak?.Invoke(settings) ?? settings;
     }
 

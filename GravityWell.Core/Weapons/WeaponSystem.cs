@@ -1,3 +1,4 @@
+using System.Numerics;
 using GravityWell.Core.Entities;
 using GravityWell.Core.Input;
 using GravityWell.Core.Physics;
@@ -51,13 +52,63 @@ public sealed class WeaponSystem
     }
 
     /// <summary>Flies the bolt one step, the way ships fly: gravity changes the velocity, then the velocity moves it.</summary>
-    /// <returns>True when the bolt is spent and should be removed.</returns>
+    /// <returns>True when the bolt is spent: it hit something, or its time ran out.</returns>
     private bool Advance(GameWorld world, Bolt bolt, float deltaTime)
     {
+        var from = bolt.Position;
         bolt.Velocity += physics.GetGravity(world, bolt.Position) * deltaTime;
         bolt.Position += bolt.Velocity * deltaTime;
         bolt.TimeRemaining -= deltaTime;
-        return bolt.TimeRemaining <= 0f;
+
+        // The hit test runs before expiry, so a bolt gets a last look at what it reaches on its final frame.
+        return ResolveHit(world, bolt, from, bolt.Position) || bolt.TimeRemaining <= 0f;
+    }
+
+    /// <summary>
+    /// What the bolt's path this frame runs into. <see cref="T"/> is how far along the path (0 to 1) it happens.
+    /// A <see cref="Ship"/> or <see cref="Structure"/> takes damage and flashes; with neither, the bolt is only absorbed.
+    /// </summary>
+    private readonly record struct HitEvent(float T, Ship? Ship = null, PlanetStructure? Structure = null);
+
+    private bool ResolveHit(GameWorld world, Bolt bolt, Vector2 from, Vector2 to)
+    {
+        HitEvent? first = null;
+        foreach (var candidate in ShipEvents(world, bolt, from, to))
+        {
+            if (first is null || candidate.T < first.Value.T)
+            {
+                first = candidate;
+            }
+        }
+
+        if (first is not { } hit)
+        {
+            return false;
+        }
+
+        if (hit.Ship is { } ship)
+        {
+            ship.Health = Math.Max(0, ship.Health - settings.Damage);
+            world.Impacts.Add(new Impact(Vector2.Lerp(from, to, hit.T)));
+        }
+
+        return true;
+    }
+
+    private IEnumerable<HitEvent> ShipEvents(GameWorld world, Bolt bolt, Vector2 from, Vector2 to)
+    {
+        foreach (var ship in world.Ships)
+        {
+            if (ReferenceEquals(ship, bolt.Shooter) || (!settings.FriendlyFire && ship.Faction == bolt.Faction))
+            {
+                continue;
+            }
+
+            if (Sweep.SegmentCircle(from, to, ship.Position, ship.CollisionRadius, out var enter, out _))
+            {
+                yield return new HitEvent(enter, ship);
+            }
+        }
     }
 
     private void Fire(GameWorld world)
