@@ -18,7 +18,7 @@ public sealed class StructureRenderer
     {
         foreach (var structure in planet.Structures)
         {
-            var position = GetPosition(planet, structure.Type);
+            var position = StructureLayout.GetAnchor(planet, structure.Type);
             var color = GetColor(planet, structure);
             var dockThickness = structure.Type == StructureType.SpaceDock &&
                 structure.State == StructureState.Operational &&
@@ -31,22 +31,6 @@ public sealed class StructureRenderer
             }
         }
     }
-
-    private static Vector2 GetPosition(Planet planet, StructureType type) => type switch
-    {
-        // The original places the four surface facilities in a compact diamond:
-        // Tech Center and Comm Center above, Base central, Colony below.
-        StructureType.Base => planet.Position,
-        StructureType.Colony => planet.Position + new Vector2(0f, 19f),
-        StructureType.TechCenter => planet.Position + new Vector2(-17f, -15f),
-        StructureType.CommCenter => planet.Position + new Vector2(14f, -11f),
-
-        // Space Dock and Sensor Array are additions to the Starbase rather than
-        // separate orbiting objects, so all three share one orbital anchor.
-        StructureType.Starbase or StructureType.SpaceDock or StructureType.SensorArray =>
-            planet.Position + new Vector2(0f, -54f),
-        _ => planet.Position
-    };
 
     private static Color GetColor(Planet planet, PlanetStructure structure) => structure.State switch
     {
