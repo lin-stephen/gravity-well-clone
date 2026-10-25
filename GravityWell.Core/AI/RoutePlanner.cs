@@ -13,7 +13,10 @@ public static class RoutePlanner
         foreach (var planet in world.Planets)
         {
             yield return planet;
-            if (planet.HasOperationalStructure(StructureType.SpaceDock)) yield return planet.SpaceDock;
+            if (planet.HasOperationalStructure(StructureType.SpaceDock))
+            {
+                yield return planet.SpaceDock;
+            }
         }
     }
 
@@ -29,7 +32,10 @@ public static class RoutePlanner
                 var point = obstacle.Position + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) *
                     (obstacle.CollisionRadius + ship.CollisionRadius + 60f);
                 if (obstacles.All(other => Vector2.Distance(point, other.Position) >
-                                           other.CollisionRadius + ship.CollisionRadius + 20f)) nodes.Add(point);
+                                           other.CollisionRadius + ship.CollisionRadius + 20f))
+                {
+                    nodes.Add(point);
+                }
             }
         }
 
@@ -41,22 +47,52 @@ public static class RoutePlanner
         {
             var current = -1;
             for (var i = 0; i < nodes.Count; i++)
-                if (!visited[i] && (current < 0 || costs[i] < costs[current])) current = i;
-            if (current < 0 || !float.IsFinite(costs[current])) break;
-            if (current == 1) break;
+            {
+                if (!visited[i] && (current < 0 || costs[i] < costs[current]))
+                {
+                    current = i;
+                }
+            }
+
+            if (current < 0 || !float.IsFinite(costs[current]))
+            {
+                break;
+            }
+
+            if (current == 1)
+            {
+                break;
+            }
+
             visited[current] = true;
             for (var next = 1; next < nodes.Count; next++)
             {
-                if (visited[next] || !IsClear(nodes[current], nodes[next], ship, obstacles)) continue;
+                if (visited[next] || !IsClear(nodes[current], nodes[next], ship, obstacles))
+                {
+                    continue;
+                }
+
                 var cost = costs[current] + Vector2.Distance(nodes[current], nodes[next]);
-                if (cost >= costs[next]) continue;
+                if (cost >= costs[next])
+                {
+                    continue;
+                }
+
                 costs[next] = cost;
                 previous[next] = current;
             }
         }
-        if (previous[1] < 0) return [];
+        if (previous[1] < 0)
+        {
+            return [];
+        }
+
         var route = new List<Vector2>();
-        for (var node = 1; node != 0; node = previous[node]) route.Add(nodes[node]);
+        for (var node = 1; node != 0; node = previous[node])
+        {
+            route.Add(nodes[node]);
+        }
+
         route.Reverse();
         return route;
     }
@@ -65,17 +101,26 @@ public static class RoutePlanner
     {
         var segment = end - start;
         var lengthSquared = segment.LengthSquared();
-        if (lengthSquared == 0) return true;
+        if (lengthSquared == 0)
+        {
+            return true;
+        }
+
         foreach (var obstacle in obstacles)
         {
             var radius = obstacle.CollisionRadius + ship.CollisionRadius + 20f;
             // Allow a ship already inside the safety margin to leave it outward.
             var fromCenter = start - obstacle.Position;
             if (fromCenter.LengthSquared() < radius * radius && Vector2.Dot(fromCenter, segment) >= 0f)
+            {
                 continue;
+            }
+
             var t = Math.Clamp(Vector2.Dot(obstacle.Position - start, segment) / lengthSquared, 0f, 1f);
             if (Vector2.DistanceSquared(start + t * segment, obstacle.Position) < radius * radius)
+            {
                 return false;
+            }
         }
         return true;
     }

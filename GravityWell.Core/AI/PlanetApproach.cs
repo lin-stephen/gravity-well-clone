@@ -23,7 +23,10 @@ public sealed class PlanetApproach(DockingSystem docking, PhysicsSystem physics,
     public ShipControls Steer(GameWorld world, Ship ship, FlightPlan plan, Planet planet, float deltaTime)
     {
         if (plan.Target != planet)
+        {
             BeginApproach(world, ship, plan, planet);
+        }
+
         plan.ReplanDelay -= deltaTime;
         var outward = ship.Position - planet.Position;
         var distance = outward.Length();
@@ -32,7 +35,9 @@ public sealed class PlanetApproach(DockingSystem docking, PhysicsSystem physics,
 
         if (plan.Phase is FlightPhase.Align or FlightPhase.Approach &&
             SteerTerminal(world, ship, plan, planet, normal, surfaceDistance) is { } terminal)
+        {
             return terminal;
+        }
 
         FollowRoute(world, ship, plan);
         return SteerCruise(world, ship, plan, normal);
@@ -45,7 +50,10 @@ public sealed class PlanetApproach(DockingSystem docking, PhysicsSystem physics,
         plan.LandingNormal = offset.LengthSquared() > 0 ? Vector2.Normalize(offset) : Vector2.UnitY;
         // Avoid the orbital installation when choosing a landing corridor.
         if (planet.HasOperationalStructure(StructureType.SpaceDock) && plan.LandingNormal.Y < -0.4f)
+        {
             plan.LandingNormal = Vector2.UnitX;
+        }
+
         plan.ApproachPoint = planet.Position + plan.LandingNormal *
             (Planet.Radius + ship.CollisionRadius + tuning.ApproachClearance);
         plan.Route = RoutePlanner.Plan(world, ship, plan.ApproachPoint);
@@ -69,13 +77,20 @@ public sealed class PlanetApproach(DockingSystem docking, PhysicsSystem physics,
         if (plan.Phase == FlightPhase.Align)
         {
             if (docking.IsRearAligned(ship, planet) && sideways.Length() < tuning.AlignedSidewaysSpeed)
+            {
                 plan.Phase = FlightPhase.Approach;
+            }
             else
+            {
                 return Accelerate(ship, HoverAcceleration(world, ship, normal, sideways), normal);
+            }
         }
         if (surfaceDistance <= docking.CaptureDistance &&
             docking.IsRearAligned(ship, planet) && docking.IsSpeedSafe(ship, planet))
+        {
             return default(ShipControls);
+        }
+
         var desiredVelocity = -normal * tuning.TouchdownSpeed;
         var acceleration = (desiredVelocity - ship.Velocity) * 2f -
             physics.GetGravity(world, ship.Position);
@@ -86,7 +101,10 @@ public sealed class PlanetApproach(DockingSystem docking, PhysicsSystem physics,
     {
         while (plan.Route.Count > 1 &&
                Vector2.Distance(ship.Position, plan.Route[0]) < tuning.WaypointReachedDistance)
+        {
             plan.Route.RemoveAt(0);
+        }
+
         if (plan.ReplanDelay <= 0f && (plan.Route.Count == 0 ||
             !RoutePlanner.IsClear(ship.Position, plan.Route[0], ship, RoutePlanner.Obstacles(world))))
         {
@@ -98,7 +116,10 @@ public sealed class PlanetApproach(DockingSystem docking, PhysicsSystem physics,
     private ShipControls SteerCruise(GameWorld world, Ship ship, FlightPlan plan, Vector2 normal)
     {
         if (plan.Route.Count == 0)
+        {
             return Seek(world, ship, ship.Position, 0f); // Brake and retry instead of flying through obstacles.
+        }
+
         var waypoint = plan.Route[0];
         var remaining = Vector2.Distance(ship.Position, waypoint);
         if (plan.Route.Count == 1 && remaining < tuning.AlignTriggerDistance &&
@@ -126,10 +147,18 @@ public sealed class PlanetApproach(DockingSystem docking, PhysicsSystem physics,
     public Vector2 ClearOfPlanets(GameWorld world, Ship ship)
     {
         var planet = world.Planets.MinBy(candidate => Vector2.DistanceSquared(candidate.Position, ship.Position));
-        if (planet is null) return ship.Position;
+        if (planet is null)
+        {
+            return ship.Position;
+        }
+
         var offset = ship.Position - planet.Position;
         var minimumDistance = Planet.Radius + ship.CollisionRadius + tuning.ApproachClearance;
-        if (offset.Length() >= minimumDistance) return ship.Position;
+        if (offset.Length() >= minimumDistance)
+        {
+            return ship.Position;
+        }
+
         var outward = offset.LengthSquared() > 0f ? Vector2.Normalize(offset) : Vector2.UnitY;
         return planet.Position + outward * minimumDistance;
     }
@@ -149,7 +178,11 @@ public sealed class PlanetApproach(DockingSystem docking, PhysicsSystem physics,
         // gives crossing traffic a consistent passing side.
         foreach (var other in world.Ships)
         {
-            if (ReferenceEquals(other, ship)) continue;
+            if (ReferenceEquals(other, ship))
+            {
+                continue;
+            }
+
             var separation = other.Position - ship.Position;
             var relativeVelocity = ship.Velocity - other.Velocity;
             var speedSquared = relativeVelocity.LengthSquared();
@@ -157,7 +190,11 @@ public sealed class PlanetApproach(DockingSystem docking, PhysicsSystem physics,
                 ? Math.Clamp(Vector2.Dot(separation, relativeVelocity) / speedSquared, 0f, 5f) : 0f;
             var closest = separation - relativeVelocity * time;
             var clearance = ship.CollisionRadius + other.CollisionRadius + 12f + MathF.Min(43f, relativeVelocity.Length() * 0.4f);
-            if (closest.Length() >= clearance || separation.Length() > 400f) continue;
+            if (closest.Length() >= clearance || separation.Length() > 400f)
+            {
+                continue;
+            }
+
             var away = separation.LengthSquared() > 0f ? -Vector2.Normalize(separation) : Vector2.UnitX;
             var right = new Vector2(away.Y, -away.X);
             desiredVelocity *= 0.5f;
@@ -170,7 +207,11 @@ public sealed class PlanetApproach(DockingSystem docking, PhysicsSystem physics,
     private static ShipControls Accelerate(Ship ship, Vector2 acceleration, Vector2 fallbackDirection)
     {
         var direction = acceleration.LengthSquared() > 0.25f ? acceleration : fallbackDirection;
-        if (direction.LengthSquared() == 0f) return default;
+        if (direction.LengthSquared() == 0f)
+        {
+            return default;
+        }
+
         var angle = MathF.Atan2(direction.X, -direction.Y) * 180f / MathF.PI;
         var error = MathF.IEEERemainder(angle - ship.Rotation, 360f);
         var turn = Math.Clamp(error / 30f, -1f, 1f);

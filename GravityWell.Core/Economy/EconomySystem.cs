@@ -11,7 +11,11 @@ public sealed class EconomySystem
 
     public void Update(GameWorld world, float deltaTime)
     {
-        if (deltaTime <= 0f) return;
+        if (deltaTime <= 0f)
+        {
+            return;
+        }
+
         foreach (var planet in world.Planets)
         {
             var colonyActive = planet.Health > 0 && planet.IsColonized &&
@@ -39,15 +43,34 @@ public sealed class EconomySystem
             var supplying = colonyActive && inventory.RawMaterials < ResourceInventory.RawCapacity;
             var refining = inventory.RawMaterials > 0 &&
                 inventory.FinishedMaterials < ResourceInventory.FinishedCapacity;
-            if (!supplying) inventory.SupplyProgress = 0;
-            if (!refining) inventory.RefiningProgress = 0;
-            if (!supplying && !refining) break;
+            if (!supplying)
+            {
+                inventory.SupplyProgress = 0;
+            }
+
+            if (!refining)
+            {
+                inventory.RefiningProgress = 0;
+            }
+
+            if (!supplying && !refining)
+            {
+                break;
+            }
 
             var untilSupply = supplying ? SupplyIntervalSeconds - inventory.SupplyProgress : double.PositiveInfinity;
             var untilRefined = refining ? RefiningIntervalSeconds - inventory.RefiningProgress : double.PositiveInfinity;
             var elapsed = Math.Min(remaining, Math.Min(untilSupply, untilRefined));
-            if (supplying) inventory.SupplyProgress += elapsed;
-            if (refining) inventory.RefiningProgress += elapsed;
+            if (supplying)
+            {
+                inventory.SupplyProgress += elapsed;
+            }
+
+            if (refining)
+            {
+                inventory.RefiningProgress += elapsed;
+            }
+
             remaining -= elapsed;
 
             if (inventory.RefiningProgress >= RefiningIntervalSeconds)

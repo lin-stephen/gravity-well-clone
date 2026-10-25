@@ -25,21 +25,29 @@ public sealed class FreighterSystem
             // A planet can change hands before the freighter arrives. It must not then build for the new owner.
             if (freighter.State == FreighterState.Traveling &&
                 freighter.TargetPlanet is { Owner: { } owner } && owner != freighter.Faction)
+            {
                 freighter.Recall();
+            }
 
             if (freighter.BeginBuilding())
+            {
                 BeginConstruction(freighter);
+            }
 
             if (freighter.State != FreighterState.Building || freighter.TargetPlanet is null ||
                 freighter.TargetStructure is null)
+            {
                 continue;
+            }
 
             var structure = freighter.TargetPlanet.Structures.Single(candidate =>
                 candidate.Type == freighter.TargetStructure.Value);
             structure.AdvanceConstruction(deltaTime / BuildDurationSeconds);
 
             if (structure.State == StructureState.Operational)
+            {
                 freighter.Consume();
+            }
         }
     }
 
@@ -55,7 +63,9 @@ public sealed class FreighterSystem
         {
             if (world.Freighters.Any(freighter =>
                     freighter.TargetPlanet == planet && freighter.State != FreighterState.Consumed))
+            {
                 continue;
+            }
 
             // The closest idle freighter wins, so one recalled mid-flight beats a freighter sitting at home.
             var freighter = world.Freighters
@@ -63,7 +73,9 @@ public sealed class FreighterSystem
                 .MinBy(candidate => Vector2.DistanceSquared(candidate.Position, planet.Position));
             var nextStructure = GetNextStructure(planet);
             if (freighter is null || nextStructure is null)
+            {
                 continue;
+            }
 
             freighter.Dispatch(planet, nextStructure.Value);
         }
@@ -75,19 +87,29 @@ public sealed class FreighterSystem
     private static StructureType? GetNextStructure(Planet planet)
     {
         if (!planet.HasStructure(StructureType.Base))
+        {
             return StructureType.Base;
+        }
 
         if (!planet.HasOperationalStructure(StructureType.Base))
+        {
             return null;
+        }
 
         if (planet.Type == PlanetType.Habitable && !planet.HasStructure(StructureType.Colony))
+        {
             return StructureType.Colony;
+        }
 
         if (planet.Type == PlanetType.Habitable && !planet.HasOperationalStructure(StructureType.Colony))
+        {
             return null;
+        }
 
         if (!planet.HasStructure(StructureType.Starbase))
+        {
             return StructureType.Starbase;
+        }
 
         return null;
     }
@@ -109,7 +131,9 @@ public sealed class FreighterSystem
                 (planet.HasOperationalStructure(StructureType.TechCenter) ||
                  planet.HasOperationalStructure(StructureType.SpaceDock)));
             if (producer is null)
+            {
                 continue;
+            }
 
             productionProgress.TryGetValue(faction, out var progress);
             progress += deltaTime / ProductionDurationSeconds;

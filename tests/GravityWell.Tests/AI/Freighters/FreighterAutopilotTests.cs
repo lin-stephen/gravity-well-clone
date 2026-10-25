@@ -22,7 +22,11 @@ public class FreighterAutopilotTests
         bool bump = false, bool withDock = false)
     {
         var target = new Planet(Vector2.Zero, owner: Faction.Blue);
-        if (withDock) target.BuildHomeworld();
+        if (withDock)
+        {
+            target.BuildHomeworld();
+        }
+
         var ship = new Freighter(start, Faction.Blue) { Velocity = velocity, Rotation = 90 };
         ship.Dispatch(target, StructureType.Base);
         var world = new GameWorld((obstacles ?? []).Append(target), [ship]);
@@ -37,15 +41,24 @@ public class FreighterAutopilotTests
         for (var step = 0; step < 180 * 60; step++)
         {
             if (bump && step == 4 * 60)
+            {
                 ship.ApplyCollision(Vector2.Zero, new Vector2(-60, 65));
+            }
+
             autopilot.Update(world, Dt);
             var phase = autopilot.GetPhase(ship);
-            if (phases.Count == 0 || phases[^1] != phase) phases.Add(phase);
+            if (phases.Count == 0 || phases[^1] != phase)
+            {
+                phases.Add(phase);
+            }
+
             physics.Update(world, default, Dt);
             docking.Update(world, Dt);
             collisions.Update(world);
             if (ship.IsDocked)
+            {
                 return new Flight(string.Join(">", phases), step, ship.Position);
+            }
         }
 
         return new Flight(string.Join(">", phases), -1, ship.Position);

@@ -22,7 +22,10 @@ public sealed class ShipAutopilot<TShip>(
     {
         var ships = shipsToPilot(world).ToList();
         foreach (var gone in pilots.Keys.Except(ships).ToArray())
+        {
             pilots.Remove(gone);
+        }
+
         foreach (var ship in ships)
         {
             if (!pilots.TryGetValue(ship, out var pilot))

@@ -24,7 +24,9 @@ public static class Palette
     public static Color ForPlanet(Planet planet)
     {
         if (planet.Owner is { } owner)
+        {
             return ForFaction(owner);
+        }
 
         return planet.Type == PlanetType.Habitable ? UncolonizedPlanet : BarrenPlanet;
     }

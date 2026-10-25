@@ -19,7 +19,10 @@ public sealed class ShipRenderer
         var right = fighter.Position + Rotate(new Vector2(9, 10));
         Raylib.DrawTriangleLines(nose, left, right, Palette.ForFaction(fighter.Faction));
 
-        if (throttle <= 0f) return;
+        if (throttle <= 0f)
+        {
+            return;
+        }
 
         // The flame tip starts at the hull's base (10) and reaches 20 at full throttle.
         var flame = fighter.Position + Rotate(new Vector2(0, 10f + 10f * Math.Min(throttle, 1f)));

@@ -33,7 +33,9 @@ public class GameWorldTests
         var world = new GameWorld();
 
         foreach (var (first, second) in world.Planets.SelectMany((a, i) => world.Planets.Skip(i + 1), (a, b) => (a, b)))
+        {
             Vector2.Distance(first.Position, second.Position).Should().BeGreaterThan(Planet.Radius * 4f);
+        }
     }
 
     [Test]
@@ -54,11 +56,17 @@ public class GameWorldTests
         {
             var homeworld = world.Planets.Single(planet => planet.Owner == fighter.Faction);
             foreach (var planet in world.Planets)
+            {
                 Vector2.Distance(fighter.Position, planet.Position)
                     .Should().BeGreaterThanOrEqualTo(Planet.Radius + Fighter.Radius);
+            }
+
             foreach (var freighter in world.Freighters)
+            {
                 Vector2.Distance(fighter.Position, freighter.Position)
                     .Should().BeGreaterThanOrEqualTo(Fighter.Radius + Freighter.Radius);
+            }
+
             Vector2.Distance(fighter.Position, homeworld.Position).Should().BeLessThan(200f);
         }
     }

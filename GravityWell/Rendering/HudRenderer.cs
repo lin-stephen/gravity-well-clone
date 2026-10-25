@@ -14,12 +14,20 @@ public sealed class HudRenderer
 
     public void DrawDockingStatus(Fighter fighter)
     {
-        if (fighter.DockingTarget is null) return;
+        if (fighter.DockingTarget is null)
+        {
+            return;
+        }
+
         var target = fighter.DockingTarget is SpaceDockBody ? "SPACEDOCK" : "PLANET";
         var status = fighter.IsDocked ? "DOCKED" : "DOCKING";
         Raylib.DrawTextEx(font, $"{status}: {target}  |  UP TO DEPART",
             new Vector2(30, 166), 15, 0.5f, Color.Lime);
-        if (!fighter.IsDocked) return;
+        if (!fighter.IsDocked)
+        {
+            return;
+        }
+
         var repair = fighter.RepairStatus switch
         {
             RepairStatus.Repairing => "REPAIRING",

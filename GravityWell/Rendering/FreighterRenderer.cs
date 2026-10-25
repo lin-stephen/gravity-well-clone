@@ -9,7 +9,9 @@ public sealed class FreighterRenderer
     public void Draw(Freighter freighter)
     {
         if (freighter.State == FreighterState.Consumed)
+        {
             return;
+        }
 
         var forward = freighter.Heading;
         var right = new Vector2(-forward.Y, forward.X);

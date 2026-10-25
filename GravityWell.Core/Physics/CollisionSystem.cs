@@ -29,18 +29,24 @@ public sealed class CollisionSystem
         HashSet<(ICollisionBody, ICollisionBody)> touching = [];
 
         for (var i = 0; i < bodies.Count; i++)
-        for (var j = i + 1; j < bodies.Count; j++)
+        {
+            for (var j = i + 1; j < bodies.Count; j++)
         {
             var first = bodies[i];
             var second = bodies[j];
             if ((first is Ship { DockingTarget: { } target } && ReferenceEquals(target, second)) ||
                 (second is Ship { DockingTarget: { } otherTarget } && ReferenceEquals(otherTarget, first)))
-                continue;
-            var radius = first.CollisionRadius + second.CollisionRadius;
-            if (Vector2.DistanceSquared(first.Position, second.Position) > radius * radius)
-                continue;
+                {
+                    continue;
+                }
 
-            var pair = (first, second);
+                var radius = first.CollisionRadius + second.CollisionRadius;
+            if (Vector2.DistanceSquared(first.Position, second.Position) > radius * radius)
+                {
+                    continue;
+                }
+
+                var pair = (first, second);
             touching.Add(pair);
             if (!contacts.Contains(pair))
             {
@@ -52,6 +58,7 @@ public sealed class CollisionSystem
 
             ResolveContact(first, second);
         }
+        }
 
         contacts = touching;
     }
@@ -59,12 +66,18 @@ public sealed class CollisionSystem
     public void ResolveContact(ICollisionBody first, ICollisionBody second)
     {
         var inverseMass = first.InverseMass + second.InverseMass;
-        if (inverseMass <= 0f) return;
+        if (inverseMass <= 0f)
+        {
+            return;
+        }
 
         var offset = second.Position - first.Position;
         var distance = offset.Length();
         var penetration = first.CollisionRadius + second.CollisionRadius - distance;
-        if (penetration < 0f) return;
+        if (penetration < 0f)
+        {
+            return;
+        }
 
         var relativeVelocity = second.Velocity - first.Velocity;
         var normal = GetContactNormal(first, second);
@@ -80,7 +93,10 @@ public sealed class CollisionSystem
     private static Vector2 GetContactNormal(ICollisionBody first, ICollisionBody second)
     {
         var offset = second.Position - first.Position;
-        if (offset.LengthSquared() > 0f) return Vector2.Normalize(offset);
+        if (offset.LengthSquared() > 0f)
+        {
+            return Vector2.Normalize(offset);
+        }
         // Match bounce resolution when coincident centers have no surface normal.
         var relativeVelocity = second.Velocity - first.Velocity;
         return relativeVelocity.LengthSquared() > 0f

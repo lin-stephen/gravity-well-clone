@@ -19,10 +19,15 @@ public sealed class PlanetRenderer
     {
         var color = Palette.ForPlanet(planet);
         if (docking.ShouldHighlight(fighter, planet))
+        {
             Raylib.DrawRing(planet.Position, Planet.Radius - 1.5f, Planet.Radius + 1.5f,
                 0f, 360f, 96, color);
+        }
         else
+        {
             Raylib.DrawCircleLinesV(planet.Position, Planet.Radius, color);
+        }
+
         structures.Draw(planet, fighter);
     }
 }

@@ -11,7 +11,9 @@ public sealed class RepairSystem
     public void Update(GameWorld world, float deltaTime)
     {
         foreach (var ship in world.Ships)
+        {
             UpdateShip(ship, deltaTime);
+        }
     }
 
     private static void UpdateShip(Ship ship, float deltaTime)
@@ -56,9 +58,16 @@ public sealed class RepairSystem
             ship.RepairProgress -= interval;
         }
         if (ship.Health >= ship.HealthCapacity)
+        {
             ship.ResetRepair(RepairStatus.FullyRepaired);
+        }
         else if (inventory.FinishedMaterials == 0)
+        {
             ship.ResetRepair(RepairStatus.AwaitingSupplies);
-        else ship.RepairStatus = RepairStatus.Repairing;
+        }
+        else
+        {
+            ship.RepairStatus = RepairStatus.Repairing;
+        }
     }
 }

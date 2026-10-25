@@ -37,12 +37,21 @@ public sealed class RadarRenderer
         Raylib.DrawCircleLinesV(center, Radius + 10f, new Color(24, 66, 91, 255));
 
         foreach (var planet in world.Planets)
+        {
             DrawObjectMarker(center, fighter.Position, planet.Position, 4f, Palette.ForPlanet(planet));
+        }
+
         foreach (var freighter in world.Freighters.Where(freighter =>
                      freighter.State != FreighterState.Consumed))
+        {
             DrawObjectMarker(center, fighter.Position, freighter.Position, 2f, Color.LightGray);
+        }
+
         foreach (var aiFighter in world.AiFighters)
+        {
             DrawObjectMarker(center, fighter.Position, aiFighter.Position, 3f, Palette.ForFaction(aiFighter.Faction));
+        }
+
         DrawFighter(center, fighter);
 
         var coordinates = $"X {displayedPosition.X:0}  Y {displayedPosition.Y:0}";
@@ -61,7 +70,9 @@ public sealed class RadarRenderer
     {
         var offset = objectPosition - fighterPosition;
         if (offset.LengthSquared() == 0f)
+        {
             return;
+        }
 
         var markerPosition = center + Vector2.Normalize(offset) * Radius;
         Raylib.DrawCircleV(markerPosition, radius, color);

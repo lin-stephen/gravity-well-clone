@@ -26,7 +26,9 @@ public sealed class StructureRenderer
             DrawGlyph(structure.Type, position, color, dockThickness);
 
             if (structure.State == StructureState.Building)
+            {
                 DrawProgress(position, structure.ConstructionProgress);
+            }
         }
     }
 

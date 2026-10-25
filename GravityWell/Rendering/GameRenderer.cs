@@ -49,7 +49,10 @@ public sealed class GameRenderer
 
         Raylib.BeginMode2D(screenCamera);
         if (showHelp)
+        {
             hud.Draw(viewport.LogicalWidth);
+        }
+
         hud.DrawDockingStatus(world.Player);
         radar.Draw(world, viewport.LogicalWidth);
         Raylib.EndMode2D();
@@ -67,11 +70,20 @@ public sealed class GameRenderer
     private void DrawWorld(GameWorld world, PlayerControls controls)
     {
         foreach (var planet in world.Planets)
+        {
             planets.Draw(planet, world.Player);
+        }
+
         foreach (var freighter in world.Freighters)
+        {
             freighters.Draw(freighter);
+        }
+
         foreach (var aiFighter in world.AiFighters)
+        {
             ships.Draw(aiFighter, aiFighter.Controls.Throttle);
+        }
+
         ships.Draw(world.Player, controls.Thrust ? 1f : 0f);
     }
 }

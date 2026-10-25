@@ -30,7 +30,9 @@ public sealed class Freighter : Ship
     public void Dispatch(Planet planet, StructureType structureType)
     {
         if (State != FreighterState.Idle || RawMaterials < CargoCapacity)
+        {
             throw new InvalidOperationException("Only a fully loaded idle freighter can be dispatched.");
+        }
 
         TargetPlanet = planet;
         TargetStructure = structureType;
@@ -41,10 +43,15 @@ public sealed class Freighter : Ship
     public void Recall()
     {
         if (State != FreighterState.Traveling)
+        {
             return;
+        }
 
         if (DockingTarget is not null)
+        {
             Undock();
+        }
+
         TargetPlanet = null;
         TargetStructure = null;
         State = FreighterState.Idle;
@@ -53,7 +60,10 @@ public sealed class Freighter : Ship
     public bool BeginBuilding()
     {
         if (State != FreighterState.Traveling || !IsDocked || DockingTarget != TargetPlanet)
+        {
             return false;
+        }
+
         State = FreighterState.Building;
         return true;
     }
@@ -61,7 +71,9 @@ public sealed class Freighter : Ship
     public void Consume()
     {
         if (State != FreighterState.Building)
+        {
             return;
+        }
 
         RawMaterials = 0;
         State = FreighterState.Consumed;

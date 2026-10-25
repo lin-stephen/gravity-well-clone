@@ -46,7 +46,10 @@ public class FighterApproachTests
         for (var step = 0; step < (int)(seconds / Dt); step++)
         {
             if (bump && step == (int)(4f / Dt))
+            {
                 fighter.ApplyCollision(Vector2.Zero, new Vector2(-60f, 65f));
+            }
+
             autopilot.Update(world, Dt);
             physics.Update(world, default, Dt);
             docking.Update(world, Dt);
@@ -55,9 +58,15 @@ public class FighterApproachTests
                       float.IsFinite(fighter.Velocity.X) && float.IsFinite(fighter.Velocity.Y);
             peakSpeed = MathF.Max(peakSpeed, fighter.Velocity.Length());
             if (measureBeforeX is { } limit && fighter.Position.X < limit)
+            {
                 peakBeforeX = MathF.Max(peakBeforeX, fighter.Velocity.Length());
+            }
+
             if (freighter is not null)
+            {
                 closest = MathF.Min(closest, Vector2.Distance(fighter.Position, freighter.Position));
+            }
+
             if (fighter.IsDocked)
             {
                 dockSeconds = (step + 1) * Dt;

@@ -8,7 +8,11 @@ public sealed class ColonizationSystem
     public void Update(GameWorld world)
     {
         foreach (var fighter in world.Fighters)
+        {
             if (fighter.IsDocked && fighter.DockingTarget is Planet planet)
+            {
                 planet.Claim(fighter.Faction);
+            }
+        }
     }
 }

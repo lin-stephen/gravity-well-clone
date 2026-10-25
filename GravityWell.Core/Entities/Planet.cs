@@ -44,7 +44,9 @@ public sealed class Planet : ICollisionBody
     public void Claim(Faction faction)
     {
         if (Owner is null || (Owner != faction && !HasStructure(StructureType.Base)))
+        {
             Owner = faction;
+        }
     }
 
     public bool HasStructure(StructureType type) =>
@@ -56,7 +58,9 @@ public sealed class Planet : ICollisionBody
     public bool CanAddStructure(StructureType type)
     {
         if (!Owner.HasValue || HasStructure(type))
+        {
             return false;
+        }
 
         return type switch
         {
@@ -73,7 +77,9 @@ public sealed class Planet : ICollisionBody
         StructureState state = StructureState.Planned)
     {
         if (!CanAddStructure(type))
+        {
             throw new InvalidOperationException($"Cannot add {type} to this planet.");
+        }
 
         var structure = new PlanetStructure(type, state);
         structures.Add(structure);
@@ -83,7 +89,10 @@ public sealed class Planet : ICollisionBody
     public void BuildHomeworld()
     {
         foreach (var type in Enum.GetValues<StructureType>())
+        {
             AddStructure(type, StructureState.Operational);
+        }
+
         BaseResources.AddRawMaterials(10);
         BaseResources.AddFinishedMaterials(10);
         StarbaseResources.AddRawMaterials(10);

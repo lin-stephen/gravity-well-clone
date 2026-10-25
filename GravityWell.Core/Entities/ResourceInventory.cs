@@ -18,7 +18,11 @@ public sealed class ResourceInventory
 
     public bool TryRefine()
     {
-        if (RawMaterials == 0 || FinishedMaterials == FinishedCapacity) return false;
+        if (RawMaterials == 0 || FinishedMaterials == FinishedCapacity)
+        {
+            return false;
+        }
+
         RawMaterials--;
         FinishedMaterials++;
         return true;
@@ -26,7 +30,11 @@ public sealed class ResourceInventory
 
     public bool TrySpendFinishedMaterial()
     {
-        if (FinishedMaterials == 0) return false;
+        if (FinishedMaterials == 0)
+        {
+            return false;
+        }
+
         FinishedMaterials--;
         return true;
     }

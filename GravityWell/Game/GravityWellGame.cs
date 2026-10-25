@@ -39,12 +39,18 @@ public sealed class GravityWellGame
     {
         var controls = input.ReadControls();
         if (controls.ToggleHelp)
+        {
             showHelp = !showHelp;
+        }
 
         freighterAutopilot.Update(world, deltaTime);
         fighterAutopilot.Update(world, deltaTime);
         physics.Update(world, controls, deltaTime);
-        if (controls.Reset) collisions.Reset();
+        if (controls.Reset)
+        {
+            collisions.Reset();
+        }
+
         docking.Update(world, deltaTime);
         collisions.Update(world);
         colonization.Update(world);

@@ -19,7 +19,9 @@ public sealed class DockingSystem
     public void Update(GameWorld world, float deltaTime)
     {
         foreach (var ship in world.Ships)
+        {
             UpdateShip(world, ship, deltaTime);
+        }
     }
 
     private void UpdateShip(GameWorld world, Ship ship, float deltaTime)
@@ -27,11 +29,15 @@ public sealed class DockingSystem
         if (ship.ReleasedDockingTarget is { } released &&
             Vector2.Distance(ship.Position, released.Position) >
             ship.CollisionRadius + released.CollisionRadius + CaptureDistance)
+        {
             ship.ReleasedDockingTarget = null;
+        }
 
         if (ship.DockingTarget is SpaceDockBody dock &&
             !dock.Planet.HasOperationalStructure(StructureType.SpaceDock))
+        {
             ship.Undock();
+        }
 
         if (ship.DockingTarget is null && ship.Controls.Throttle <= 0f)
         {
@@ -40,15 +46,28 @@ public sealed class DockingSystem
             {
                 if (ship is Freighter freighter &&
                     (freighter.State != FreighterState.Traveling || freighter.TargetPlanet != planet))
+                {
                     continue;
+                }
+
                 if (ship is not Freighter && planet.HasOperationalStructure(StructureType.SpaceDock) &&
                     TryCapture(ship, planet.SpaceDock))
+                {
                     break;
-                if (TryCapture(ship, planet)) break;
+                }
+
+                if (TryCapture(ship, planet))
+                {
+                    break;
+                }
             }
         }
 
-        if (ship.DockingTarget is not { } target) return;
+        if (ship.DockingTarget is not { } target)
+        {
+            return;
+        }
+
         var destination = target.Position + ship.DockingNormal *
             (ship.CollisionRadius + target.CollisionRadius);
         var blend = 1f - MathF.Exp(-settings.DampingRate * MathF.Max(0f, deltaTime));
@@ -77,7 +96,11 @@ public sealed class DockingSystem
     public bool IsApproachSpeedSafe(Ship ship, ICollisionBody target)
     {
         var towardTarget = target.Position - ship.Position;
-        if (towardTarget.LengthSquared() == 0f) return false;
+        if (towardTarget.LengthSquared() == 0f)
+        {
+            return false;
+        }
+
         var approachSpeed = Vector2.Dot(ship.Velocity - target.Velocity,
             Vector2.Normalize(towardTarget));
         // Receding motion has no closing speed; sideways motion contributes zero.
@@ -97,15 +120,25 @@ public sealed class DockingSystem
 
     private bool TryCapture(Ship ship, ICollisionBody target)
     {
-        if (target == ship.ReleasedDockingTarget) return false;
+        if (target == ship.ReleasedDockingTarget)
+        {
+            return false;
+        }
+
         var offset = ship.Position - target.Position;
         var distance = offset.Length();
         var radius = ship.CollisionRadius + target.CollisionRadius;
         if (distance < radius - CaptureDistance || distance > radius + CaptureDistance || distance == 0f)
+        {
             return false;
+        }
+
         var normal = offset / distance;
         if (!IsRearAligned(ship, target) || !IsSpeedSafe(ship, target))
+        {
             return false;
+        }
+
         ship.BeginDocking(target, normal);
         return true;
     }

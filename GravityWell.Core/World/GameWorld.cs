@@ -15,10 +15,17 @@ public sealed class GameWorld
         get
         {
             foreach (var fighter in Fighters)
+            {
                 yield return fighter;
+            }
+
             foreach (var freighter in freighters)
+            {
                 if (freighter.State != FreighterState.Consumed)
+                {
                     yield return freighter;
+                }
+            }
         }
     }
 
@@ -32,7 +39,9 @@ public sealed class GameWorld
         {
             yield return Player;
             foreach (var fighter in aiFighters)
+            {
                 yield return fighter;
+            }
         }
     }
 
@@ -104,7 +113,10 @@ public sealed class GameWorld
             if (homeworld.Owner is not { } faction || faction == playerFaction ||
                 !homeworld.HasOperationalStructure(StructureType.TechCenter) ||
                 fighters.Any(fighter => fighter.Faction == faction))
+            {
                 continue;
+            }
+
             fighters.Add(new Fighter
             {
                 Faction = faction,
@@ -121,7 +133,8 @@ public sealed class GameWorld
     {
         // Search outward from the producer instead of spawning overlapping hulls.
         for (var ring = 0; ; ring++)
-        for (var slot = 0; slot < 16; slot++)
+        {
+            for (var slot = 0; slot < 16; slot++)
         {
             var angle = MathF.PI / 2f + slot * MathF.Tau / 16;
             var position = producer.Position + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) *
@@ -131,11 +144,16 @@ public sealed class GameWorld
                     .Select(planet => planet.SpaceDock))
                 .Any(body => Vector2.Distance(position, body.Position) <
                     Freighter.Radius + body.CollisionRadius + 8f);
-            if (blocked) continue;
-            var ship = new Freighter(position, faction);
+            if (blocked)
+                {
+                    continue;
+                }
+
+                var ship = new Freighter(position, faction);
             FaceOutward(ship, producer);
             freighters.Add(ship);
             return;
+        }
         }
     }
 

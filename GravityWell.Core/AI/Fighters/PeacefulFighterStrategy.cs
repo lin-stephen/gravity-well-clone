@@ -27,7 +27,11 @@ internal sealed class PeacefulFighterStrategy : IAutopilotStrategy<Fighter>
         // otherwise take on finishing the dock and keep taking, since nothing repairs a wreck.
         if (fighter.Health <= 0)
         {
-            if (fighter.DockingTarget is not { } held) return Hold(world, fighter, plan);
+            if (fighter.DockingTarget is not { } held)
+            {
+                return Hold(world, fighter, plan);
+            }
+
             return IsOwnedBy(held, fighter.Faction) ? default : new ShipControls(0f, 1f);
         }
 
@@ -38,7 +42,10 @@ internal sealed class PeacefulFighterStrategy : IAutopilotStrategy<Fighter>
                 // Two ships docking side by side at one planet overlap and never finish, so the first
                 // fighter in world order keeps the planet and the other releases it and re-picks.
                 if (!ReferenceEquals(FirstDockingAt(world, docked), fighter))
+                {
                     return new ShipControls(0f, 1f);
+                }
+
                 plan.Phase = FlightPhase.Dock; // Let the claim land.
                 return default;
             }
@@ -56,7 +63,10 @@ internal sealed class PeacefulFighterStrategy : IAutopilotStrategy<Fighter>
         // Hold where the fighter was when it stopped having something to do, but never pressed
         // against a planet it has just left.
         if (plan.Phase != FlightPhase.Holding)
+        {
             plan.HoldPosition = approach.ClearOfPlanets(world, fighter);
+        }
+
         plan.Target = null;
         plan.Phase = FlightPhase.Holding;
         return approach.HoldAt(world, fighter, plan);

@@ -75,7 +75,10 @@ public class FighterAutopilotTests
         Run(world, new FighterAutopilot(), 180f, _ =>
         {
             if (firstClaimed is null)
+            {
                 firstClaimed = first.IsColonized ? first : second.IsColonized ? second : null;
+            }
+
             dockedAtSecond |= fighter.IsDocked && ReferenceEquals(fighter.DockingTarget, second);
         });
 
@@ -264,7 +267,9 @@ public class FighterAutopilotTests
         var autopilot = new FighterAutopilot();
 
         for (var i = 0; i < 120; i++)
+        {
             autopilot.Update(world, Dt);
+        }
 
         fighter.Controls.Should().Be(default(ShipControls));
         autopilot.GetTarget(fighter).Should().BeNull();
