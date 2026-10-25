@@ -12,7 +12,6 @@ public partial class Application
     {
         Raylib.SetConfigFlags(ConfigFlags.ResizableWindow | ConfigFlags.VSyncHint);
         Raylib.InitWindow(GameConstants.DesignWidth, GameConstants.DesignHeight, "Gravity Well");
-        Raylib.SetTargetFPS(60);
         Game.Initialize();
     }
 
