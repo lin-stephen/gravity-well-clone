@@ -50,7 +50,7 @@ public class FreighterTests
         var building = DispatchedFreighter(planet);
         building.BeginDocking(planet, Vector2.UnitY);
         building.CompleteDocking();
-        building.BeginBuilding().Should().BeTrue();
+        building.BeginBuilding(new PlanetStructure(StructureType.Base, StructureState.Building));
 
         idle.Recall();
         building.Recall();
@@ -68,13 +68,14 @@ public class FreighterTests
         freighter.Dispatch(planet, StructureType.Base);
         freighter.BeginDocking(planet, -Vector2.UnitY);
         freighter.CompleteDocking();
-        freighter.BeginBuilding().Should().BeTrue();
+        freighter.BeginBuilding(new PlanetStructure(StructureType.Base, StructureState.Building));
 
         freighter.Abandon();
 
         freighter.State.Should().Be(FreighterState.Idle);
         freighter.TargetPlanet.Should().BeNull();
         freighter.TargetStructure.Should().BeNull();
+        freighter.BuildSite.Should().BeNull();
         freighter.DockingTarget.Should().BeNull();
         freighter.RawMaterials.Should().Be(Freighter.CargoCapacity);
     }
@@ -121,12 +122,65 @@ public class FreighterTests
         building.Dispatch(planet, StructureType.Colony);
         building.BeginDocking(planet, -Vector2.UnitY);
         building.CompleteDocking();
-        building.BeginBuilding().Should().BeTrue();
+        building.BeginBuilding(new PlanetStructure(StructureType.Colony, StructureState.Building));
 
         idle.Redirect(StructureType.Base);
         building.Redirect(StructureType.Base);
 
         idle.TargetStructure.Should().BeNull();
         building.TargetStructure.Should().Be(StructureType.Colony);
+    }
+
+    [Test]
+    public void HasArrived_IsTrueOnlyOnceDockedAtTheTargetPlanet()
+    {
+        var planet = new Planet(Vector2.Zero, owner: Faction.Blue);
+        var freighter = new Freighter(new Vector2(0f, -46f), Faction.Blue);
+        freighter.HasArrived.Should().BeFalse("an idle freighter has nowhere to be");
+        freighter.Dispatch(planet, StructureType.Base);
+        freighter.HasArrived.Should().BeFalse("it has not docked yet");
+        freighter.BeginDocking(planet, -Vector2.UnitY);
+        freighter.CompleteDocking();
+
+        freighter.HasArrived.Should().BeTrue();
+    }
+
+    [Test]
+    public void HasArrived_IsFalseWhenDockedAtADifferentPlanet()
+    {
+        var target = new Planet(Vector2.Zero, owner: Faction.Blue);
+        var other = new Planet(new Vector2(500f, 0f), owner: Faction.Blue);
+        var freighter = new Freighter(new Vector2(500f, -46f), Faction.Blue);
+        freighter.Dispatch(target, StructureType.Base);
+        freighter.BeginDocking(other, -Vector2.UnitY);
+        freighter.CompleteDocking();
+
+        freighter.HasArrived.Should().BeFalse();
+    }
+
+    [Test]
+    public void BeginBuilding_HoldsTheSiteItIsBuilding()
+    {
+        var planet = new Planet(Vector2.Zero, owner: Faction.Blue);
+        var freighter = new Freighter(new Vector2(0f, -46f), Faction.Blue);
+        freighter.Dispatch(planet, StructureType.Base);
+        freighter.BeginDocking(planet, -Vector2.UnitY);
+        freighter.CompleteDocking();
+        var site = new PlanetStructure(StructureType.Base, StructureState.Building);
+
+        freighter.BeginBuilding(site);
+
+        freighter.State.Should().Be(FreighterState.Building);
+        freighter.BuildSite.Should().BeSameAs(site);
+    }
+
+    [Test]
+    public void BeginBuilding_BeforeArriving_Throws()
+    {
+        var planet = new Planet(Vector2.Zero, owner: Faction.Blue);
+        var freighter = DispatchedFreighter(planet);
+        var site = new PlanetStructure(StructureType.Base, StructureState.Building);
+
+        freighter.Invoking(ship => ship.BeginBuilding(site)).Should().Throw<InvalidOperationException>();
     }
 }

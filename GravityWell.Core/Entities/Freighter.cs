@@ -27,6 +27,12 @@ public sealed class Freighter : Ship
     public Planet? TargetPlanet { get; private set; }
     public StructureType? TargetStructure { get; private set; }
 
+    /// <summary>The structure under construction while the freighter is building, so nobody has to look it up again.</summary>
+    public PlanetStructure? BuildSite { get; private set; }
+
+    /// <summary>True once the freighter is docked at the planet it was sent to, ready to start building.</summary>
+    public bool HasArrived => State == FreighterState.Traveling && IsDocked && DockingTarget == TargetPlanet;
+
     public void Dispatch(Planet planet, StructureType structureType)
     {
         if (State != FreighterState.Idle || RawMaterials < CargoCapacity)
@@ -88,18 +94,20 @@ public sealed class Freighter : Ship
 
         TargetPlanet = null;
         TargetStructure = null;
+        BuildSite = null;
         State = FreighterState.Idle;
     }
 
-    public bool BeginBuilding()
+    /// <summary>Starts building the given structure. The freighter must already have arrived at its target planet.</summary>
+    public void BeginBuilding(PlanetStructure site)
     {
-        if (State != FreighterState.Traveling || !IsDocked || DockingTarget != TargetPlanet)
+        if (!HasArrived)
         {
-            return false;
+            throw new InvalidOperationException("A freighter can only start building once docked at its target planet.");
         }
 
+        BuildSite = site;
         State = FreighterState.Building;
-        return true;
     }
 
     public void Consume()
@@ -110,6 +118,7 @@ public sealed class Freighter : Ship
         }
 
         RawMaterials = 0;
+        BuildSite = null;
         State = FreighterState.Consumed;
     }
 }

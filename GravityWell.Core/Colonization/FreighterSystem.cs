@@ -27,29 +27,26 @@ public sealed class FreighterSystem
                 KeepOrderCurrent(freighter, target);
             }
 
-            if (freighter.BeginBuilding())
+            if (freighter.HasArrived)
             {
                 BeginConstruction(freighter);
             }
 
-            if (freighter.State != FreighterState.Building || freighter.TargetPlanet is null ||
-                freighter.TargetStructure is null)
+            if (freighter.BuildSite is not { } site)
             {
                 continue;
             }
 
-            var structure = freighter.TargetPlanet.Structures.Single(candidate =>
-                candidate.Type == freighter.TargetStructure.Value);
-            if (structure.State == StructureState.Destroyed)
+            if (site.State == StructureState.Destroyed)
             {
                 // The build site was shot out from under the freighter. It is sent again if the planet still needs it.
                 freighter.Abandon();
                 continue;
             }
 
-            structure.AdvanceConstruction(deltaTime / BuildDurationSeconds);
+            site.AdvanceConstruction(deltaTime / BuildDurationSeconds);
 
-            if (structure.State == StructureState.Operational)
+            if (site.State == StructureState.Operational)
             {
                 freighter.Consume();
             }
@@ -77,8 +74,9 @@ public sealed class FreighterSystem
 
     private static void BeginConstruction(Freighter freighter)
     {
-        var structure = freighter.TargetPlanet!.AddStructure(freighter.TargetStructure!.Value);
-        structure.BeginConstruction();
+        var site = freighter.TargetPlanet!.AddStructure(freighter.TargetStructure!.Value);
+        site.BeginConstruction();
+        freighter.BeginBuilding(site);
     }
 
     private static void DispatchIdleFreighters(GameWorld world)

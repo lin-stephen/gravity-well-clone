@@ -140,6 +140,44 @@ public class FreighterSystemTests
     }
 
     [Test]
+    public void Update_ArrivedFreighter_BuildsAndHoldsTheStructureItCreated()
+    {
+        var planet = new Planet(Vector2.Zero, owner: Faction.Red);
+        var freighter = new Freighter(new Vector2(0f, -46f), Faction.Red);
+        var world = new GameWorld([planet], [freighter]);
+        var system = new FreighterSystem();
+        system.Update(world, Dt);
+        freighter.BeginDocking(planet, -Vector2.UnitY);
+        freighter.CompleteDocking();
+
+        system.Update(world, Dt);
+
+        freighter.BuildSite.Should().BeSameAs(planet.Structures.Single());
+        freighter.BuildSite!.ConstructionProgress.Should().BeGreaterThan(0f);
+    }
+
+    [Test]
+    public void Update_FinishedBuild_ConsumesTheFreighterAndReleasesTheSite()
+    {
+        var planet = new Planet(Vector2.Zero, owner: Faction.Red);
+        var freighter = new Freighter(new Vector2(0f, -46f), Faction.Red);
+        var world = new GameWorld([planet], [freighter]);
+        var system = new FreighterSystem();
+        system.Update(world, Dt);
+        freighter.BeginDocking(planet, -Vector2.UnitY);
+        freighter.CompleteDocking();
+
+        for (var step = 0; step < 100 && freighter.State != FreighterState.Consumed; step++)
+        {
+            system.Update(world, Dt);
+        }
+
+        freighter.State.Should().Be(FreighterState.Consumed);
+        planet.Structures.Single().State.Should().Be(StructureState.Operational);
+        freighter.BuildSite.Should().BeNull();
+    }
+
+    [Test]
     public void Update_StructureDestroyedWhileBuilding_FreesTheFreighterToTryAgain()
     {
         var planet = new Planet(Vector2.Zero, owner: Faction.Red);
@@ -158,6 +196,32 @@ public class FreighterSystemTests
         freighter.State.Should().Be(FreighterState.Traveling, "it is sent again to rebuild");
         freighter.IsDocked.Should().BeFalse();
         freighter.RawMaterials.Should().Be(Freighter.CargoCapacity);
+        freighter.BuildSite.Should().BeNull();
+    }
+
+    [Test]
+    public void Update_AfterAbandoningADestroyedSite_TheRebuildHoldsTheReplacementNotTheWreck()
+    {
+        var planet = new Planet(Vector2.Zero, owner: Faction.Red);
+        var freighter = new Freighter(new Vector2(0f, -46f), Faction.Red);
+        var world = new GameWorld([planet], [freighter]);
+        var system = new FreighterSystem();
+        system.Update(world, Dt);
+        freighter.BeginDocking(planet, -Vector2.UnitY);
+        freighter.CompleteDocking();
+        system.Update(world, Dt);
+        var wreck = planet.Structures.Single();
+        wreck.TakeDamage(PlanetStructure.MaxHealth);
+        system.Update(world, Dt);
+        freighter.BeginDocking(planet, -Vector2.UnitY);
+        freighter.CompleteDocking();
+
+        system.Update(world, Dt);
+
+        var replacement = planet.Structures.Single();
+        replacement.Should().NotBeSameAs(wreck);
+        replacement.State.Should().Be(StructureState.Building);
+        freighter.BuildSite.Should().BeSameAs(replacement);
     }
 
     private static (Planet Planet, Freighter Freighter, GameWorld World, FreighterSystem System) ColonyFreighterOnItsWay()

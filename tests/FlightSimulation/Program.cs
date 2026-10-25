@@ -37,7 +37,7 @@ static void Flight(string name, Vector2 start, Vector2 velocity, Planet[]? obsta
         Check(ship.DockingTarget == target, name + " right target");
         Check(ship.Health == Freighter.MaxHealth, name + " no collision damage");
         Check(docking.IsRearAligned(ship, target), name + " rear-first landing");
-        Check(ship.BeginBuilding(), name + " construction after docking");
+        Check(ship.HasArrived, name + " arrived after docking");
         Console.WriteLine($"PASS {name}: docked in {step * dt:F1}s");
         return;
     }
