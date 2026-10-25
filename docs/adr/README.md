@@ -16,6 +16,7 @@ its tradeoffs.
 | [0008](0008-autopilots-are-strategies-over-a-shared-runner.md) | Autopilots are strategies over a shared runner | Accepted |
 | [0009](0009-a-base-guards-a-planet-from-takeover.md) | A base guards a planet from takeover | Accepted |
 | [0010](0010-fighter-behaviour-is-an-enum-chosen-per-faction-at-spawn.md) | Fighter behaviour is an enum chosen per faction at spawn | Accepted |
+| [0011](0011-bolts-are-swept-segments-and-planets-are-one-way-doors.md) | Bolts are swept segments and planets are one-way doors | Accepted |
 
 New records should copy [the template](template.md), use the next four-digit
 number, and be added to this table. Accepted ADRs aren't edited to disguise a

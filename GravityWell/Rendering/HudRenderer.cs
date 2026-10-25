@@ -60,7 +60,7 @@ public sealed class HudRenderer
             Color.LightGray);
         Raylib.DrawTextEx(font, "UP  THRUST     HOME  RESET", new Vector2(30, 84), 15, 0.5f,
             Color.LightGray);
-        Raylib.DrawTextEx(font, "?  HIDE HELP", new Vector2(30, 107), 15, 0.5f,
+        Raylib.DrawTextEx(font, "F / DOWN  FIRE    ?  HIDE HELP", new Vector2(30, 107), 15, 0.5f,
             Color.LightGray);
         Raylib.DrawTextEx(font, $"{Raylib.GetFPS()} FPS", new Vector2(viewportWidth - 92, 20),
             15, 0.5f, Color.Lime);

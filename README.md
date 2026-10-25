@@ -47,8 +47,8 @@ dotnet workload install wasm-tools
 dotnet run --project GravityWell/GravityWell.csproj
 ```
 
-Use Left/Right to rotate, Up to thrust, and Home to reset the ship. The initial
-prototype models gravity from a star and planet.
+Use Left/Right to rotate, Up to thrust, F or Down to fire the cannon, and Home to
+reset the ship. The initial prototype models gravity from a star and planet.
 
 ## Publish
 

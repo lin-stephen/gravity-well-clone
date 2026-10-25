@@ -3,6 +3,7 @@ using GravityWell.Core.AI.Freighters;
 using GravityWell.Core.Colonization;
 using GravityWell.Core.Economy;
 using GravityWell.Core.Physics;
+using GravityWell.Core.Weapons;
 using GravityWell.Core.World;
 using GravityWell.Input;
 using GravityWell.Rendering;
@@ -20,6 +21,8 @@ public sealed class GravityWellGame
     private readonly FreighterSystem freighters = new();
     private readonly FreighterAutopilot freighterAutopilot;
     private readonly FighterAutopilot fighterAutopilot;
+    private readonly WeaponSettings weaponSettings = new();
+    private readonly WeaponSystem weapons;
     private readonly EconomySystem economy = new();
     private readonly RepairSystem repairs = new();
     private readonly GameRenderer renderer;
@@ -29,7 +32,8 @@ public sealed class GravityWellGame
     {
         freighterAutopilot = new FreighterAutopilot(docking, physics);
         fighterAutopilot = new FighterAutopilot(docking, physics);
-        renderer = new GameRenderer(docking);
+        weapons = new WeaponSystem(physics, weaponSettings);
+        renderer = new GameRenderer(docking, weaponSettings.ImpactDuration);
     }
 
     public void Initialize() => renderer.Initialize();
@@ -53,6 +57,7 @@ public sealed class GravityWellGame
 
         docking.Update(world, deltaTime);
         collisions.Update(world);
+        weapons.Update(world, controls, deltaTime);
         colonization.Update(world);
         freighters.Update(world, deltaTime);
         economy.Update(world, deltaTime);

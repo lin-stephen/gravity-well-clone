@@ -11,6 +11,9 @@ public static class Palette
     public static readonly Color StructurePlanned = new(90, 103, 116, 255);
     public static readonly Color StructureDestroyed = new(116, 54, 54, 255);
 
+    // Pale and warm, so a hit flash stands out against all four faction colours.
+    public static readonly Color Impact = new(255, 244, 214, 255);
+
     // Yellow leans lime so it stays distinct from the amber StructureBuilding colour.
     public static Color ForFaction(Faction faction) => faction switch
     {

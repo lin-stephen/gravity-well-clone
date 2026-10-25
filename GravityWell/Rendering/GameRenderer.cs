@@ -1,5 +1,6 @@
 using GravityWell.Core.Input;
 using GravityWell.Core.Physics;
+using GravityWell.Core.Weapons;
 using GravityWell.Core.World;
 using GravityWell.Game;
 using GravityWell.Input;
@@ -14,14 +15,16 @@ public sealed class GameRenderer
     private readonly ShipRenderer ships = new();
     private readonly FreighterRenderer freighters = new();
     private readonly PlanetRenderer planets;
+    private readonly BoltRenderer bolts;
 
     private readonly HudRenderer hud = new();
     private readonly RadarRenderer radar = new();
 
 
-    public GameRenderer(DockingSystem? docking = null)
+    public GameRenderer(DockingSystem? docking = null, float? impactDuration = null)
     {
         planets = new PlanetRenderer(docking);
+        bolts = new BoltRenderer(impactDuration ?? new WeaponSettings().ImpactDuration);
     }
 
     public void Initialize()
@@ -85,5 +88,15 @@ public sealed class GameRenderer
         }
 
         ships.Draw(world.Player, controls.Thrust ? 1f : 0f);
+
+        foreach (var bolt in world.Bolts)
+        {
+            bolts.DrawBolt(bolt);
+        }
+
+        foreach (var impact in world.Impacts)
+        {
+            bolts.DrawImpact(impact);
+        }
     }
 }
