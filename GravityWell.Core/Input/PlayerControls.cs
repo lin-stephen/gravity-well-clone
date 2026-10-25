@@ -5,4 +5,5 @@ public readonly record struct PlayerControls(
     bool TurnRight,
     bool Thrust,
     bool Reset,
-    bool ToggleHelp);
+    bool ToggleHelp,
+    bool Fire = false);

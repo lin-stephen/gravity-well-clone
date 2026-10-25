@@ -32,6 +32,8 @@ public sealed class GameWorld
     public IReadOnlyList<Planet> Planets { get; }
     public IReadOnlyList<Freighter> Freighters => freighters;
     public IReadOnlyList<Fighter> AiFighters => aiFighters;
+    public List<Bolt> Bolts { get; } = [];
+    public List<Impact> Impacts { get; } = [];
 
     public IEnumerable<Fighter> Fighters
     {

@@ -7,6 +7,8 @@ public sealed class Fighter : Ship
     public const int MaxHealth = 6;
     public const float Radius = 10f;
     public const float MaxSpeed = 260f;
+    /// <summary>How far ahead of the centre the nose is drawn, and where a fired bolt starts.</summary>
+    public const float NoseDistance = 13f;
     /// <summary>How the AI flies this fighter. Fixed at spawn; ignored for the player.</summary>
     public FighterBehavior Behavior { get; init; } = FighterBehavior.Peaceful;
     public override int HealthCapacity => MaxHealth;

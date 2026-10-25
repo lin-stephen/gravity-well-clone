@@ -14,7 +14,7 @@ public sealed class ShipRenderer
             point.X * MathF.Cos(radians) - point.Y * MathF.Sin(radians),
             point.X * MathF.Sin(radians) + point.Y * MathF.Cos(radians));
 
-        var nose = fighter.Position + Rotate(new Vector2(0, -13));
+        var nose = fighter.Position + Rotate(new Vector2(0, -Fighter.NoseDistance));
         var left = fighter.Position + Rotate(new Vector2(-9, 10));
         var right = fighter.Position + Rotate(new Vector2(9, 10));
         Raylib.DrawTriangleLines(nose, left, right, Palette.ForFaction(fighter.Faction));
