@@ -77,8 +77,8 @@ public sealed class Freighter : Ship
     }
 
     /// <summary>
-    /// Gives up a build whose structure was destroyed under it: the freighter lets go of its dock and returns to
-    /// idle with its cargo, so it can be sent again. Does nothing unless the freighter is building.
+    /// Gives up a build whose structure was destroyed or cancelled under it: the freighter lets go of its dock and
+    /// returns to idle with its cargo, so it can be sent again. Does nothing unless the freighter is building.
     /// </summary>
     public void Abandon()
     {
@@ -98,12 +98,22 @@ public sealed class Freighter : Ship
         State = FreighterState.Idle;
     }
 
-    /// <summary>Starts building the given structure. The freighter must already have arrived at its target planet.</summary>
+    /// <summary>
+    /// Starts building the given structure, which must be the one ordered, under construction on the target planet.
+    /// The freighter must already have arrived there.
+    /// </summary>
     public void BeginBuilding(PlanetStructure site)
     {
         if (!HasArrived)
         {
             throw new InvalidOperationException("A freighter can only start building once docked at its target planet.");
+        }
+
+        if (site.Type != TargetStructure || site.State != StructureState.Building ||
+            !TargetPlanet!.Structures.Contains(site))
+        {
+            throw new ArgumentException(
+                "The build site must be the ordered structure, under construction on the target planet.", nameof(site));
         }
 
         BuildSite = site;

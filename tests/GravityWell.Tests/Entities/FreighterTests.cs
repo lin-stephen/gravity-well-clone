@@ -13,6 +13,16 @@ public class FreighterTests
         return freighter;
     }
 
+    private static PlanetStructure BuildingSite(Planet planet, StructureType type)
+    {
+        if (type == StructureType.Colony)
+        {
+            planet.AddStructure(StructureType.Base, StructureState.Operational);
+        }
+
+        return planet.AddStructure(type, StructureState.Building);
+    }
+
     [Test]
     public void Recall_ReturnsATravelingFreighterToIdleWithItsCargo()
     {
@@ -50,7 +60,7 @@ public class FreighterTests
         var building = DispatchedFreighter(planet);
         building.BeginDocking(planet, Vector2.UnitY);
         building.CompleteDocking();
-        building.BeginBuilding(new PlanetStructure(StructureType.Base, StructureState.Building));
+        building.BeginBuilding(BuildingSite(planet, StructureType.Base));
 
         idle.Recall();
         building.Recall();
@@ -68,7 +78,7 @@ public class FreighterTests
         freighter.Dispatch(planet, StructureType.Base);
         freighter.BeginDocking(planet, -Vector2.UnitY);
         freighter.CompleteDocking();
-        freighter.BeginBuilding(new PlanetStructure(StructureType.Base, StructureState.Building));
+        freighter.BeginBuilding(BuildingSite(planet, StructureType.Base));
 
         freighter.Abandon();
 
@@ -122,7 +132,7 @@ public class FreighterTests
         building.Dispatch(planet, StructureType.Colony);
         building.BeginDocking(planet, -Vector2.UnitY);
         building.CompleteDocking();
-        building.BeginBuilding(new PlanetStructure(StructureType.Colony, StructureState.Building));
+        building.BeginBuilding(BuildingSite(planet, StructureType.Colony));
 
         idle.Redirect(StructureType.Base);
         building.Redirect(StructureType.Base);
@@ -166,7 +176,7 @@ public class FreighterTests
         freighter.Dispatch(planet, StructureType.Base);
         freighter.BeginDocking(planet, -Vector2.UnitY);
         freighter.CompleteDocking();
-        var site = new PlanetStructure(StructureType.Base, StructureState.Building);
+        var site = BuildingSite(planet, StructureType.Base);
 
         freighter.BeginBuilding(site);
 
@@ -182,5 +192,57 @@ public class FreighterTests
         var site = new PlanetStructure(StructureType.Base, StructureState.Building);
 
         freighter.Invoking(ship => ship.BeginBuilding(site)).Should().Throw<InvalidOperationException>();
+    }
+
+    [Test]
+    public void BeginBuilding_OfAStructureTypeThatWasNotOrdered_Throws()
+    {
+        var planet = new Planet(Vector2.Zero, owner: Faction.Blue);
+        var freighter = new Freighter(new Vector2(0f, -46f), Faction.Blue);
+        freighter.Dispatch(planet, StructureType.Base);
+        freighter.BeginDocking(planet, -Vector2.UnitY);
+        freighter.CompleteDocking();
+        var colony = BuildingSite(planet, StructureType.Colony);
+
+        freighter.Invoking(ship => ship.BeginBuilding(colony)).Should().Throw<ArgumentException>();
+    }
+
+    [Test]
+    public void BeginBuilding_OfAStructureThatIsNotOnTheTargetPlanet_Throws()
+    {
+        var planet = new Planet(Vector2.Zero, owner: Faction.Blue);
+        var freighter = new Freighter(new Vector2(0f, -46f), Faction.Blue);
+        freighter.Dispatch(planet, StructureType.Base);
+        freighter.BeginDocking(planet, -Vector2.UnitY);
+        freighter.CompleteDocking();
+        var elsewhere = new PlanetStructure(StructureType.Base, StructureState.Building);
+
+        freighter.Invoking(ship => ship.BeginBuilding(elsewhere)).Should().Throw<ArgumentException>();
+    }
+
+    [Test]
+    public void BeginBuilding_OfAStructureThatIsNotUnderConstruction_Throws()
+    {
+        var planet = new Planet(Vector2.Zero, owner: Faction.Blue);
+        var freighter = new Freighter(new Vector2(0f, -46f), Faction.Blue);
+        freighter.Dispatch(planet, StructureType.Base);
+        freighter.BeginDocking(planet, -Vector2.UnitY);
+        freighter.CompleteDocking();
+        var planned = planet.AddStructure(StructureType.Base);
+
+        freighter.Invoking(ship => ship.BeginBuilding(planned)).Should().Throw<ArgumentException>();
+    }
+
+    [Test]
+    public void BeginBuilding_OfADestroyedStructure_Throws()
+    {
+        var planet = new Planet(Vector2.Zero, owner: Faction.Blue);
+        var freighter = new Freighter(new Vector2(0f, -46f), Faction.Blue);
+        freighter.Dispatch(planet, StructureType.Base);
+        freighter.BeginDocking(planet, -Vector2.UnitY);
+        freighter.CompleteDocking();
+        var wreck = planet.AddStructure(StructureType.Base, StructureState.Destroyed);
+
+        freighter.Invoking(ship => ship.BeginBuilding(wreck)).Should().Throw<ArgumentException>();
     }
 }

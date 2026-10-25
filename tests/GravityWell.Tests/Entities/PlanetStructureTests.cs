@@ -137,4 +137,49 @@ public class PlanetStructureTests
         planet.HasStructure(StructureType.Base).Should().BeFalse();
         planet.HasOperationalStructure(StructureType.Base).Should().BeFalse();
     }
+
+    [Test]
+    public void Cancel_AStructureUnderConstruction_DiscardsIt()
+    {
+        var structure = new PlanetStructure(StructureType.Colony, StructureState.Building);
+
+        structure.Cancel();
+
+        structure.State.Should().Be(StructureState.Destroyed);
+        structure.Health.Should().Be(0);
+        structure.IsTargetable.Should().BeFalse();
+    }
+
+    [Test]
+    public void Cancel_AnOperationalStructure_ChangesNothing()
+    {
+        var structure = new PlanetStructure(StructureType.Base, StructureState.Operational);
+
+        structure.Cancel();
+
+        structure.State.Should().Be(StructureState.Operational);
+        structure.Health.Should().Be(PlanetStructure.MaxHealth);
+    }
+
+    [TestCase(StructureState.Planned)]
+    [TestCase(StructureState.Building)]
+    public void Cancel_AnUnfinishedStructure_IsDestroyed(StructureState state)
+    {
+        var structure = new PlanetStructure(StructureType.Colony, state);
+
+        structure.Cancel();
+
+        structure.State.Should().Be(StructureState.Destroyed);
+    }
+
+    [Test]
+    public void Cancel_AnAlreadyDestroyedStructure_ChangesNothing()
+    {
+        var structure = new PlanetStructure(StructureType.Base, StructureState.Destroyed);
+
+        structure.Cancel();
+
+        structure.State.Should().Be(StructureState.Destroyed);
+        structure.Health.Should().Be(0);
+    }
 }

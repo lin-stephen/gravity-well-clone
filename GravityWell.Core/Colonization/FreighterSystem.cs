@@ -44,6 +44,15 @@ public sealed class FreighterSystem
                 continue;
             }
 
+            if (LostItsFoundation(freighter.TargetPlanet!, site))
+            {
+                // The Base it stands on is gone, so the half-built structure is dropped and the freighter leaves with
+                // its cargo. The planet asks for a new Base next, and the structure is built again after it.
+                site.Cancel();
+                freighter.Abandon();
+                continue;
+            }
+
             site.AdvanceConstruction(deltaTime / BuildDurationSeconds);
 
             if (site.State == StructureState.Operational)
@@ -52,6 +61,9 @@ public sealed class FreighterSystem
             }
         }
     }
+
+    private static bool LostItsFoundation(Planet planet, PlanetStructure site) =>
+        site.Type != StructureType.Base && !planet.HasOperationalStructure(StructureType.Base);
 
     /// <summary>
     /// A planet can change hands before the freighter arrives, and it must not then build for the new owner: the

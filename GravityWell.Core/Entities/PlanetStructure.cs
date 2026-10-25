@@ -42,6 +42,19 @@ public sealed class PlanetStructure
         }
     }
 
+    /// <summary>
+    /// Gives up a structure that is not finished yet. It counts as destroyed, so the planet builds it again from
+    /// scratch rather than waiting on a half-built one nobody will complete. A finished structure is not affected.
+    /// </summary>
+    public void Cancel()
+    {
+        if (State is StructureState.Planned or StructureState.Building)
+        {
+            State = StructureState.Destroyed;
+            Health = 0;
+        }
+    }
+
     public void AdvanceConstruction(float progress)
     {
         if (State != StructureState.Building || progress <= 0f)
