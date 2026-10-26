@@ -18,16 +18,21 @@ public sealed class EconomySystem
 
         foreach (var planet in world.Planets)
         {
-            var colonyActive = planet.Health > 0 && planet.IsColonized &&
-                planet.Type == PlanetType.Habitable && planet.HasOperationalStructure(StructureType.Colony);
+            var colonyActive = planet is { Health: > 0, IsColonized: true, Type: PlanetType.Habitable }
+                               && planet.HasOperationalStructure(StructureType.Colony);
             UpdateInventory(planet.BaseResources, colonyActive,
-                planet.Health > 0 && planet.IsColonized && planet.HasOperationalStructure(StructureType.Base), deltaTime);
+                planet is { Health: > 0, IsColonized: true }
+                && planet.HasOperationalStructure(StructureType.Base),
+                deltaTime);
             UpdateInventory(planet.StarbaseResources, colonyActive,
-                planet.Health > 0 && planet.IsColonized && planet.HasOperationalStructure(StructureType.Starbase), deltaTime);
+                planet is { Health: > 0, IsColonized: true }
+                && planet.HasOperationalStructure(StructureType.Starbase),
+                deltaTime);
         }
     }
 
-    private static void UpdateInventory(ResourceInventory inventory, bool colonyActive, bool refineryActive, float deltaTime)
+    private static void UpdateInventory(ResourceInventory inventory, bool colonyActive, bool refineryActive,
+        float deltaTime)
     {
         if (!refineryActive)
         {
@@ -35,14 +40,14 @@ public sealed class EconomySystem
             inventory.RefiningProgress = 0;
             return;
         }
+
         // Advance to supply/refining events in time order. New raw materials
         // cannot receive refining time from before they actually arrived.
         double remaining = deltaTime;
         while (remaining > 0)
         {
             var supplying = colonyActive && inventory.RawMaterials < ResourceInventory.RawCapacity;
-            var refining = inventory.RawMaterials > 0 &&
-                inventory.FinishedMaterials < ResourceInventory.FinishedCapacity;
+            var refining = inventory is { RawMaterials: > 0, FinishedMaterials: < ResourceInventory.FinishedCapacity };
             if (!supplying)
             {
                 inventory.SupplyProgress = 0;
@@ -59,7 +64,8 @@ public sealed class EconomySystem
             }
 
             var untilSupply = supplying ? SupplyIntervalSeconds - inventory.SupplyProgress : double.PositiveInfinity;
-            var untilRefined = refining ? RefiningIntervalSeconds - inventory.RefiningProgress : double.PositiveInfinity;
+            var untilRefined =
+                refining ? RefiningIntervalSeconds - inventory.RefiningProgress : double.PositiveInfinity;
             var elapsed = Math.Min(remaining, Math.Min(untilSupply, untilRefined));
             if (supplying)
             {
@@ -78,6 +84,7 @@ public sealed class EconomySystem
                 inventory.RefiningProgress = 0;
                 inventory.TryRefine();
             }
+
             if (inventory.SupplyProgress >= SupplyIntervalSeconds)
             {
                 inventory.SupplyProgress = 0;
