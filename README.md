@@ -77,8 +77,23 @@ resolution separates overlaps and changes only inward velocity along the contact
 normal, preserving sideways motion. Freighter autopilot recovers using the
 resulting physical velocity. Damage uses impact velocity before the bounce.
 
-Destruction is not yet implemented. Detection uses positions each frame, so
+Collision detection uses positions each frame, so
 sufficiently fast bodies can pass through each other between frames.
+
+## Ship destruction
+
+Fighters and freighters are destroyed at zero health from either bolts or collisions.
+A brief explosion marks the loss; destroyed ships stop flying, firing, colliding,
+claiming planets, and appearing on radar. A destroyed freighter is removed and its
+unfinished construction is cancelled so another freighter can rebuild it. Existing
+freighter production replaces losses when a friendly shipyard is available.
+
+Player and AI fighters respawn after five seconds at their last completed landing
+on a friendly planet with an operational Tech Center, or at a friendly operational
+Space Dock. Their initial respawn point is their homeworld. The recorded facility
+must still be operational and friendly; otherwise the fighter waits. Home still
+resets the player manually. Respawns currently cost no materials. Lifecycle rules
+live in `GravityWell.Core/Lifecycle/ShipLifecycleSystem.cs`.
 
 ## Landing and docking
 

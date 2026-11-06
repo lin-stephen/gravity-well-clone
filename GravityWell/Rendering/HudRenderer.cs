@@ -14,6 +14,12 @@ public sealed class HudRenderer
 
     public void DrawDockingStatus(Fighter fighter)
     {
+        if (fighter.IsDestroyed)
+        {
+            Raylib.DrawTextEx(font, "SHIP DESTROYED | AWAITING REPLACEMENT | HOME TO RESET",
+                new Vector2(30, 166), 15, 0.5f, Color.Orange);
+            return;
+        }
         if (fighter.DockingTarget is null)
         {
             return;

@@ -22,7 +22,7 @@ public sealed class PhysicsSystem
             world.Player.Reset();
         }
 
-        world.Player.Controls = new ShipControls(
+        world.Player.Controls = world.Player.IsDestroyed ? default : new ShipControls(
             (controls.TurnRight ? 1f : 0f) - (controls.TurnLeft ? 1f : 0f),
             controls.Thrust ? 1f : 0f);
         foreach (var ship in world.Ships)

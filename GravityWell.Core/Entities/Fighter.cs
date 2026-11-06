@@ -21,6 +21,7 @@ public sealed class Fighter : Ship
 
     public void Reset()
     {
+        Restore();
         Undock();
         ReleasedDockingTarget = null;
         Controls = default;

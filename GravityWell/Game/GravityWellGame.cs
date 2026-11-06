@@ -5,6 +5,7 @@ using GravityWell.Core.Economy;
 using GravityWell.Core.Physics;
 using GravityWell.Core.Weapons;
 using GravityWell.Core.World;
+using GravityWell.Core.Lifecycle;
 using GravityWell.Input;
 using GravityWell.Rendering;
 
@@ -25,6 +26,7 @@ public sealed class GravityWellGame
     private readonly WeaponSystem weapons;
     private readonly EconomySystem economy = new();
     private readonly RepairSystem repairs = new();
+    private readonly ShipLifecycleSystem lifecycle = new();
     private readonly GameRenderer renderer;
     private bool showHelp = true;
 
@@ -47,6 +49,7 @@ public sealed class GravityWellGame
             showHelp = !showHelp;
         }
 
+        lifecycle.Update(world, deltaTime);
         freighterAutopilot.Update(world, deltaTime);
         fighterAutopilot.Update(world, deltaTime);
         physics.Update(world, controls, deltaTime);
@@ -58,6 +61,7 @@ public sealed class GravityWellGame
         docking.Update(world, deltaTime);
         collisions.Update(world);
         weapons.Update(world, controls, deltaTime);
+        lifecycle.ResolveDestruction(world);
         colonization.Update(world);
         freighters.Update(world, deltaTime);
         economy.Update(world, deltaTime);

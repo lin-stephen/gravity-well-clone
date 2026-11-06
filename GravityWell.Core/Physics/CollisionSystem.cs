@@ -20,12 +20,11 @@ public sealed class CollisionSystem
 
     public void Update(GameWorld world)
     {
-        List<ICollisionBody> bodies = [world.Player];
-        bodies.AddRange(world.AiFighters);
+        List<ICollisionBody> bodies = [.. world.Fighters];
         bodies.AddRange(world.Planets);
         bodies.AddRange(world.Planets.Where(planet => planet.HasOperationalStructure(StructureType.SpaceDock))
             .Select(planet => planet.SpaceDock));
-        bodies.AddRange(world.Freighters.Where(body => body.State != FreighterState.Consumed));
+        bodies.AddRange(world.Freighters.Where(body => !body.IsDestroyed && body.State != FreighterState.Consumed));
         HashSet<(ICollisionBody, ICollisionBody)> touching = [];
 
         for (var i = 0; i < bodies.Count; i++)

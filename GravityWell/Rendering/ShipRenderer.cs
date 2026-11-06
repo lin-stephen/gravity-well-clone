@@ -9,6 +9,10 @@ public sealed class ShipRenderer
     /// <param name="throttle">0 to 1. The flame grows with it, so a ship that only trims against gravity barely shows one.</param>
     public void Draw(Fighter fighter, float throttle)
     {
+        if (fighter.IsDestroyed)
+        {
+            return;
+        }
         var radians = fighter.Rotation * MathF.PI / 180f;
         Vector2 Rotate(Vector2 point) => new(
             point.X * MathF.Cos(radians) - point.Y * MathF.Sin(radians),

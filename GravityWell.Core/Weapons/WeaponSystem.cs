@@ -104,7 +104,7 @@ public sealed class WeaponSystem
     {
         foreach (var ship in world.Ships)
         {
-            if (ReferenceEquals(ship, bolt.Shooter) || (!settings.FriendlyFire && ship.Faction == bolt.Faction))
+            if (ship.Health <= 0 || ReferenceEquals(ship, bolt.Shooter) || (!settings.FriendlyFire && ship.Faction == bolt.Faction))
             {
                 continue;
             }
@@ -118,7 +118,7 @@ public sealed class WeaponSystem
 
     private void Fire(GameWorld world)
     {
-        if (fireTimer > 0f || world.Bolts.Count >= settings.MaxBolts)
+        if (world.Player.IsDestroyed || world.Player.Health <= 0 || fireTimer > 0f || world.Bolts.Count >= settings.MaxBolts)
         {
             return;
         }

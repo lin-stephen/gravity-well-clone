@@ -20,7 +20,7 @@ public sealed class ShipAutopilot<TShip>(
 
     public void Update(GameWorld world, float deltaTime)
     {
-        var ships = shipsToPilot(world).ToList();
+        var ships = shipsToPilot(world).Where(ship => !ship.IsDestroyed).ToList();
         foreach (var gone in pilots.Keys.Except(ships).ToArray())
         {
             pilots.Remove(gone);

@@ -8,7 +8,7 @@ public sealed class FreighterRenderer
 {
     public void Draw(Freighter freighter)
     {
-        if (freighter.State == FreighterState.Consumed)
+        if (freighter.IsDestroyed || freighter.State == FreighterState.Consumed)
         {
             return;
         }

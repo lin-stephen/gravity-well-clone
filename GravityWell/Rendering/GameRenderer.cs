@@ -2,6 +2,7 @@ using GravityWell.Core.Input;
 using GravityWell.Core.Physics;
 using GravityWell.Core.Weapons;
 using GravityWell.Core.World;
+using GravityWell.Core.Entities;
 using GravityWell.Game;
 using GravityWell.Input;
 using Raylib_cs;
@@ -97,6 +98,20 @@ public sealed class GameRenderer
         foreach (var impact in world.Impacts)
         {
             bolts.DrawImpact(impact);
+        }
+
+        foreach (var explosion in world.Explosions)
+        {
+            var progress = explosion.Age / Explosion.DurationSeconds;
+            var color = new Color(255, 150, 45, (int)(255 * (1f - progress)));
+            Raylib.DrawCircleLinesV(explosion.Position, 8f + progress * 42f, color);
+            for (var i = 0; i < 12; i++)
+            {
+                var angle = i * MathF.Tau / 12;
+                var direction = new System.Numerics.Vector2(MathF.Cos(angle), MathF.Sin(angle));
+                Raylib.DrawLineV(explosion.Position + direction * (5f + progress * 25f),
+                    explosion.Position + direction * (12f + progress * 45f), color);
+            }
         }
     }
 }

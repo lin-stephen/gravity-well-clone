@@ -132,7 +132,7 @@ public class WeaponSystemShipHitTests
     }
 
     [Test]
-    public void Hit_ClampsHealthAtZero_AndKeepsShipInWorld()
+    public void Bolt_FliesThroughZeroHealthShip()
     {
         var enemy = WeaponTestWorld.Enemy(new Vector2(200f, 0f));
         enemy.Health = 0;
@@ -143,7 +143,7 @@ public class WeaponSystemShipHitTests
 
         enemy.Health.Should().Be(0);
         world.AiFighters.Should().Contain(enemy);
-        world.Bolts.Should().BeEmpty();
+        world.Bolts.Should().ContainSingle();
     }
 
     [Test]

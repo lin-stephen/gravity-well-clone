@@ -42,17 +42,20 @@ public sealed class RadarRenderer
         }
 
         foreach (var freighter in world.Freighters.Where(freighter =>
-                     freighter.State != FreighterState.Consumed))
+                     !freighter.IsDestroyed && freighter.State != FreighterState.Consumed))
         {
             DrawObjectMarker(center, fighter.Position, freighter.Position, 2f, Color.LightGray);
         }
 
-        foreach (var aiFighter in world.AiFighters)
+        foreach (var aiFighter in world.AiFighters.Where(fighter => !fighter.IsDestroyed))
         {
             DrawObjectMarker(center, fighter.Position, aiFighter.Position, 3f, Palette.ForFaction(aiFighter.Faction));
         }
 
-        DrawFighter(center, fighter);
+        if (!fighter.IsDestroyed)
+        {
+            DrawFighter(center, fighter);
+        }
 
         var coordinates = $"X {displayedPosition.X:0}  Y {displayedPosition.Y:0}";
         var textSize = Raylib.MeasureTextEx(font, coordinates, 14, 0.5f);

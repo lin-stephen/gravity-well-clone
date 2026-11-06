@@ -5,6 +5,20 @@ namespace GravityWell.Core.Entities;
 
 public abstract class Ship : ICollisionBody
 {
+    public bool IsDestroyed { get; private set; }
+
+    internal void Destroy()
+    {
+        IsDestroyed = true;
+        Health = 0;
+        Controls = default;
+        Velocity = Vector2.Zero;
+        Undock();
+        ReleasedDockingTarget = null;
+    }
+
+    protected void Restore() => IsDestroyed = false;
+
     public Faction Faction { get; init; } = Faction.Blue;
     public abstract int HealthCapacity { get; }
     public RepairStatus RepairStatus { get; internal set; }

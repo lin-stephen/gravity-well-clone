@@ -21,7 +21,7 @@ public sealed class GameWorld
 
             foreach (var freighter in freighters)
             {
-                if (freighter.State != FreighterState.Consumed)
+                if (!freighter.IsDestroyed && freighter.State != FreighterState.Consumed)
                 {
                     yield return freighter;
                 }
@@ -34,18 +34,27 @@ public sealed class GameWorld
     public IReadOnlyList<Fighter> AiFighters => aiFighters;
     public List<Bolt> Bolts { get; } = [];
     public List<Impact> Impacts { get; } = [];
+    public List<Explosion> Explosions { get; } = [];
 
     public IEnumerable<Fighter> Fighters
     {
         get
         {
-            yield return Player;
+            if (!Player.IsDestroyed)
+            {
+                yield return Player;
+            }
             foreach (var fighter in aiFighters)
             {
-                yield return fighter;
+                if (!fighter.IsDestroyed)
+                {
+                    yield return fighter;
+                }
             }
         }
     }
+
+    internal void RemoveDestroyedFreighters() => freighters.RemoveAll(ship => ship.IsDestroyed);
 
     public GameWorld(IEnumerable<Planet> planets, IEnumerable<Freighter> freighters,
         IEnumerable<Fighter>? aiFighters = null)
