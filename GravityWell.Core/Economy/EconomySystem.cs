@@ -5,9 +5,13 @@ namespace GravityWell.Core.Economy;
 
 public sealed class EconomySystem
 {
-    // Each active refinery receives one raw unit every two seconds from its colony.
-    public const float SupplyIntervalSeconds = 2f;
-    public const float RefiningIntervalSeconds = 2f;
+    private readonly EconomySettings settings;
+
+    public EconomySystem(EconomySettings? settings = null)
+    {
+        this.settings = settings ?? new EconomySettings();
+        this.settings.Validate();
+    }
 
     public void Update(GameWorld world, float deltaTime)
     {
@@ -31,7 +35,7 @@ public sealed class EconomySystem
         }
     }
 
-    private static void UpdateInventory(ResourceInventory inventory, bool colonyActive, bool refineryActive,
+    private void UpdateInventory(ResourceInventory inventory, bool colonyActive, bool refineryActive,
         float deltaTime)
     {
         if (!refineryActive)
@@ -63,9 +67,9 @@ public sealed class EconomySystem
                 break;
             }
 
-            var untilSupply = supplying ? SupplyIntervalSeconds - inventory.SupplyProgress : double.PositiveInfinity;
+            var untilSupply = supplying ? settings.SupplyIntervalSeconds - inventory.SupplyProgress : double.PositiveInfinity;
             var untilRefined =
-                refining ? RefiningIntervalSeconds - inventory.RefiningProgress : double.PositiveInfinity;
+                refining ? settings.RefiningIntervalSeconds - inventory.RefiningProgress : double.PositiveInfinity;
             var elapsed = Math.Min(remaining, Math.Min(untilSupply, untilRefined));
             if (supplying)
             {
@@ -79,13 +83,13 @@ public sealed class EconomySystem
 
             remaining -= elapsed;
 
-            if (inventory.RefiningProgress >= RefiningIntervalSeconds)
+            if (inventory.RefiningProgress >= settings.RefiningIntervalSeconds)
             {
                 inventory.RefiningProgress = 0;
                 inventory.TryRefine();
             }
 
-            if (inventory.SupplyProgress >= SupplyIntervalSeconds)
+            if (inventory.SupplyProgress >= settings.SupplyIntervalSeconds)
             {
                 inventory.SupplyProgress = 0;
                 inventory.AddRawMaterials(1);
