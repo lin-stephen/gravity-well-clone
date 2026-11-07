@@ -26,6 +26,7 @@ public sealed class GravityWellGame
     private readonly WeaponSystem weapons;
     private readonly EconomySystem economy = new();
     private readonly RepairSystem repairs = new();
+    private readonly BaseConstructionSystem baseConstruction = new();
     private readonly ShipLifecycleSystem lifecycle = new();
     private readonly GameRenderer renderer;
     private bool showHelp = true;
@@ -66,6 +67,7 @@ public sealed class GravityWellGame
         freighters.Update(world, deltaTime);
         economy.Update(world, deltaTime);
         repairs.Update(world, deltaTime);
+        baseConstruction.Update(world, deltaTime);
         renderer.Draw(world, controls, showHelp);
     }
 }

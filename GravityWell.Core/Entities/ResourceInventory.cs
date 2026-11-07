@@ -28,14 +28,18 @@ public sealed class ResourceInventory
         return true;
     }
 
-    public bool TrySpendFinishedMaterial()
+    public bool TrySpendFinishedMaterial() => TrySpendFinishedMaterials(1);
+
+    /// <summary>Spends the full cost atomically; insufficient stock leaves the inventory unchanged.</summary>
+    public bool TrySpendFinishedMaterials(int amount)
     {
-        if (FinishedMaterials == 0)
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(amount);
+        if (FinishedMaterials < amount)
         {
             return false;
         }
 
-        FinishedMaterials--;
+        FinishedMaterials -= amount;
         return true;
     }
 }

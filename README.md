@@ -201,3 +201,20 @@ Ship construction costs and freighter cargo/resupply are not yet connected to
 these stores. Barren outposts therefore need future resupply support for a
 renewable repair service. The simulation checks also cover repair eligibility,
 costs, depletion, separate inventories, production, and landing-to-repair flow.
+
+## Automatic Base construction
+
+An operational Base automatically builds a Tech Center, then a Comm Center, one
+at a time. Each costs five finished materials from the Base's stores, paid in
+full when construction starts, and takes five seconds to complete. Builds wait
+for sufficient stock and continue without further payments. Docked repairs get
+first use of materials each tick. Barren worlds can build these facilities from
+supplied stock; no Colony or Starbase is required.
+
+Destroyed facilities are rebuilt using the same costs. Losing the operational
+Base cancels unfinished facilities without refunding materials; completed
+facilities remain. Existing structure glyphs show construction progress. Costs
+and duration are tuning choices in `Economy/BaseConstructionSettings.cs`, since
+the original manual does not specify values or a build priority. This mechanism
+builds the facilities; research upgrades and Comm Center radar restrictions are
+not yet implemented.
