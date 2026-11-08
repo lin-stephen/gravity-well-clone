@@ -5,17 +5,11 @@ using GravityWell.Core.World;
 namespace GravityWell.Core.Colonization;
 
 /// <summary>Reusable cargo trips from friendly colonies to Base and Starbase stores without local supply.</summary>
-public sealed class FreighterSupplySystem
+internal sealed class FreighterSupplyPolicy : IFreighterPolicy
 {
-    public const float LoadingIntervalSeconds = 2f;
+    private const float LoadingIntervalSeconds = 2f;
 
-    public void Update(GameWorld world, float deltaTime)
-    {
-        UpdateActive(world, deltaTime);
-        DispatchIdle(world);
-    }
-
-    internal void UpdateActive(GameWorld world, float deltaTime)
+    public void UpdateActive(GameWorld world, float deltaTime)
     {
         var elapsed = float.IsFinite(deltaTime) ? Math.Max(0f, deltaTime) : 0f;
         foreach (var ship in world.Freighters)
@@ -66,7 +60,7 @@ public sealed class FreighterSupplySystem
         }
     }
 
-    internal void DispatchIdle(GameWorld world)
+    public void DispatchIdle(GameWorld world)
     {
         foreach (var ship in world.Freighters)
         {

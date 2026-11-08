@@ -6,5 +6,6 @@
   </PropertyGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="FlightSimulation" />
+    <InternalsVisibleTo Include="GravityWell.Tests" />
   </ItemGroup>
 </Project>

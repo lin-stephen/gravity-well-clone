@@ -1,0 +1,147 @@
+using System.Numerics;
+using GravityWell.Core.Entities;
+using GravityWell.Core.World;
+
+namespace GravityWell.Core.Colonization;
+
+/// <summary>Sends freighters with a full load to build the next structure on colonized planets.</summary>
+internal sealed class FreighterConstructionPolicy : IFreighterPolicy
+{
+    private const float BuildDurationSeconds = 3f;
+
+    public void UpdateActive(GameWorld world, float deltaTime)
+    {
+        foreach (var freighter in world.Freighters)
+        {
+            if (freighter.Mission != FreighterMission.Construction)
+            {
+                continue;
+            }
+            if (freighter.State == FreighterState.Traveling && freighter.TargetPlanet is { } target)
+            {
+                KeepOrderCurrent(freighter, target);
+            }
+
+            if (freighter.HasArrived)
+            {
+                BeginConstruction(freighter);
+            }
+
+            if (freighter.BuildSite is not { } site)
+            {
+                continue;
+            }
+
+            if (site.State == StructureState.Destroyed)
+            {
+                // The build site was shot out from under the freighter. It is sent again if the planet still needs it.
+                freighter.Abandon();
+                continue;
+            }
+
+            if (LostItsFoundation(freighter.TargetPlanet!, site))
+            {
+                // The Base it stands on is gone, so the half-built structure is dropped and the freighter leaves with
+                // its cargo. The planet asks for a new Base next, and the structure is built again after it.
+                site.Cancel();
+                freighter.Abandon();
+                continue;
+            }
+
+            site.AdvanceConstruction(deltaTime / BuildDurationSeconds);
+
+            if (site.State == StructureState.Operational)
+            {
+                freighter.Consume();
+            }
+        }
+    }
+
+    private static bool LostItsFoundation(Planet planet, PlanetStructure site) =>
+        site.Type != StructureType.Base && !planet.HasOperationalStructure(StructureType.Base);
+
+    /// <summary>
+    /// A planet can change hands before the freighter arrives, and it must not then build for the new owner: the
+    /// freighter is recalled. A structure can also be destroyed on the way, so the planet needs something other than
+    /// what the freighter was sent to build. The order is changed in place, since a freighter already touching the
+    /// planet must not be sent away and back, which its own dock would refuse. With nothing to build it is recalled.
+    /// </summary>
+    private static void KeepOrderCurrent(Freighter freighter, Planet planet)
+    {
+        var next = GetNextStructure(planet);
+        if ((planet.Owner is { } owner && owner != freighter.Faction) || next is null)
+        {
+            freighter.Recall();
+        }
+        else if (next != freighter.TargetStructure)
+        {
+            freighter.Redirect(next.Value);
+        }
+    }
+
+    private static void BeginConstruction(Freighter freighter)
+    {
+        var site = freighter.TargetPlanet!.AddStructure(freighter.TargetStructure!.Value);
+        site.BeginConstruction();
+        freighter.BeginBuilding(site);
+    }
+
+    public void DispatchIdle(GameWorld world)
+    {
+        foreach (var planet in world.Planets.Where(NeedsExpansion))
+        {
+            if (world.Freighters.Any(freighter =>
+                    freighter.TargetPlanet == planet && freighter.Mission == FreighterMission.Construction &&
+                    freighter.State != FreighterState.Consumed))
+            {
+                continue;
+            }
+
+            // The closest idle freighter wins, so one recalled mid-flight beats a freighter sitting at home.
+            var freighter = world.Freighters
+                .Where(candidate => candidate.Faction == planet.Owner && candidate.State == FreighterState.Idle &&
+                                    candidate.RawMaterials == Freighter.CargoCapacity)
+                .MinBy(candidate => Vector2.DistanceSquared(candidate.Position, planet.Position));
+            var nextStructure = GetNextStructure(planet);
+            if (freighter is null || nextStructure is null)
+            {
+                continue;
+            }
+
+            freighter.Dispatch(planet, nextStructure.Value);
+        }
+    }
+
+    private static bool NeedsExpansion(Planet planet) =>
+        planet.IsColonized && GetNextStructure(planet).HasValue;
+
+    private static StructureType? GetNextStructure(Planet planet)
+    {
+        if (!planet.HasStructure(StructureType.Base))
+        {
+            return StructureType.Base;
+        }
+
+        if (!planet.HasOperationalStructure(StructureType.Base))
+        {
+            return null;
+        }
+
+        if (planet.Type == PlanetType.Habitable && !planet.HasStructure(StructureType.Colony))
+        {
+            return StructureType.Colony;
+        }
+
+        if (planet.Type == PlanetType.Habitable && !planet.HasOperationalStructure(StructureType.Colony))
+        {
+            return null;
+        }
+
+        if (!planet.HasStructure(StructureType.Starbase))
+        {
+            return StructureType.Starbase;
+        }
+
+        return null;
+    }
+}
