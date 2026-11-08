@@ -6,7 +6,7 @@ public sealed class Freighter : Ship
 {
     public const float Radius = 12f;
     public const float Speed = 90f;
-    public const int CargoCapacity = 1;
+    public const int CargoCapacity = 10;
     public const int MaxHealth = 6;
 
     public Freighter(Vector2 position, Faction faction)
@@ -23,6 +23,8 @@ public sealed class Freighter : Ship
     public Vector2 Heading => Forward;
     public override int HealthCapacity => MaxHealth;
     public FreighterState State { get; private set; } = FreighterState.Idle;
+    public FreighterMission Mission { get; private set; } = FreighterMission.Construction;
+    internal double LoadingProgress { get; set; }
     public int RawMaterials { get; private set; } = CargoCapacity;
     public Planet? TargetPlanet { get; private set; }
     public StructureType? TargetStructure { get; private set; }
@@ -30,7 +32,7 @@ public sealed class Freighter : Ship
     /// <summary>The structure under construction while the freighter is building, so nobody has to look it up again.</summary>
     public PlanetStructure? BuildSite { get; private set; }
 
-    /// <summary>True once the freighter is docked at the planet it was sent to, ready to start building.</summary>
+    /// <summary>True once docked at its destination, ready to build, load or deliver cargo.</summary>
     public bool HasArrived => State == FreighterState.Traveling && IsDocked && DockingTarget == TargetPlanet;
 
     public void Dispatch(Planet planet, StructureType structureType)
@@ -42,7 +44,31 @@ public sealed class Freighter : Ship
 
         TargetPlanet = planet;
         TargetStructure = structureType;
+        Mission = FreighterMission.Construction;
         State = FreighterState.Traveling;
+    }
+
+    internal void DispatchTransport(Planet planet, FreighterMission mission)
+    {
+        if (State != FreighterState.Idle || mission == FreighterMission.Construction)
+        {
+            throw new InvalidOperationException("Only an idle freighter can take a transport order.");
+        }
+        TargetPlanet = planet;
+        TargetStructure = null;
+        Mission = mission;
+        LoadingProgress = 0;
+        State = FreighterState.Traveling;
+    }
+
+    internal void LoadRawMaterial() => RawMaterials = Math.Min(CargoCapacity, RawMaterials + 1);
+
+    internal void DeliverRawMaterials(ResourceInventory inventory)
+    {
+        var amount = Math.Min(RawMaterials, Math.Max(0,
+            ResourceInventory.RawCapacity - inventory.RawMaterials - inventory.FinishedMaterials));
+        inventory.AddRawMaterials(amount);
+        RawMaterials -= amount;
     }
 
     /// <summary>Cancels the order of a freighter that is still on its way, keeping its cargo so it can be sent elsewhere.</summary>
@@ -60,6 +86,8 @@ public sealed class Freighter : Ship
 
         TargetPlanet = null;
         TargetStructure = null;
+        Mission = FreighterMission.Construction;
+        LoadingProgress = 0;
         State = FreighterState.Idle;
     }
 
@@ -70,7 +98,7 @@ public sealed class Freighter : Ship
     /// </summary>
     public void Redirect(StructureType structureType)
     {
-        if (State == FreighterState.Traveling)
+        if (State == FreighterState.Traveling && Mission == FreighterMission.Construction)
         {
             TargetStructure = structureType;
         }
@@ -104,7 +132,7 @@ public sealed class Freighter : Ship
     /// </summary>
     public void BeginBuilding(PlanetStructure site)
     {
-        if (!HasArrived)
+        if (!HasArrived || Mission != FreighterMission.Construction)
         {
             throw new InvalidOperationException("A freighter can only start building once docked at its target planet.");
         }

@@ -197,10 +197,33 @@ finished materials. Rates live in `Economy/EconomySystem.cs` and
 These rates and capacities are tuning choices: the reference manual specifies
 the material flow and faster orbital repairs but does not give numeric rates.
 
-Ship construction costs and freighter cargo/resupply are not yet connected to
-these stores. Barren outposts therefore need future resupply support for a
-renewable repair service. The simulation checks also cover repair eligibility,
+Ship construction costs are not yet charged to these stores. Freighter cargo
+deliveries provide barren outposts with raw materials for refining, repairs and
+facility construction. The simulation checks also cover repair eligibility,
 costs, depletion, separate inventories, production, and landing-to-repair flow.
+
+## Freighter resupply
+
+After assigning construction orders, idle freighters automatically ferry raw
+materials to friendly worlds without an operational Colony. Each Base and
+Starbase requests supplies while its combined raw and finished stock is below
+20 units. Base stores take priority at a destination; one freighter is assigned
+to a planet at a time. Deliveries require completed landing, preserve excess
+cargo, and do not consume the freighter. The existing refineries turn delivered
+raw materials into finished materials, allowing barren worlds to construct
+Tech Centers and Comm Centers and maintain repair services.
+
+Freighters carry 10 raw units. Empty or partially loaded ships with no delivery
+available return to the nearest friendly operational Colony and load one raw
+unit every two seconds while docked. The Colony produces that cargo directly,
+alongside its existing supply to local refineries. Full ships can then take
+construction orders or another supply mission. Orders are cancelled if their
+destination changes ownership, their required facility is destroyed, or local
+supply makes the delivery unnecessary. Cargo aboard a destroyed ship is lost.
+
+Hold size, loading rate and stock targets are tuning choices. New freighters
+still start fully loaded under the existing production model; construction
+missions still require a full hold and consume the ship and cargo.
 
 ## Automatic Base construction
 

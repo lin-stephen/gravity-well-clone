@@ -10,11 +10,14 @@ public sealed class FreighterSystem
     private const float ProductionDurationSeconds = 5f;
     private const int FreighterCapacityPerFaction = 3;
     private readonly Dictionary<Faction, float> productionProgress = [];
+    private readonly FreighterSupplySystem supplies = new();
 
     public void Update(GameWorld world, float deltaTime)
     {
+        supplies.UpdateActive(world, deltaTime);
         UpdateActiveFreighters(world, deltaTime);
         DispatchIdleFreighters(world);
+        supplies.DispatchIdle(world);
         ProduceReplacementFreighters(world, deltaTime);
     }
 
@@ -22,6 +25,10 @@ public sealed class FreighterSystem
     {
         foreach (var freighter in world.Freighters)
         {
+            if (freighter.Mission != FreighterMission.Construction)
+            {
+                continue;
+            }
             if (freighter.State == FreighterState.Traveling && freighter.TargetPlanet is { } target)
             {
                 KeepOrderCurrent(freighter, target);
@@ -96,14 +103,16 @@ public sealed class FreighterSystem
         foreach (var planet in world.Planets.Where(NeedsExpansion))
         {
             if (world.Freighters.Any(freighter =>
-                    freighter.TargetPlanet == planet && freighter.State != FreighterState.Consumed))
+                    freighter.TargetPlanet == planet && freighter.Mission == FreighterMission.Construction &&
+                    freighter.State != FreighterState.Consumed))
             {
                 continue;
             }
 
             // The closest idle freighter wins, so one recalled mid-flight beats a freighter sitting at home.
             var freighter = world.Freighters
-                .Where(candidate => candidate.Faction == planet.Owner && candidate.State == FreighterState.Idle)
+                .Where(candidate => candidate.Faction == planet.Owner && candidate.State == FreighterState.Idle &&
+                                    candidate.RawMaterials == Freighter.CargoCapacity)
                 .MinBy(candidate => Vector2.DistanceSquared(candidate.Position, planet.Position));
             var nextStructure = GetNextStructure(planet);
             if (freighter is null || nextStructure is null)
