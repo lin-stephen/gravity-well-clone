@@ -5,6 +5,7 @@ Project documentation for the Gravity Well clone.
 | Section | Contents |
 |---------|----------|
 | [adr/](adr/README.md) | Architecture decision records for the clone |
+| [design/](design/system-dependencies.md) | Design docs for the clone, starting with the subsystem dependency diagram |
 | [reference/](reference/README.md) | Source material about the original 1995 game: the archived manual, screenshots, and a digest of game mechanics |
 
 ## Where things go
