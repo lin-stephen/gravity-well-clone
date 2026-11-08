@@ -12,22 +12,25 @@ internal sealed class FreighterProduction
 
     public void Update(GameWorld world, float deltaTime)
     {
-        foreach (var faction in Enum.GetValues<Faction>())
+        // Factions without an operational Tech Center or Space Dock don't build and keep their stored progress.
+        // Ordered by faction so freighters are added in a stable order regardless of planet order.
+        var producers = world.Planets
+            .Where(planet => planet.Owner is not null &&
+                (planet.HasOperationalStructure(StructureType.TechCenter) ||
+                 planet.HasOperationalStructure(StructureType.SpaceDock)))
+            .GroupBy(planet => planet.Owner!.Value)
+            .OrderBy(group => group.Key)
+            .ToList();
+
+        foreach (var group in producers)
         {
+            var faction = group.Key;
+            var producer = group.First();
             var activeCount = world.Freighters.Count(freighter =>
                 freighter.Faction == faction && freighter.State != FreighterState.Consumed);
             if (activeCount >= FreighterCapacityPerFaction)
             {
                 productionProgress[faction] = 0f;
-                continue;
-            }
-
-            var producer = world.Planets.FirstOrDefault(planet =>
-                planet.Owner == faction &&
-                (planet.HasOperationalStructure(StructureType.TechCenter) ||
-                 planet.HasOperationalStructure(StructureType.SpaceDock)));
-            if (producer is null)
-            {
                 continue;
             }
 
