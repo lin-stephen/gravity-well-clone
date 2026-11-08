@@ -1,4 +1,4 @@
-namespace GravityWell.Game;
+namespace GravityWell.Rendering;
 
 public static class GameConstants
 {

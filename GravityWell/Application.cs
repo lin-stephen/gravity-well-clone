@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices.JavaScript;
 using GravityWell.Game;
+using GravityWell.Rendering;
 using Raylib_cs;
 
 namespace GravityWell;

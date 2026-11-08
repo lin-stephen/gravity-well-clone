@@ -3,7 +3,6 @@ using GravityWell.Core.Physics;
 using GravityWell.Core.Weapons;
 using GravityWell.Core.World;
 using GravityWell.Core.Entities;
-using GravityWell.Game;
 using GravityWell.Input;
 using Raylib_cs;
 

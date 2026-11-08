@@ -1,5 +1,4 @@
 using System.Numerics;
-using GravityWell.Game;
 using Raylib_cs;
 
 namespace GravityWell.Rendering;

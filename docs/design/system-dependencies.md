@@ -42,7 +42,6 @@ flowchart TB
     Game --> Lifecycle
     Game --> Rendering
     Game --> AppInput
-    Rendering -. "GameConstants (cycle)" .-> Game
     Rendering --> Weapons
     AppInput --> CoreInput
 
@@ -147,10 +146,12 @@ freighter job is a new policy added to the array in `FreighterSystem`.
 
 ## Known violations
 
+The app layer is acyclic: `Game` depends on `Rendering`, never the reverse. `GameConstants` (the logical viewport size)
+lives in `Rendering` for that reason.
+
 | # | Violation | Why it matters | Suggested fix |
 |---|---|---|---|
-| 1 | `Game` <-> `Rendering` cycle: `Game` owns the renderer, and `Rendering` reads `GameConstants` (`DesignWidth`, `DesignHeight`) from `GravityWell.Game`. 9 uses in `Viewport`, `StarfieldRenderer`, `RadarRenderer`, `GameRenderer`. | The only cycle in the solution. `Rendering` can't be reasoned about or reused without `Game`. | Move `GameConstants` out of `Game` (for example into the app root or `Rendering`). |
-| 2 | `Rendering/GameRenderer.cs` has `using GravityWell.Input;` (the app namespace) but nothing in `Rendering` uses `InputSystem`. The `PlayerControls` it draws comes from `Core.Input`. | An unused edge that also hides the fact that two different `Input` namespaces exist (`GravityWell.Input` and `GravityWell.Core.Input`). | Remove the `using`. Consider renaming the app's namespace to avoid the clash. |
+| 1 | `Rendering/GameRenderer.cs` has `using GravityWell.Input;` (the app namespace) but nothing in `Rendering` uses `InputSystem`. The `PlayerControls` it draws comes from `Core.Input`. | An unused edge that also hides the fact that two different `Input` namespaces exist (`GravityWell.Input` and `GravityWell.Core.Input`). | Remove the `using`. Consider renaming the app's namespace to avoid the clash. |
 
 ## Keeping this accurate
 
