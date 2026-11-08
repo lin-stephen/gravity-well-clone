@@ -1,6 +1,6 @@
 using GravityWell.Core.World;
 
-namespace GravityWell.Core.Colonization;
+namespace GravityWell.Core.Colonization.Policies;
 
 /// <summary>
 /// One kind of freighter job. <see cref="FreighterSystem"/> owns the ships and runs each policy in priority order, so a

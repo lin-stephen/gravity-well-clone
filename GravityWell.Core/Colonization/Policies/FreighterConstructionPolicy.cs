@@ -2,7 +2,7 @@ using System.Numerics;
 using GravityWell.Core.Entities;
 using GravityWell.Core.World;
 
-namespace GravityWell.Core.Colonization;
+namespace GravityWell.Core.Colonization.Policies;
 
 /// <summary>Sends freighters with a full load to build the next structure on colonized planets.</summary>
 internal sealed class FreighterConstructionPolicy : IFreighterPolicy

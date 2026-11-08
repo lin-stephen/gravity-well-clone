@@ -2,7 +2,7 @@ using System.Numerics;
 using GravityWell.Core.Entities;
 using GravityWell.Core.World;
 
-namespace GravityWell.Core.Colonization;
+namespace GravityWell.Core.Colonization.Policies;
 
 /// <summary>Reusable cargo trips from friendly colonies to Base and Starbase stores without local supply.</summary>
 internal sealed class FreighterSupplyPolicy : IFreighterPolicy
