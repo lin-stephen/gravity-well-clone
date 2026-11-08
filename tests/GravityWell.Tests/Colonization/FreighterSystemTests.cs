@@ -399,4 +399,45 @@ public class FreighterSystemTests
         freighter.TargetStructure.Should().Be(StructureType.Colony, "the planet asks for the Colony again");
         cancelled.State.Should().Be(StructureState.Destroyed);
     }
+
+    [Test]
+    public void SupplyDelivery_SeesStructuresAsTheyWereBeforeThatTicksBuilding()
+    {
+        // The Colony finishes on the very tick a supply freighter docks at the same outpost. Supply is advanced
+        // before construction, so it still sees an outpost without a Colony and unloads instead of being recalled
+        // with its cargo. Advancing construction first would silently change the outcome of this tick.
+        var outpost = new Planet(new Vector2(600, 0), PlanetType.Habitable, Faction.Blue);
+        outpost.AddStructure(StructureType.Base, StructureState.Operational);
+        var colony = outpost.AddStructure(StructureType.Colony);
+        colony.BeginConstruction();
+        colony.AdvanceConstruction(0.9f);
+
+        var builder = new Freighter(Vector2.Zero, Faction.Blue);
+        builder.Dispatch(outpost, StructureType.Colony);
+        DockAtTarget(builder);
+        builder.BeginBuilding(colony);
+
+        var supplier = new Freighter(Vector2.Zero, Faction.Blue);
+        supplier.DispatchTransport(outpost, FreighterMission.SupplyBase);
+        DockAtTarget(supplier);
+
+        new FreighterSystem().Update(new GameWorld([outpost], [builder, supplier]), 1f);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(colony.State, Is.EqualTo(StructureState.Operational));
+            Assert.That(builder.State, Is.EqualTo(FreighterState.Consumed));
+            Assert.That(outpost.BaseResources.RawMaterials, Is.EqualTo(Freighter.CargoCapacity));
+            Assert.That(supplier.RawMaterials, Is.Zero);
+        });
+    }
+
+    private static void DockAtTarget(Freighter ship)
+    {
+        var target = ship.TargetPlanet!;
+        ship.Position = target.Position + Vector2.UnitY * (Planet.Radius + Freighter.Radius);
+        ship.Velocity = Vector2.Zero;
+        ship.BeginDocking(target, Vector2.UnitY);
+        ship.CompleteDocking();
+    }
 }
